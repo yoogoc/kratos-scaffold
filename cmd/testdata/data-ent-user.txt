@@ -1,0 +1,92 @@
+package data
+
+import (
+	"context"
+	"test/internal/biz"
+	"test/internal/data/ent"
+
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+var _ biz.UserRepo = (*userRepo)(nil)
+
+type userRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
+	return &userRepo{
+		data: data,
+		log:  log.NewHelper(log.With(logger, "module", "data/user")),
+	}
+}
+
+func (r userRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error) {
+	client := EntClient(ctx, r.data)
+	row, err := client.User.Create().
+		SetName(user.Name).
+		SetAge(user.Age).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return userEnt2Biz(row), nil
+}
+
+func (r userRepo) BulkCreate(ctx context.Context, list []*biz.User) ([]*biz.User, error) {
+	client := EntClient(ctx, r.data)
+	var builders []*ent.UserCreate
+	for _, item := range list {
+		builders = append(builders, client.User.Create().
+			SetName(item.Name).
+			SetAge(item.Age),
+		)
+	}
+	rows, err := client.User.CreateBulk(builders...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return bulkUserEnt2Biz(rows), nil
+}
+
+func (r userRepo) Update(ctx context.Context, user *biz.User) (*biz.User, error) {
+	client := EntClient(ctx, r.data)
+	row, err := client.User.UpdateOne(userBiz2Ent(user)).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return userEnt2Biz(row), nil
+}
+
+func (r userRepo) DestroyBy(ctx context.Context, param *biz.UserParam) (int, error) {
+	client := EntClient(ctx, r.data)
+	return client.User.Delete().Where(userParam2Predicates(param)...).Exec(ctx)
+}
+
+func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, pagesize int) ([]*biz.User, int, error) {
+	client := EntClient(ctx, r.data)
+	query := client.User.Query().Where(userParam2Predicates(param)...)
+	count, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if pagesize > 0 {
+		query = query.Limit(pagesize).Offset((page - 1) * pagesize)
+	}
+	rows, err := query.All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return bulkUserEnt2Biz(rows), count, nil
+}
+
+func (r userRepo) FindBy(ctx context.Context, param *biz.UserParam) (*biz.User, error) {
+	client := EntClient(ctx, r.data)
+	rows, err := client.User.Query().Where(userParam2Predicates(param)...).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return userEnt2Biz(rows), nil
+}

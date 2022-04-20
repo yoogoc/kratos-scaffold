@@ -1,0 +1,18 @@
+package schema
+
+import "entgo.io/ent"
+
+// NeedRemove holds the schema definition for the NeedRemove entity.
+type NeedRemove struct {
+	ent.Schema
+}
+
+// Fields of the NeedRemove.
+func (NeedRemove) Fields() []ent.Field {
+	return nil
+}
+
+// Edges of the NeedRemove.
+func (NeedRemove) Edges() []ent.Edge {
+	return nil
+}

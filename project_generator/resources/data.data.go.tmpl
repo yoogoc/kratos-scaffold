@@ -1,0 +1,52 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/project_generator.DataTmpl*/ -}}
+package data
+
+import (
+	"{{.AppPkgPath}}/internal/conf"
+	"{{.AppPkgPath}}/internal/data/ent"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/wire"
+
+	{{- if eq .DBDriverType "mysql"}}
+	_ "github.com/go-sql-driver/mysql"
+	{{- end}}
+	_ "{{.AppPkgPath}}/internal/data/ent/runtime"
+)
+
+// ProviderSet is data providers.
+var ProviderSet = wire.NewSet(NewEntClient, NewData, NewTxRepo)
+
+type Data struct {
+	log *log.Helper
+	db  *ent.Client
+}
+
+func NewEntClient(conf *conf.Data, logger log.Logger) *ent.Client {
+	l := log.NewHelper(log.With(logger, "module", "{{.LoggerName}}/ent"))
+
+	var ops []ent.Option
+	if conf.Database.EntDebug {
+		ops = append(ops, ent.Debug())
+	} else {
+		//ops = append(ops, ent.Log(log.Info))
+	}
+
+	client, err := ent.Open(
+		conf.Database.Driver,
+		conf.Database.Source,
+		ops...,
+	)
+	if err != nil {
+		l.Fatalf("failed opening connection to db: %v", err)
+	}
+	return client
+}
+
+func NewData(conf *conf.Data, logger log.Logger, db *ent.Client) (*Data, error) {
+	l := log.NewHelper(log.With(logger, "module", "{{.LoggerName}}"))
+	return &Data{
+		log: l,
+		db:  db,
+	}, nil
+}

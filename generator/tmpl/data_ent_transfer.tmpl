@@ -1,0 +1,70 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.DataEnt*/ -}}
+package data
+
+import (
+	"{{.CurrentPkgPath}}/biz"
+	"{{.CurrentPkgPath}}/data/ent"
+	"{{.CurrentPkgPath}}/data/ent/{{.Name | ToLower}}"
+	"{{.CurrentPkgPath}}/data/ent/predicate"
+)
+
+func {{.Name | ToLowerCamel}}Biz2Ent(source *biz.{{.Name | ToCamel}}) *ent.{{.Name | ToCamel}} {
+	return &ent.{{.Name | ToCamel}}{
+		{{- range $i, $f := .Fields }}
+		{{ $f.Name | ToEntName }}: source.{{ $f.Name | ToCamel }},
+		{{- end }}
+	}
+}
+
+func bulk{{.Name | ToCamel}}Biz2Ent(source []*biz.{{.Name | ToCamel}}) []*ent.{{.Name | ToCamel}} {
+	var list []*ent.{{.Name | ToCamel}}
+	for _, item := range source {
+		list = append(list, {{.Name | ToLowerCamel}}Biz2Ent(item))
+	}
+	return list
+}
+
+func {{.Name | ToLowerCamel}}Ent2Biz(source *ent.{{.Name | ToCamel}}) *biz.{{.Name | ToCamel}} {
+	return &biz.{{.Name | ToCamel}}{
+		{{- range $i, $f := .Fields }}
+		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToEntName }},
+		{{- end }}
+	}
+}
+
+func bulk{{.Name | ToCamel}}Ent2Biz(source []*ent.{{.Name | ToCamel}}) []*biz.{{.Name | ToCamel}} {
+	var list []*biz.{{.Name | ToCamel}}
+	for _, item := range source {
+		list = append(list, {{.Name | ToLowerCamel}}Ent2Biz(item))
+	}
+	return list
+}
+
+func {{.Name | ToLowerCamel}}Param2Predicates(param *biz.{{.Name | ToCamel}}Param) []predicate.{{.Name | ToCamel}} {
+	{{- $modelName := .Name |ToLower}}
+	{{- $strToPreMap := .StrToPreMap}}
+	var ps []predicate.{{.Name | ToCamel}}
+	{{- range $i, $f := .ParamFields }}
+	{{- $isIn := eq $f.Type $strToPreMap.in }}
+	{{ if $isIn }}
+	if len(param.{{ $f.Name | ToCamel }}) > 0 {
+		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}...))
+	}
+	{{- else }}
+	{{- $isString := eq $f.FieldType "string" }}
+	{{- $isNotString := not $isString }}
+	{{ if $isString  }}
+	if param.{{ $f.Name | ToCamel }} != "" {
+		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}))
+	}
+	{{- end }}
+	{{ if $isNotString }}
+	{{- /* FIXME 现在除了string都判定为数字类型 */ -}}
+	if param.{{ $f.Name | ToCamel }} != 0 {
+		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}{{ if eq $f.Type $strToPreMap.in }}...{{- end }}))
+	}
+	{{- end}}
+	{{- end }}
+	{{- end }}
+	return ps
+}

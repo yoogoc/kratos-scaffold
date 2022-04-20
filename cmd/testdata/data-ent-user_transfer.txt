@@ -1,0 +1,60 @@
+package data
+
+import (
+	"test/internal/biz"
+	"test/internal/data/ent"
+	"test/internal/data/ent/predicate"
+	"test/internal/data/ent/user"
+)
+
+func userBiz2Ent(source *biz.User) *ent.User {
+	return &ent.User{
+		ID:   source.Id,
+		Name: source.Name,
+		Age:  source.Age,
+	}
+}
+
+func bulkUserBiz2Ent(source []*biz.User) []*ent.User {
+	var list []*ent.User
+	for _, item := range source {
+		list = append(list, userBiz2Ent(item))
+	}
+	return list
+}
+
+func userEnt2Biz(source *ent.User) *biz.User {
+	return &biz.User{
+		Id:   source.ID,
+		Name: source.Name,
+		Age:  source.Age,
+	}
+}
+
+func bulkUserEnt2Biz(source []*ent.User) []*biz.User {
+	var list []*biz.User
+	for _, item := range source {
+		list = append(list, userEnt2Biz(item))
+	}
+	return list
+}
+
+func userParam2Predicates(param *biz.UserParam) []predicate.User {
+
+	var ps []predicate.User
+	if param.IdEq != 0 {
+		ps = append(ps, user.IDEQ(param.IdEq))
+	}
+
+	if param.NameContains != "" {
+		ps = append(ps, user.NameContains(param.NameContains))
+	}
+
+	if param.AgeGtEq != 0 {
+		ps = append(ps, user.AgeGTE(param.AgeGtEq))
+	}
+	if param.AgeLtEq != 0 {
+		ps = append(ps, user.AgeLTE(param.AgeLtEq))
+	}
+	return ps
+}

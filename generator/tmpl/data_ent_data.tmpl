@@ -1,0 +1,95 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.DataEnt*/ -}}
+{{$modelName := .Name |ToLowerCamel}}
+package data
+
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/log"
+	"{{.CurrentPkgPath}}/biz"
+	"{{.CurrentPkgPath}}/data/ent"
+)
+
+var _ biz.{{.Name | ToCamel}}Repo = (*{{$modelName}}Repo)(nil)
+
+type {{$modelName}}Repo struct {
+	data *Data
+	log  *log.Helper
+}
+
+func New{{.Name | ToCamel}}Repo(data *Data, logger log.Logger) biz.{{.Name | ToCamel}}Repo {
+	return &{{$modelName}}Repo{
+		data: data,
+		log:  log.NewHelper(log.With(logger, "module", "data/{{$modelName}}")),
+	}
+}
+
+func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
+	client := EntClient(ctx, r.data)
+	row, err := client.{{.Name | ToCamel}}.Create().
+		{{- range $i, $f := .FieldsExceptPrimary }}
+		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
+		{{- end }}
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return {{$modelName}}Ent2Biz(row), nil
+}
+
+func (r {{$modelName}}Repo) BulkCreate(ctx context.Context, list []*biz.{{.Name | ToCamel}}) ([]*biz.{{.Name | ToCamel}}, error) {
+	client := EntClient(ctx, r.data)
+	var builders []*ent.{{.Name | ToCamel}}Create
+	for _, item := range list {
+		builders = append(builders, client.{{.Name | ToCamel}}.Create().
+			{{- range $i, $f := .FieldsExceptPrimary }}
+			Set{{ $f.Name | ToEntName }}(item.{{ $f.Name | ToCamel }}){{- if last $i $.FieldsExceptPrimary}},{{- else}}.{{- end}}
+			{{- end }}
+		)
+	}
+	rows, err := client.{{.Name | ToCamel}}.CreateBulk(builders...).Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return bulk{{.Name | ToCamel}}Ent2Biz(rows), nil
+}
+
+func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
+	client := EntClient(ctx, r.data)
+	row, err := client.{{.Name | ToCamel}}.UpdateOne({{$modelName}}Biz2Ent({{$modelName}})).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return {{$modelName}}Ent2Biz(row), nil
+}
+
+func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
+	client := EntClient(ctx, r.data)
+	return client.{{.Name | ToCamel}}.Delete().Where({{$modelName}}Param2Predicates(param)...).Exec(ctx)
+}
+
+func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, pagesize int) ([]*biz.{{.Name | ToCamel}}, int, error) {
+	client := EntClient(ctx, r.data)
+	query := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...)
+	count, err := query.Clone().Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	if pagesize > 0 {
+		query = query.Limit(pagesize).Offset((page - 1) * pagesize)
+	}
+	rows, err := query.All(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return bulk{{.Name | ToCamel}}Ent2Biz(rows), count, nil
+}
+
+func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (*biz.{{.Name | ToCamel}}, error) {
+	client := EntClient(ctx, r.data)
+	rows, err := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).First(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return {{$modelName}}Ent2Biz(rows), nil
+}

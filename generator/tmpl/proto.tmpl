@@ -1,0 +1,55 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.Proto*/ -}}
+syntax = "proto3";
+package {{.Package}};
+option go_package = "{{.GoPackage}}";
+option java_multiple_files = true;
+option java_package = "{{.JavaPackage}}";
+
+service {{.Name}}Service {
+	rpc Create{{.Name}} (Create{{.Name}}Request) returns (Create{{.Name}}Reply);
+	rpc Update{{.Name}} (Update{{.Name}}Request) returns (Update{{.Name}}Reply);
+	rpc Delete{{.Name}} (Delete{{.Name}}Request) returns (Delete{{.Name}}Reply);
+	rpc Get{{.Name}} (Get{{.Name}}Request) returns (Get{{.Name}}Reply);
+	rpc List{{.Name}} (List{{.Name}}Request) returns (List{{.Name}}Reply);
+}
+
+message {{.Name}} {
+	{{- range $i, $f := .Fields }}
+	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{- end }}
+}
+message Create{{.Name}}Request {
+	{{- range $i, $f := .CreateForm }}
+	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{- end }}
+}
+message Create{{.Name}}Reply {}
+message Update{{.Name}}Request {
+	{{- range $i, $f := .UpdateForm }}
+	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{- end }}
+}
+message Update{{.Name}}Reply {}
+{{$primaryField := .PrimaryField }}
+message Delete{{.Name}}Request {
+	{{ $primaryField.FieldType }} {{ $primaryField.Name | fieldStyle }} = 1;
+}
+message Delete{{.Name}}Reply {}
+message Get{{.Name}}Request {
+	{{ $primaryField.FieldType }} {{ $primaryField.Name | fieldStyle }} = 1;
+}
+message Get{{.Name}}Reply {
+	{{.Name}} {{.Name | ToLower | fieldStyle }} = 1;
+}
+message List{{.Name}}Request {
+	uint32 page = 1;
+	uint32 pagesize = 2;
+	{{- $strToPreMap := .StrToPreMap}}
+	{{- range $i, $f := .ListParams }}
+	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{- end }}{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
+	{{- end }}
+}
+message List{{.Name}}Reply {
+	repeated {{.Name}} {{.Name | ToPlural | fieldStyle }} = 1;
+	uint32 count = 2;
+}

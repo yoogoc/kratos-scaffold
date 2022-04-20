@@ -1,0 +1,24 @@
+package biz
+
+import (
+	"context"
+
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+type TxRepo interface {
+	WithEntTx(context.Context, func(context.Context) error) error
+}
+
+type TxUsecase struct {
+	repo TxRepo
+	log  *log.Helper
+}
+
+func NewTxUsecase(repo TxRepo, logger log.Logger) *TxUsecase {
+	return &TxUsecase{repo: repo, log: log.NewHelper(logger)}
+}
+
+func (uc *TxUsecase) WithEntTx(ctx context.Context, fn func(context.Context) error) error {
+	return uc.repo.WithEntTx(ctx, fn)
+}

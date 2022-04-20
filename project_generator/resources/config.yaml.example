@@ -1,0 +1,14 @@
+trace:
+  endpoint: http://127.0.0.1:14268/api/traces
+server:
+  http:
+    addr: 0.0.0.0:4000
+    timeout: 10000000s
+  grpc:
+    addr: 0.0.0.0:4001
+    timeout: 10000000s
+data:
+  database:
+    driver: mysql
+    source: root:dangerous@tcp(127.0.0.1:3306)/test?charset=utf8mb4&parseTime=true&multiStatements=true&loc=Local
+    ent_debug: true

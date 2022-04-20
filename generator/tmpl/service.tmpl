@@ -1,0 +1,71 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.Service*/ -}}
+package service
+
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/log"
+	v1 "{{.ApiPath}}"
+	"{{.CurrentPkgPath}}/biz"
+)
+
+type {{.Name}}Service struct {
+	v1.Unimplemented{{.Name}}ServiceServer
+	uc  *biz.{{.Name}}Usecase
+	log *log.Helper
+}
+
+func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger log.Logger) *{{.Name}}Service {
+	return &{{.Name}}Service{
+		log: log.NewHelper(log.With(logger, "module", "service/{{.Name | ToSnake}}")),
+		uc:  uc,
+	}
+}
+
+func (s *{{.Name}}Service) Create{{.Name}}(ctx context.Context, req *v1.Create{{.Name}}Request) (*v1.Create{{.Name}}Reply, error) {
+	_, err := s.uc.Create{{.Name}}(ctx, create{{.Name}}Req2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Create{{.Name}}Reply{}, nil
+}
+
+func (s *{{.Name}}Service) Update{{.Name}}(ctx context.Context, req *v1.Update{{.Name}}Request) (*v1.Update{{.Name}}Reply, error) {
+	_, err := s.uc.Update{{.Name}}(ctx, update{{.Name}}Req2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Update{{.Name}}Reply{}, nil
+}
+
+func (s *{{.Name}}Service) Delete{{.Name}}(ctx context.Context, req *v1.Delete{{.Name}}Request) (*v1.Delete{{.Name}}Reply, error) {
+	_, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{
+		IdEq: req.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Delete{{.Name}}Reply{}, nil
+}
+
+func (s *{{.Name}}Service) Get{{.Name}}(ctx context.Context, req *v1.Get{{.Name}}Request) (*v1.Get{{.Name}}Reply, error) {
+	item, err := s.uc.Find{{.Name}}By(ctx, &biz.{{.Name}}Param{
+		IdEq: req.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Get{{.Name}}Reply{
+		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+	}, nil
+}
+
+func (s *{{.Name}}Service) List{{.Name}}(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {
+	dates, count, err := s.uc.List{{.Name}}(ctx, list{{.Name}}Req2Biz(req), int(req.Page), int(req.Pagesize))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.List{{.Name}}Reply{
+		{{.Name| ToCamel | ToPlural}}: bulk{{.Name}}Biz2Proto(dates),
+		Count: uint32(count),
+	}, nil
+}

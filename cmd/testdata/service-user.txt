@@ -1,0 +1,71 @@
+package service
+
+import (
+	"context"
+	v1 "test/api/user/v1"
+	"test/internal/biz"
+
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+type UserService struct {
+	v1.UnimplementedUserServiceServer
+	uc  *biz.UserUsecase
+	log *log.Helper
+}
+
+func NewUserService(uc *biz.UserUsecase, logger log.Logger) *UserService {
+	return &UserService{
+		log: log.NewHelper(log.With(logger, "module", "service/user")),
+		uc:  uc,
+	}
+}
+
+func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserReply, error) {
+	_, err := s.uc.CreateUser(ctx, createUserReq2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.CreateUserReply{}, nil
+}
+
+func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserReply, error) {
+	_, err := s.uc.UpdateUser(ctx, updateUserReq2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateUserReply{}, nil
+}
+
+func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserReply, error) {
+	_, err := s.uc.DestroyUserBy(ctx, &biz.UserParam{
+		IdEq: req.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.DeleteUserReply{}, nil
+}
+
+func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
+	item, err := s.uc.FindUserBy(ctx, &biz.UserParam{
+		IdEq: req.Id,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v1.GetUserReply{
+		User: userBiz2Proto(item),
+	}, nil
+}
+
+func (s *UserService) ListUser(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
+	dates, count, err := s.uc.ListUser(ctx, listUserReq2Biz(req), int(req.Page), int(req.Pagesize))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.ListUserReply{
+		Users: bulkUserBiz2Proto(dates),
+		Count: uint32(count),
+	}, nil
+}

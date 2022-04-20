@@ -1,0 +1,46 @@
+package service
+
+import (
+	v1 "test/api/user/v1"
+	"test/internal/biz"
+)
+
+func createUserReq2Biz(req *v1.CreateUserRequest) *biz.User {
+	return &biz.User{
+		Name: req.Name,
+		Age:  req.Age,
+	}
+}
+
+func updateUserReq2Biz(req *v1.UpdateUserRequest) *biz.User {
+	return &biz.User{
+		Id:   req.Id,
+		Name: req.Name,
+		Age:  req.Age,
+	}
+}
+
+func userBiz2Proto(item *biz.User) *v1.User {
+	return &v1.User{
+		Id:   item.Id,
+		Name: item.Name,
+		Age:  item.Age,
+	}
+}
+
+func bulkUserBiz2Proto(list []*biz.User) []*v1.User {
+	var target []*v1.User
+	for _, item := range list {
+		target = append(target, userBiz2Proto(item))
+	}
+	return target
+}
+
+func listUserReq2Biz(req *v1.ListUserRequest) *biz.UserParam {
+	return &biz.UserParam{
+		IdEq:         req.IdEq,
+		NameContains: req.NameContains,
+		AgeGtEq:      req.AgeGtEq,
+		AgeLtEq:      req.AgeLtEq,
+	}
+}

@@ -1,0 +1,66 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.Biz */ -}}
+package biz
+
+import (
+	"context"
+	"github.com/go-kratos/kratos/v2/log"
+	"time"
+)
+
+type {{.Name}} struct {
+	{{- range $i, $f := .Fields }}
+	{{ $f.Name | ToCamel }} {{ $f.FieldType }}
+	{{- end }}
+}
+
+type {{.Name}}Param struct {
+	{{- $strToPreMap := .StrToPreMap}}
+	{{- range $i, $f := .ParamFields }}
+	{{ $f.Name | ToCamel }} {{ if eq $f.Type $strToPreMap.in }}[]{{- end }}{{ $f.FieldType }}
+	{{- end }}
+}
+
+type {{.Name}}Repo interface {
+	Create(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
+	BulkCreate(ctx context.Context, {{.Name | ToLower | ToPlural}} []*{{.Name}}) ([]*{{.Name}}, error)
+	Update(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
+	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
+	List(ctx context.Context, param *{{.Name}}Param, page, pagesize int) ([]*{{.Name}}, int, error)
+	FindBy(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error)
+}
+
+type {{.Name}}Usecase struct {
+	repo {{.Name}}Repo
+	log  *log.Helper
+}
+
+func New{{.Name}}Usecase(repo {{.Name}}Repo, logger log.Logger) *{{.Name}}Usecase {
+	return &{{.Name}}Usecase{
+		repo: repo,
+		log:  log.NewHelper(log.With(logger, "module", "usecase/{{.Name | ToLower}}")),
+	}
+}
+
+func (uc *{{.Name}}Usecase) Create{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {
+	return uc.repo.Create(ctx, {{.Name | ToLower}})
+}
+
+func (uc *{{.Name}}Usecase) BulkCreate{{.Name}}(ctx context.Context, {{.Name | ToLower | ToPlural}} []*{{.Name}}) ([]*{{.Name}}, error) {
+	return uc.repo.BulkCreate(ctx, {{.Name | ToLower | ToPlural}})
+}
+
+func (uc *{{.Name}}Usecase) Update{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {
+	return uc.repo.Update(ctx, {{.Name | ToLower}})
+}
+
+func (uc *{{.Name}}Usecase) Destroy{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (int, error) {
+	return uc.repo.DestroyBy(ctx, param)
+}
+
+func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}Param, page, pagesize int) ([]*{{.Name}}, int, error) {
+	return uc.repo.List(ctx, param, page, pagesize)
+}
+
+func (uc *{{.Name}}Usecase) Find{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error) {
+	return uc.repo.FindBy(ctx, param)
+}

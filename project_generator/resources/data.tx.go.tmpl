@@ -1,0 +1,68 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/project_generator.DataTmpl*/ -}}
+package data
+
+import (
+	"context"
+	"{{.AppPkgPath}}/internal/biz"
+	"{{.AppPkgPath}}/internal/data/ent"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/pkg/errors"
+)
+
+type txRepo struct {
+	data *Data
+	log  *log.Helper
+}
+
+// NewTxRepo .
+func NewTxRepo(data *Data, logger log.Logger) biz.TxRepo {
+	return &txRepo{
+		data: data,
+		log:  log.NewHelper(logger),
+	}
+}
+
+func (r *txRepo) WithEntTx(ctx context.Context, fn func(ctx context.Context) error) error {
+	// 如果事务内嵌套事务,则交由上层处理
+	if tx := ent.TxFromContext(ctx); tx != nil {
+		return fn(ctx)
+	}
+	tx, err := r.data.db.Tx(ctx)
+	txContext := ent.NewTxContext(ctx, tx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			_ = tx.Rollback()
+			panic(v)
+		}
+	}()
+	if err := fn(txContext); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = errors.Wrapf(err, "rolling back transaction: %v", rerr)
+		}
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return errors.Wrapf(err, "committing transaction: %v", err)
+	}
+	return nil
+}
+
+func EntClient(ctx context.Context, data *Data) *ent.Client {
+	tx := ent.TxFromContext(ctx)
+	if tx != nil {
+		return tx.Client()
+	}
+	return data.db
+}
+
+func EntClientWithWhere(ctx context.Context, data *Data) (*ent.Client, bool) {
+	tx := ent.TxFromContext(ctx)
+	if tx != nil {
+		return tx.Client(), true
+	}
+	return data.db, false
+}

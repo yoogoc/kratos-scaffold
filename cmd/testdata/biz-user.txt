@@ -1,0 +1,65 @@
+package biz
+
+import (
+	"context"
+
+	"github.com/go-kratos/kratos/v2/log"
+)
+
+type User struct {
+	Id   int64
+	Name string
+	Age  int32
+}
+
+type UserParam struct {
+	IdEq         int64
+	NameContains string
+	AgeGtEq      int32
+	AgeLtEq      int32
+}
+
+type UserRepo interface {
+	Create(ctx context.Context, user *User) (*User, error)
+	BulkCreate(ctx context.Context, users []*User) ([]*User, error)
+	Update(ctx context.Context, user *User) (*User, error)
+	DestroyBy(ctx context.Context, param *UserParam) (int, error)
+	List(ctx context.Context, param *UserParam, page, pagesize int) ([]*User, int, error)
+	FindBy(ctx context.Context, param *UserParam) (*User, error)
+}
+
+type UserUsecase struct {
+	repo UserRepo
+	log  *log.Helper
+}
+
+func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
+	return &UserUsecase{
+		repo: repo,
+		log:  log.NewHelper(log.With(logger, "module", "usecase/user")),
+	}
+}
+
+func (uc *UserUsecase) CreateUser(ctx context.Context, user *User) (*User, error) {
+	return uc.repo.Create(ctx, user)
+}
+
+func (uc *UserUsecase) BulkCreateUser(ctx context.Context, users []*User) ([]*User, error) {
+	return uc.repo.BulkCreate(ctx, users)
+}
+
+func (uc *UserUsecase) UpdateUser(ctx context.Context, user *User) (*User, error) {
+	return uc.repo.Update(ctx, user)
+}
+
+func (uc *UserUsecase) DestroyUserBy(ctx context.Context, param *UserParam) (int, error) {
+	return uc.repo.DestroyBy(ctx, param)
+}
+
+func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, page, pagesize int) ([]*User, int, error) {
+	return uc.repo.List(ctx, param, page, pagesize)
+}
+
+func (uc *UserUsecase) FindUserBy(ctx context.Context, param *UserParam) (*User, error) {
+	return uc.repo.FindBy(ctx, param)
+}

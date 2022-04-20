@@ -1,0 +1,48 @@
+{{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.Service*/ -}}
+package service
+
+import (
+	"fmt"
+	v1 "{{.ApiPath}}"
+	"{{.CurrentPkgPath}}/biz"
+)
+
+func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
+	return &biz.{{.Name}}{
+		{{- range $i, $f := .FieldsExceptPrimary }}
+		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- end }}
+	}
+}
+
+func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
+	return &biz.{{.Name}}{
+		{{- range $i, $f := .Fields }}
+		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- end }}
+	}
+}
+
+func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
+	return &v1.{{.Name}}{
+		{{- range $i, $f := .Fields }}
+		{{ $f.Name | ToCamel }}: item.{{ $f.Name | ToCamel }},
+		{{- end }}
+	}
+}
+
+func bulk{{.Name}}Biz2Proto(list []*biz.{{.Name}}) []*v1.{{.Name}} {
+	var target []*v1.{{.Name}}
+	for _, item := range list {
+		target = append(target, {{.Name | ToLowCamel}}Biz2Proto(item))
+	}
+	return target
+}
+
+func list{{.Name}}Req2Biz(req *v1.List{{.Name}}Request) *biz.{{.Name}}Param {
+	return &biz.{{.Name}}Param{
+		{{- range $i, $f := .ParamFields }}
+		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- end }}
+	}
+}
