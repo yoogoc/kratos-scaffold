@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"strings"
-	
+
 	"github.com/YoogoC/kratos-scaffold/generator"
-	
+
 	"github.com/spf13/cobra"
 )
 
@@ -28,13 +28,13 @@ kratos-scaffold  user -o api/user/v1/user.proto id:int64:eq,in name:string:conta
 			}
 		},
 	}
-	
-	addProtoCmd(protoCmd)
-	
+
+	addProtoFlags(protoCmd)
+
 	return protoCmd
 }
 
-func addProtoCmd(protoCmd *cobra.Command) {
+func addProtoFlags(protoCmd *cobra.Command) {
 	protoCmd.PersistentFlags().StringVarP(&outProtoPath, "out", "o", "", "proto out path")
 }
 
