@@ -60,12 +60,12 @@ func (s *{{.Name}}Service) Get{{.Name}}(ctx context.Context, req *v1.Get{{.Name}
 }
 
 func (s *{{.Name}}Service) List{{.Name}}(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {
-	dates, count, err := s.uc.List{{.Name}}(ctx, list{{.Name}}Req2Biz(req), int(req.Page), int(req.Pagesize))
+	list, count, err := s.uc.List{{.Name}}(ctx, list{{.Name}}Req2Biz(req), int(req.Page), int(req.Pagesize))
 	if err != nil {
 		return nil, err
 	}
 	return &v1.List{{.Name}}Reply{
-		{{.Name| ToCamel | ToPlural}}: bulk{{.Name}}Biz2Proto(dates),
+		{{.Name| ToCamel | ToPlural}}: bulk{{.Name}}Biz2Proto(list),
 		Count: uint32(count),
 	}, nil
 }
