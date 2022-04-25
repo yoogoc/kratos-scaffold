@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 
 	"github.com/iancoleman/strcase"
@@ -19,11 +20,11 @@ type DataEnt struct {
 	Name        string
 	Namespace   string
 	AppDirName  string // TODO
-	Fields      []Field
-	StrToPreMap map[string]PredicateType
+	Fields      []field.Field
+	StrToPreMap map[string]field.PredicateType
 }
 
-func NewDataEnt(name string, ns string, fields []Field) DataEnt {
+func NewDataEnt(name string, ns string, fields []field.Field) DataEnt {
 	adn := ""
 	if ns != "" {
 		adn = "app/" + ns // TODO
@@ -33,18 +34,18 @@ func NewDataEnt(name string, ns string, fields []Field) DataEnt {
 		Namespace:   ns,
 		AppDirName:  adn,
 		Fields:      fields,
-		StrToPreMap: strToPreMap,
+		StrToPreMap: field.StrToPreMap,
 	}
 }
 
-func (b DataEnt) ParamFields() []Predicate {
-	fs := make([]Predicate, 0, len(b.Fields))
-	for _, field := range b.Fields {
-		for _, predicate := range field.Predicates {
-			fs = append(fs, Predicate{
-				Name:      field.Name + predicate.Type.String(),
-				FieldType: field.FieldType,
-				EntName:   entName(field.Name) + predicate.Type.EntString(),
+func (b DataEnt) ParamFields() []field.Predicate {
+	fs := make([]field.Predicate, 0, len(b.Fields))
+	for _, f := range b.Fields {
+		for _, predicate := range f.Predicates {
+			fs = append(fs, field.Predicate{
+				Name:      f.Name + predicate.Type.String(),
+				FieldType: f.FieldType,
+				EntName:   entName(f.Name) + predicate.Type.EntString(),
 				Type:      predicate.Type,
 			})
 		}
@@ -52,8 +53,8 @@ func (b DataEnt) ParamFields() []Predicate {
 	return fs
 }
 
-func (b DataEnt) FieldsExceptPrimary() []Field {
-	return util.FilterSlice(b.Fields, func(f Field) bool {
+func (b DataEnt) FieldsExceptPrimary() []field.Field {
+	return util.FilterSlice(b.Fields, func(f field.Field) bool {
 		return f.Name != "id"
 	})
 }
@@ -245,7 +246,7 @@ func (b DataEnt) genData() error {
 		"ToCamel":      strcase.ToCamel,
 		"ToLowerCamel": strcase.ToLowerCamel,
 		"ToEntName":    entName,
-		"last": func(x int, a []Field) bool {
+		"last": func(x int, a []field.Field) bool {
 			return x == len(a)-1
 		},
 	}

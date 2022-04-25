@@ -3,95 +3,18 @@ package generator
 import (
 	"bytes"
 	_ "embed"
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 
 	"github.com/gertd/go-pluralize"
-	"github.com/iancoleman/strcase"
 	"golang.org/x/mod/modfile"
 )
-
-type PredicateType int
-
-const (
-	PredicateTypeEq = iota
-	PredicateTypeContains
-	PredicateTypeGt
-	PredicateTypeGtE
-	PredicateTypeLt
-	PredicateTypeLtE
-	PredicateTypeIn
-)
-
-var (
-	presMap = map[PredicateType]string{
-		PredicateTypeEq:       "Eq",
-		PredicateTypeContains: "Contains",
-		PredicateTypeGt:       "Gt",
-		PredicateTypeGtE:      "GtEq",
-		PredicateTypeLt:       "Lt",
-		PredicateTypeLtE:      "LtEq",
-		PredicateTypeIn:       "In",
-	}
-	presEntMap = map[PredicateType]string{
-		PredicateTypeEq:       "EQ",
-		PredicateTypeContains: "Contains",
-		PredicateTypeGt:       "GT",
-		PredicateTypeGtE:      "GTE",
-		PredicateTypeLt:       "LT",
-		PredicateTypeLtE:      "LTE",
-		PredicateTypeIn:       "In",
-	}
-	strToPreMap = map[string]PredicateType{
-		"eq":       PredicateTypeEq,
-		"contains": PredicateTypeContains,
-		"gt":       PredicateTypeGt,
-		"gte":      PredicateTypeGtE,
-		"lt":       PredicateTypeLt,
-		"lte":      PredicateTypeLtE,
-		"in":       PredicateTypeIn,
-	}
-
-	fieldStyleMap = map[string]func(string) string{
-		"snake": strcase.ToSnake,
-		"camel": strcase.ToLowerCamel,
-	}
-)
-
-func (pred PredicateType) String() string {
-	return presMap[pred]
-}
-
-func (pred PredicateType) EntString() string {
-	return presEntMap[pred]
-}
-
-func NewPredicateType(s string) PredicateType {
-	predicateType, ok := strToPreMap[strings.ToLower(s)]
-	if !ok {
-		panic(fmt.Sprintf("unknown PredicateType: %s", s))
-	}
-	return predicateType
-}
-
-type Predicate struct {
-	Name      string
-	Type      PredicateType
-	FieldType string
-	EntName   string
-}
-
-type Field struct {
-	Name       string
-	FieldType  string
-	Predicates []Predicate
-}
 
 type Proto struct {
 	Name        string
@@ -99,17 +22,17 @@ type Proto struct {
 	Package     string
 	GoPackage   string
 	JavaPackage string
-	Fields      []Field
+	Fields      []field.Field
 	GenGrpc     bool
 	GenHttp     bool
 	primaryKey  string
 	fieldStyle  string
-	StrToPreMap map[string]PredicateType
+	StrToPreMap map[string]field.PredicateType
 }
 
 var plural = pluralize.NewClient()
 
-func NewProto(name string, path string, fields []Field) Proto {
+func NewProto(name string, path string, fields []field.Field) Proto {
 	ps := strings.Split(path, "/")
 	onlyPath := strings.Join(ps[0:len(ps)-1], "/")
 	pkgName := strings.ReplaceAll(onlyPath, "/", ".")
@@ -125,7 +48,7 @@ func NewProto(name string, path string, fields []Field) Proto {
 		GenHttp:     false, // TODO
 		primaryKey:  "id",  // TODO
 		fieldStyle:  "camel",
-		StrToPreMap: strToPreMap,
+		StrToPreMap: field.StrToPreMap,
 	}
 }
 
@@ -148,29 +71,29 @@ func javaPackage(name string) string {
 	return name
 }
 
-func (p Proto) CreateForm() []Field {
-	return util.FilterSlice(p.Fields, func(f Field) bool {
+func (p Proto) CreateForm() []field.Field {
+	return util.FilterSlice(p.Fields, func(f field.Field) bool {
 		return f.Name != p.primaryKey
 	})
 }
 
-func (p Proto) UpdateForm() []Field {
-	fs := make([]Field, 0, len(p.Fields))
+func (p Proto) UpdateForm() []field.Field {
+	fs := make([]field.Field, 0, len(p.Fields))
 
 	fs = append(fs, p.PrimaryField())
-	fs = append(fs, util.FilterSlice(p.Fields, func(f Field) bool {
+	fs = append(fs, util.FilterSlice(p.Fields, func(f field.Field) bool {
 		return f.Name != p.primaryKey
 	})...)
 	return fs
 }
 
-func (p Proto) ListParams() []Predicate {
-	fs := make([]Predicate, 0, len(p.Fields))
-	for _, field := range p.Fields {
-		for _, predicate := range field.Predicates {
-			fs = append(fs, Predicate{
-				Name:      field.Name + predicate.Type.String(),
-				FieldType: field.FieldType,
+func (p Proto) ListParams() []field.Predicate {
+	fs := make([]field.Predicate, 0, len(p.Fields))
+	for _, f := range p.Fields {
+		for _, predicate := range f.Predicates {
+			fs = append(fs, field.Predicate{
+				Name:      f.Name + predicate.Type.String(),
+				FieldType: f.FieldType,
 				Type:      predicate.Type,
 			})
 		}
@@ -178,18 +101,18 @@ func (p Proto) ListParams() []Predicate {
 	return fs
 }
 
-func (p Proto) PrimaryField() Field {
-	idField, ok := util.FindSlice(p.Fields, func(f Field) bool {
+func (p Proto) PrimaryField() field.Field {
+	idField, ok := util.FindSlice(p.Fields, func(f field.Field) bool {
 		return f.Name == p.primaryKey
 	})
 	if !ok {
-		idField = Field{
+		idField = field.Field{
 			Name:      p.primaryKey,
 			FieldType: "int64", // TODO
-			Predicates: []Predicate{
+			Predicates: []field.Predicate{
 				{
 					Name:      p.primaryKey,
-					Type:      PredicateTypeEq,
+					Type:      field.PredicateTypeEq,
 					FieldType: "int64",
 				},
 			},
@@ -208,7 +131,7 @@ func (p Proto) Generate() error {
 		"ToLower":    strings.ToLower,
 		"ToPlural":   plural.Plural,
 		"add":        func(a int, b int) int { return a + b },
-		"fieldStyle": func(s string) string { return fieldStyleMap[p.fieldStyle](s) },
+		"fieldStyle": func(s string) string { return field.StyleFieldMap[p.fieldStyle](s) },
 	}
 	tmpl, err := template.New("protoTmpl").Funcs(funcMap).Parse(protoTmpl)
 	if err != nil {

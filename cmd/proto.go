@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/YoogoC/kratos-scaffold/generator"
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
 
 	"github.com/spf13/cobra"
 )
@@ -38,21 +39,21 @@ func addProtoFlags(protoCmd *cobra.Command) {
 	protoCmd.PersistentFlags().StringVarP(&outProtoPath, "out", "o", "", "proto out path")
 }
 
-func parseFields(strs []string) []generator.Field {
-	var fs []generator.Field
+func parseFields(strs []string) []field.Field {
+	var fs []field.Field
 	for _, str := range strs {
 		ss := strings.Split(str, ":")
-		var pres []generator.Predicate
+		var pres []field.Predicate
 		if len(ss) > 2 {
 			for _, p := range strings.Split(ss[2], ",") {
-				pres = append(pres, generator.Predicate{
+				pres = append(pres, field.Predicate{
 					Name:      ss[0],
-					Type:      generator.NewPredicateType(p),
+					Type:      field.NewPredicateType(p),
 					FieldType: ss[1],
 				})
 			}
 		}
-		fs = append(fs, generator.Field{
+		fs = append(fs, field.Field{
 			Name:       ss[0],
 			FieldType:  ss[1],
 			Predicates: pres,

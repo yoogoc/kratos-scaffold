@@ -7,7 +7,8 @@ import (
 	"path"
 	"strings"
 	"text/template"
-	
+
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/imports"
 )
@@ -16,11 +17,11 @@ type Biz struct {
 	Name        string
 	Namespace   string
 	AppDirName  string // TODO
-	Fields      []Field
-	StrToPreMap map[string]PredicateType
+	Fields      []field.Field
+	StrToPreMap map[string]field.PredicateType
 }
 
-func NewBiz(name string, ns string, fields []Field) Biz {
+func NewBiz(name string, ns string, fields []field.Field) Biz {
 	adn := ""
 	if ns != "" {
 		adn = "app/" + ns // TODO
@@ -30,17 +31,17 @@ func NewBiz(name string, ns string, fields []Field) Biz {
 		Namespace:   ns,
 		AppDirName:  adn,
 		Fields:      fields,
-		StrToPreMap: strToPreMap,
+		StrToPreMap: field.StrToPreMap,
 	}
 }
 
-func (b Biz) ParamFields() []Predicate {
-	fs := make([]Predicate, 0, len(b.Fields))
-	for _, field := range b.Fields {
-		for _, predicate := range field.Predicates {
-			fs = append(fs, Predicate{
-				Name:      field.Name + predicate.Type.String(),
-				FieldType: field.FieldType,
+func (b Biz) ParamFields() []field.Predicate {
+	fs := make([]field.Predicate, 0, len(b.Fields))
+	for _, f := range b.Fields {
+		for _, predicate := range f.Predicates {
+			fs = append(fs, field.Predicate{
+				Name:      f.Name + predicate.Type.String(),
+				FieldType: f.FieldType,
 				Type:      predicate.Type,
 			})
 		}
@@ -53,7 +54,7 @@ var bizTmpl string
 
 func (b Biz) Generate() error {
 	buf := new(bytes.Buffer)
-	
+
 	funcMap := template.FuncMap{
 		"ToLower":  strings.ToLower,
 		"ToPlural": plural.Plural,

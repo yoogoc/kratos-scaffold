@@ -3,9 +3,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	
+
+	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/spf13/cobra"
 )
+
+var settings = cli.New()
 
 func Execute() {
 	rootCmd := newRootCmd(os.Args[1:])
@@ -25,11 +28,13 @@ func newRootCmd(args []string) *cobra.Command {
 			_ = cmd.Help()
 		},
 	}
-	
+
 	flags := rootCmd.PersistentFlags()
-	
+
+	settings.AddFlags(flags)
+
 	_ = flags.Parse(args)
-	
+
 	rootCmd.AddCommand(
 		newNewCmd(),
 		newServiceCmd(),
@@ -37,6 +42,6 @@ func newRootCmd(args []string) *cobra.Command {
 		newProtoCmd(),
 		newDataCmd(),
 	)
-	
+
 	return rootCmd
 }

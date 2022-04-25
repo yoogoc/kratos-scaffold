@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 
 	"github.com/iancoleman/strcase"
@@ -18,11 +19,11 @@ type Service struct {
 	Name       string
 	Namespace  string
 	AppDirName string // TODO
-	Fields     []Field
+	Fields     []field.Field
 	ApiPath    string
 }
 
-func NewService(name string, ns string, fields []Field) Service {
+func NewService(name string, ns string, fields []field.Field) Service {
 	adn := ""
 	apiModelName := name
 	if ns != "" {
@@ -39,13 +40,13 @@ func NewService(name string, ns string, fields []Field) Service {
 	}
 }
 
-func (b Service) ParamFields() []Field {
-	fs := make([]Field, 0, len(b.Fields))
-	for _, field := range b.Fields {
-		for _, predicate := range field.Predicates {
-			fs = append(fs, Field{
-				Name:      field.Name + predicate.Type.String(),
-				FieldType: field.FieldType,
+func (b Service) ParamFields() []field.Field {
+	fs := make([]field.Field, 0, len(b.Fields))
+	for _, f := range b.Fields {
+		for _, predicate := range f.Predicates {
+			fs = append(fs, field.Field{
+				Name:      f.Name + predicate.Type.String(),
+				FieldType: f.FieldType,
 			})
 		}
 	}
@@ -56,8 +57,8 @@ func (b Service) CurrentPkgPath() string {
 	return path.Join(ModName(), b.AppDirName, "internal")
 }
 
-func (b Service) FieldsExceptPrimary() []Field {
-	return util.FilterSlice(b.Fields, func(f Field) bool {
+func (b Service) FieldsExceptPrimary() []field.Field {
+	return util.FilterSlice(b.Fields, func(f field.Field) bool {
 		return f.Name != "id"
 	})
 }
