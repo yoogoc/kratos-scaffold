@@ -12,9 +12,9 @@ func TestProto(t *testing.T) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
-	
-	runTestCmd(t, "proto -o api/user/v1/user.proto user id:int64:eq name:string:contains age:int32:gte,lte")
+
+	runTestCmd(t, "proto -n user user id:int64:eq name:string:contains age:int32:gte,lte")
 	_ = os.Chdir(wd)
-	
+
 	AssertGoldenFile(t, path.Join(dir, "api/user/v1/user.proto"), "proto.txt")
 }

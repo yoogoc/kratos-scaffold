@@ -9,107 +9,50 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
-
-	"github.com/gertd/go-pluralize"
-	"golang.org/x/mod/modfile"
 )
 
 type Proto struct {
-	Name        string
-	OutPath     string
-	Package     string
-	GoPackage   string
-	JavaPackage string
-	Fields      []field.Field
+	ApiDirName  string
+	Namespace   string
+	Name        string // is CamelName style
+	Fields      field.Fields
 	GenGrpc     bool
 	GenHttp     bool
 	primaryKey  string
-	fieldStyle  string
+	FieldStyle  string
 	StrToPreMap map[string]field.PredicateType
 }
 
-var plural = pluralize.NewClient()
-
-func NewProto(name string, path string, fields []field.Field) Proto {
-	ps := strings.Split(path, "/")
-	onlyPath := strings.Join(ps[0:len(ps)-1], "/")
-	pkgName := strings.ReplaceAll(onlyPath, "/", ".")
-
-	return Proto{
-		Name:        plural.Singular(strings.ToUpper(name[0:1]) + name[1:]),
-		OutPath:     path,
-		Package:     pkgName,
-		GoPackage:   goPackage(onlyPath),
-		JavaPackage: javaPackage(pkgName),
-		Fields:      fields,
-		GenGrpc:     false, // TODO
-		GenHttp:     false, // TODO
-		primaryKey:  "id",  // TODO
-		fieldStyle:  "camel",
+func NewProto(setting *cli.EnvSettings) *Proto {
+	return &Proto{
+		primaryKey:  "id", // TODO
+		FieldStyle:  setting.FieldStyle,
 		StrToPreMap: field.StrToPreMap,
+		ApiDirName:  setting.ApiDirName,
+		Namespace:   setting.Namespace,
 	}
 }
 
-func ModName() string {
-	modBytes, err := os.ReadFile("go.mod")
-	if err != nil {
-		if modBytes, err = os.ReadFile("../go.mod"); err != nil {
-			return ""
-		}
-	}
-	return modfile.ModulePath(modBytes)
+func (p *Proto) CreateFields() []*field.Field {
+	return p.Fields.CreateFields(p.primaryKey)
 }
 
-func goPackage(path string) string {
-	s := strings.Split(path, "/")
-	return ModName() + "/" + path + ";" + s[len(s)-1]
+func (p *Proto) UpdateFields() []*field.Field {
+	return p.Fields.UpdateFields(p.PrimaryField())
 }
 
-func javaPackage(name string) string {
-	return name
-}
-
-func (p Proto) CreateForm() []field.Field {
-	return util.FilterSlice(p.Fields, func(f field.Field) bool {
-		return f.Name != p.primaryKey
-	})
-}
-
-func (p Proto) UpdateForm() []field.Field {
-	fs := make([]field.Field, 0, len(p.Fields))
-
-	fs = append(fs, p.PrimaryField())
-	fs = append(fs, util.FilterSlice(p.Fields, func(f field.Field) bool {
-		return f.Name != p.primaryKey
-	})...)
-	return fs
-}
-
-func (p Proto) ListParams() []field.Predicate {
-	fs := make([]field.Predicate, 0, len(p.Fields))
-	for _, f := range p.Fields {
-		for _, predicate := range f.Predicates {
-			fs = append(fs, field.Predicate{
-				Name:      f.Name + predicate.Type.String(),
-				FieldType: f.FieldType,
-				Type:      predicate.Type,
-			})
-		}
-	}
-	return fs
-}
-
-func (p Proto) PrimaryField() field.Field {
-	idField, ok := util.FindSlice(p.Fields, func(f field.Field) bool {
+func (p *Proto) PrimaryField() *field.Field {
+	idField, ok := util.FindSlice(p.Fields, func(f *field.Field) bool {
 		return f.Name == p.primaryKey
 	})
 	if !ok {
-		idField = field.Field{
+		idField = &field.Field{
 			Name:      p.primaryKey,
 			FieldType: "int64", // TODO
-			Predicates: []field.Predicate{
+			Predicates: []*field.Predicate{
 				{
 					Name:      p.primaryKey,
 					Type:      field.PredicateTypeEq,
@@ -124,14 +67,14 @@ func (p Proto) PrimaryField() field.Field {
 //go:embed tmpl/proto.tmpl
 var protoTmpl string
 
-func (p Proto) Generate() error {
+func (p *Proto) Generate() error {
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
 		"ToLower":    strings.ToLower,
-		"ToPlural":   plural.Plural,
+		"ToPlural":   util.Plural,
 		"add":        func(a int, b int) int { return a + b },
-		"fieldStyle": func(s string) string { return field.StyleFieldMap[p.fieldStyle](s) },
+		"fieldStyle": func(s string) string { return field.StyleFieldMap[p.FieldStyle](s) },
 	}
 	tmpl, err := template.New("protoTmpl").Funcs(funcMap).Parse(protoTmpl)
 	if err != nil {
@@ -142,7 +85,7 @@ func (p Proto) Generate() error {
 		return err
 	}
 
-	out := p.OutPath
+	out := p.OutPath()
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -158,4 +101,25 @@ func (p Proto) Generate() error {
 		}
 	}
 	return os.WriteFile(out, buf.Bytes(), 0o644)
+}
+
+func (p *Proto) OutPath() string {
+	return path.Join(p.Path(), strings.ToLower(p.Name)+".proto")
+}
+
+func (p *Proto) Path() string {
+	return path.Join(p.ApiDirName, p.Namespace, util.DefaultApiVersion)
+}
+
+func (p *Proto) GoPackage() string {
+	s := strings.Split(p.Path(), "/")
+	return util.ModName() + "/" + p.Path() + ";" + s[len(s)-1]
+}
+
+func (p *Proto) JavaPackage() string {
+	return p.Package()
+}
+
+func (p *Proto) Package() string {
+	return strings.ReplaceAll(p.Path(), "/", ".")
 }

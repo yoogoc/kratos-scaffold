@@ -182,8 +182,8 @@ func genCmd(name string, appPath string, isSubMono bool) error {
 	appPkgPath := name
 	serviceName := strings.ReplaceAll(name, "/", ".")
 	if isSubMono {
-		appPkgPath = path.Join(generator.ModName(), "app", name)
-		serviceName = strings.ReplaceAll(path.Join(generator.ModName(), name), "/", ".")
+		appPkgPath = path.Join(util.ModName(), "app", name)
+		serviceName = strings.ReplaceAll(path.Join(util.ModName(), name), "/", ".")
 	}
 	cmdTmpl := CmdTmpl{
 		AppPkgPath:  appPkgPath,
@@ -296,7 +296,7 @@ var ProviderSet = wire.NewSet()
 	// 3.3 gen data/data.go data/tx.go
 	appPkgPath := name
 	if isSubMono {
-		appPkgPath = path.Join(generator.ModName(), "app", name)
+		appPkgPath = path.Join(util.ModName(), "app", name)
 	}
 	if err := NewDataTmpl(name, appPkgPath, dataPath).Generate(); err != nil {
 		return err

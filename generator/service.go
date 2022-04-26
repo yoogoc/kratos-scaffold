@@ -19,11 +19,11 @@ type Service struct {
 	Name       string
 	Namespace  string
 	AppDirName string // TODO
-	Fields     []field.Field
+	Fields     field.Fields
 	ApiPath    string
 }
 
-func NewService(name string, ns string, fields []field.Field) Service {
+func NewService(name string, ns string, fields []*field.Field) Service {
 	adn := ""
 	apiModelName := name
 	if ns != "" {
@@ -32,11 +32,11 @@ func NewService(name string, ns string, fields []field.Field) Service {
 	}
 
 	return Service{
-		Name:       plural.Singular(strings.ToUpper(name[0:1]) + name[1:]),
+		Name:       util.Singular(strcase.ToCamel(name)),
 		Namespace:  ns,
 		AppDirName: adn,
 		Fields:     fields,
-		ApiPath:    path.Join(ModName(), "api", apiModelName, "v1"), // TODO
+		ApiPath:    path.Join(util.ModName(), "api", apiModelName, "v1"), // TODO
 	}
 }
 
@@ -54,11 +54,11 @@ func (b Service) ParamFields() []field.Field {
 }
 
 func (b Service) CurrentPkgPath() string {
-	return path.Join(ModName(), b.AppDirName, "internal")
+	return path.Join(util.ModName(), b.AppDirName, "internal")
 }
 
-func (b Service) FieldsExceptPrimary() []field.Field {
-	return util.FilterSlice(b.Fields, func(f field.Field) bool {
+func (b Service) FieldsExceptPrimary() []*field.Field {
+	return util.FilterSlice(b.Fields, func(f *field.Field) bool {
 		return f.Name != "id"
 	})
 }
@@ -84,7 +84,7 @@ func (b Service) genTransfer() error {
 
 	funcMap := template.FuncMap{
 		"ToLower":    strings.ToLower,
-		"ToPlural":   plural.Plural,
+		"ToPlural":   util.Plural,
 		"ToCamel":    strcase.ToCamel,
 		"ToSnake":    strcase.ToSnake,
 		"ToLowCamel": strcase.ToLowerCamel,
@@ -110,7 +110,7 @@ func (b Service) genService() error {
 
 	funcMap := template.FuncMap{
 		"ToLower":    strings.ToLower,
-		"ToPlural":   plural.Plural,
+		"ToPlural":   util.Plural,
 		"ToCamel":    strcase.ToCamel,
 		"ToSnake":    strcase.ToSnake,
 		"ToLowCamel": strcase.ToLowerCamel,

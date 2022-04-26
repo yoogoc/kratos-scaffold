@@ -26,7 +26,7 @@ func New{{.Name | ToCamel}}Repo(data *Data, logger log.Logger) biz.{{.Name | ToC
 func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	client := EntClient(ctx, r.data)
 	row, err := client.{{.Name | ToCamel}}.Create().
-		{{- range $i, $f := .FieldsExceptPrimary }}
+		{{- range $i, $f := .CreateFields }}
 		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
 		{{- end }}
 		Save(ctx)
@@ -41,8 +41,8 @@ func (r {{$modelName}}Repo) BulkCreate(ctx context.Context, list []*biz.{{.Name 
 	var builders []*ent.{{.Name | ToCamel}}Create
 	for _, item := range list {
 		builders = append(builders, client.{{.Name | ToCamel}}.Create().
-			{{- range $i, $f := .FieldsExceptPrimary }}
-			Set{{ $f.Name | ToEntName }}(item.{{ $f.Name | ToCamel }}){{- if last $i $.FieldsExceptPrimary}},{{- else}}.{{- end}}
+			{{- range $i, $f := .CreateFields }}
+			Set{{ $f.Name | ToEntName }}(item.{{ $f.Name | ToCamel }}){{- if last $i $.CreateFields}},{{- else}}.{{- end}}
 			{{- end }}
 		)
 	}

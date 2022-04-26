@@ -19,13 +19,13 @@ message {{.Name}} {
 	{{- end }}
 }
 message Create{{.Name}}Request {
-	{{- range $i, $f := .CreateForm }}
+	{{- range $i, $f := .CreateFields }}
 	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
 message Create{{.Name}}Reply {}
 message Update{{.Name}}Request {
-	{{- range $i, $f := .UpdateForm }}
+	{{- range $i, $f := .UpdateFields }}
 	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
@@ -45,7 +45,7 @@ message List{{.Name}}Request {
 	uint32 page = 1;
 	uint32 pagesize = 2;
 	{{- $strToPreMap := .StrToPreMap}}
-	{{- range $i, $f := .ListParams }}
+	{{- range $i, $f := .Fields.ParamFields }}
 	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{- end }}{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
 	{{- end }}
 }

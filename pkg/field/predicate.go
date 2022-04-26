@@ -22,9 +22,9 @@ var (
 		PredicateTypeEq:       "Eq",
 		PredicateTypeContains: "Contains",
 		PredicateTypeGt:       "Gt",
-		PredicateTypeGtE:      "GtEq",
+		PredicateTypeGtE:      "GTE",
 		PredicateTypeLt:       "Lt",
-		PredicateTypeLtE:      "LtEq",
+		PredicateTypeLtE:      "LTE",
 		PredicateTypeIn:       "In",
 	}
 	presEntMap = map[PredicateType]string{

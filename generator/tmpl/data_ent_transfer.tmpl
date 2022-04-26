@@ -44,7 +44,7 @@ func {{.Name | ToLowerCamel}}Param2Predicates(param *biz.{{.Name | ToCamel}}Para
 	{{- $modelName := .Name |ToLower}}
 	{{- $strToPreMap := .StrToPreMap}}
 	var ps []predicate.{{.Name | ToCamel}}
-	{{- range $i, $f := .ParamFields }}
+	{{- range $i, $f := .Fields.ParamFields }}
 	{{- $isIn := eq $f.Type $strToPreMap.in }}
 	{{ if $isIn }}
 	if len(param.{{ $f.Name | ToCamel }}) > 0 {

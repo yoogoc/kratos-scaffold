@@ -1,63 +1,41 @@
 package cmd
 
 import (
-	"strings"
-
 	"github.com/YoogoC/kratos-scaffold/generator"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
-
+	"github.com/YoogoC/kratos-scaffold/pkg/util"
+	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 )
 
-var (
-	outProtoPath string
-)
-
 func newProtoCmd() *cobra.Command {
+	proto := generator.NewProto(settings)
 	var protoCmd = &cobra.Command{
 		Use:   "proto [NAME]",
 		Short: "proto generate req and res model, crud service and xx.pb.go,xx_grpc.pb.go,[xx_http.pb.go].",
 		Long: `proto generate req and res model, crud service and xx.pb.go,xx_grpc.pb.go,[xx_http.pb.go].
-kratos-scaffold  user -o api/user/v1/user.proto id:int64:eq,in name:string:contains age:int32:gte,lte -g -h`,
+kratos-scaffold user -n user id:int64:eq,in name:string:contains age:int32:gte,lte --grpc --http`,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-		Run: func(cmd *cobra.Command, args []string) {
-			modelName := args[0]
-			proto := generator.NewProto(modelName, outProtoPath, parseFields(args[1:]))
-			err := proto.Generate()
-			if err != nil {
-				panic(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runProto(proto, args)
 		},
 	}
 
-	addProtoFlags(protoCmd)
-
+	addProtoFlags(protoCmd, proto)
 	return protoCmd
 }
 
-func addProtoFlags(protoCmd *cobra.Command) {
-	protoCmd.PersistentFlags().StringVarP(&outProtoPath, "out", "o", "", "proto out path")
+func addProtoFlags(protoCmd *cobra.Command, proto *generator.Proto) {
+	protoCmd.PersistentFlags().BoolVarP(&proto.GenHttp, "http", "", true, "generate xx.http.pb.go")
+	protoCmd.PersistentFlags().BoolVarP(&proto.GenHttp, "grpc", "", true, "generate xx.grpc.pb.go")
 }
 
-func parseFields(strs []string) []field.Field {
-	var fs []field.Field
-	for _, str := range strs {
-		ss := strings.Split(str, ":")
-		var pres []field.Predicate
-		if len(ss) > 2 {
-			for _, p := range strings.Split(ss[2], ",") {
-				pres = append(pres, field.Predicate{
-					Name:      ss[0],
-					Type:      field.NewPredicateType(p),
-					FieldType: ss[1],
-				})
-			}
-		}
-		fs = append(fs, field.Field{
-			Name:       ss[0],
-			FieldType:  ss[1],
-			Predicates: pres,
-		})
-	}
-	return fs
+func runProto(proto *generator.Proto, args []string) error {
+	modelName := args[0]
+
+	proto.Name = util.Singular(strcase.ToCamel(modelName))
+	proto.Fields = field.ParseFields(args[1:])
+
+	err := proto.Generate()
+	return err
 }

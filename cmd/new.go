@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/YoogoC/kratos-scaffold/project_generator"
-	
+
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +31,7 @@ func newNewCmd() *cobra.Command {
 		},
 	}
 	addNewFlags(newCmd) // inject config struct
-	
+
 	return newCmd
 }
 

@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"github.com/YoogoC/kratos-scaffold/generator"
-	
+	"github.com/YoogoC/kratos-scaffold/pkg/field"
+
 	"github.com/spf13/cobra"
 )
 
@@ -18,16 +19,16 @@ func newBizCmd() *cobra.Command {
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		Run: func(cmd *cobra.Command, args []string) {
 			modelName := args[0]
-			biz := generator.NewBiz(modelName, namespace, parseFields(args[1:]))
+			biz := generator.NewBiz(modelName, namespace, field.ParseFields(args[1:]))
 			err := biz.Generate()
 			if err != nil {
 				panic(err)
 			}
 		},
 	}
-	
+
 	addBizFlags(bizCmd)
-	
+
 	return bizCmd
 }
 

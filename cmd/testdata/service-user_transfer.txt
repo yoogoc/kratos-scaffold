@@ -40,7 +40,7 @@ func listUserReq2Biz(req *v1.ListUserRequest) *biz.UserParam {
 	return &biz.UserParam{
 		IdEq:         req.IdEq,
 		NameContains: req.NameContains,
-		AgeGtEq:      req.AgeGtEq,
-		AgeLtEq:      req.AgeLtEq,
+		AgeGTE:       req.AgeGTE,
+		AgeLTE:       req.AgeLTE,
 	}
 }

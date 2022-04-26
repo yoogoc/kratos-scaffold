@@ -20,17 +20,17 @@ type DataEnt struct {
 	Name        string
 	Namespace   string
 	AppDirName  string // TODO
-	Fields      []field.Field
+	Fields      field.Fields
 	StrToPreMap map[string]field.PredicateType
 }
 
-func NewDataEnt(name string, ns string, fields []field.Field) DataEnt {
+func NewDataEnt(name string, ns string, fields []*field.Field) *DataEnt {
 	adn := ""
 	if ns != "" {
 		adn = "app/" + ns // TODO
 	}
-	return DataEnt{
-		Name:        plural.Singular(strings.ToUpper(name[0:1]) + name[1:]),
+	return &DataEnt{
+		Name:        util.Singular(strcase.ToCamel(name)),
 		Namespace:   ns,
 		AppDirName:  adn,
 		Fields:      fields,
@@ -38,25 +38,8 @@ func NewDataEnt(name string, ns string, fields []field.Field) DataEnt {
 	}
 }
 
-func (b DataEnt) ParamFields() []field.Predicate {
-	fs := make([]field.Predicate, 0, len(b.Fields))
-	for _, f := range b.Fields {
-		for _, predicate := range f.Predicates {
-			fs = append(fs, field.Predicate{
-				Name:      f.Name + predicate.Type.String(),
-				FieldType: f.FieldType,
-				EntName:   entName(f.Name) + predicate.Type.EntString(),
-				Type:      predicate.Type,
-			})
-		}
-	}
-	return fs
-}
-
-func (b DataEnt) FieldsExceptPrimary() []field.Field {
-	return util.FilterSlice(b.Fields, func(f field.Field) bool {
-		return f.Name != "id"
-	})
+func (b *DataEnt) CreateFields() []*field.Field {
+	return b.Fields.CreateFields("id") // TODO
 }
 
 //go:embed tmpl/data_ent_data.tmpl
@@ -68,7 +51,7 @@ var dataEntSchemaTmpl string
 //go:embed tmpl/data_ent_transfer.tmpl
 var dataEntTransferTmpl string
 
-func (b DataEnt) Generate() error {
+func (b *DataEnt) Generate() error {
 	// 1. gen ent schema and entity
 	err := b.genEnt()
 	if err != nil {
@@ -87,7 +70,7 @@ func (b DataEnt) Generate() error {
 	return nil
 }
 
-func (b DataEnt) EntPath() string {
+func (b *DataEnt) EntPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -101,7 +84,7 @@ func (b DataEnt) EntPath() string {
 	return p
 }
 
-func (b DataEnt) OutPath() string {
+func (b *DataEnt) OutPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
@@ -109,16 +92,16 @@ func (b DataEnt) OutPath() string {
 	return path.Join(wd, b.AppDirName, "internal/data") // TODO
 }
 
-func (b DataEnt) CurrentPkgPath() string {
-	return path.Join(ModName(), b.AppDirName, "internal")
+func (b *DataEnt) CurrentPkgPath() string {
+	return path.Join(util.ModName(), b.AppDirName, "internal")
 }
 
-func (b DataEnt) genEnt() error {
+func (b *DataEnt) genEnt() error {
 	fmt.Println("generating ent schema...")
 	schemaBuf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
 		"ToLower":  strings.ToLower,
-		"ToPlural": plural.Plural,
+		"ToPlural": util.Plural,
 		"ToCamel":  strcase.ToCamel,
 		"ToSnake":  strcase.ToSnake,
 	}
@@ -203,15 +186,15 @@ func (c *Client) DB() *sql.DB {
 	return nil
 }
 
-func (b DataEnt) genTransfer() error {
+func (b *DataEnt) genTransfer() error {
 	fmt.Println("generating data transfer...")
 	buf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
 		"ToLower":      strings.ToLower,
-		"ToPlural":     plural.Plural,
+		"ToPlural":     util.Plural,
 		"ToCamel":      strcase.ToCamel,
 		"ToLowerCamel": strcase.ToLowerCamel,
-		"ToEntName":    entName,
+		"ToEntName":    field.EntName,
 	}
 	tmpl, err := template.New("dataEntTransferTmpl").Funcs(funcMap).Parse(dataEntTransferTmpl)
 	if err != nil {
@@ -229,24 +212,16 @@ func (b DataEnt) genTransfer() error {
 	return os.WriteFile(p, content, 0o644)
 }
 
-func entName(s string) string {
-	s = strcase.ToCamel(s)
-	if len(s) < 2 || strings.ToLower(s[len(s)-2:]) != "id" {
-		return s
-	}
-	return s[:len(s)-2] + "ID"
-}
-
-func (b DataEnt) genData() error {
+func (b *DataEnt) genData() error {
 	fmt.Println("generating data...")
 	buf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
 		"ToLower":      strings.ToLower,
-		"ToPlural":     plural.Plural,
+		"ToPlural":     util.Plural,
 		"ToCamel":      strcase.ToCamel,
 		"ToLowerCamel": strcase.ToLowerCamel,
-		"ToEntName":    entName,
-		"last": func(x int, a []field.Field) bool {
+		"ToEntName":    field.EntName,
+		"last": func(x int, a []*field.Field) bool {
 			return x == len(a)-1
 		},
 	}

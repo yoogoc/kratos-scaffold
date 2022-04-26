@@ -15,8 +15,8 @@ type User struct {
 type UserParam struct {
 	IdEq         int64
 	NameContains string
-	AgeGtEq      int32
-	AgeLtEq      int32
+	AgeGTE       int32
+	AgeLTE       int32
 }
 
 type UserRepo interface {

@@ -9,6 +9,7 @@ import (
 	"text/template"
 
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
+	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/imports"
 )
@@ -17,17 +18,17 @@ type Biz struct {
 	Name        string
 	Namespace   string
 	AppDirName  string // TODO
-	Fields      []field.Field
+	Fields      field.Fields
 	StrToPreMap map[string]field.PredicateType
 }
 
-func NewBiz(name string, ns string, fields []field.Field) Biz {
+func NewBiz(name string, ns string, fields []*field.Field) Biz {
 	adn := ""
 	if ns != "" {
 		adn = "app/" + ns // TODO
 	}
 	return Biz{
-		Name:        plural.Singular(strings.ToUpper(name[0:1]) + name[1:]),
+		Name:        util.Singular(strcase.ToCamel(name)),
 		Namespace:   ns,
 		AppDirName:  adn,
 		Fields:      fields,
@@ -57,7 +58,7 @@ func (b Biz) Generate() error {
 
 	funcMap := template.FuncMap{
 		"ToLower":  strings.ToLower,
-		"ToPlural": plural.Plural,
+		"ToPlural": util.Plural,
 		"ToCamel":  strcase.ToCamel,
 	}
 	tmpl, err := template.New("bizTmpl").Funcs(funcMap).Parse(bizTmpl)

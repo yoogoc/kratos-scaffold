@@ -44,8 +44,8 @@ message ListUserRequest {
 	uint32 pagesize = 2;
 	int64 idEq = 3;
 	string nameContains = 4;
-	int32 ageGtEq = 5;
-	int32 ageLtEq = 6;
+	int32 ageGTE = 5;
+	int32 ageLTE = 6;
 }
 message ListUserReply {
 	repeated User users = 1;
