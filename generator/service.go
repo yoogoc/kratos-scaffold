@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 
@@ -18,29 +19,21 @@ import (
 type Service struct {
 	Name       string
 	Namespace  string
-	AppDirName string // TODO
+	AppDirName string
+	ApiDirName string
 	Fields     field.Fields
 	ApiPath    string
 }
 
-func NewService(name string, ns string, fields []*field.Field) Service {
-	adn := ""
-	apiModelName := name
-	if ns != "" {
-		adn = "app/" + ns // TODO
-		apiModelName = ns
-	}
-
-	return Service{
-		Name:       util.Singular(strcase.ToCamel(name)),
-		Namespace:  ns,
-		AppDirName: adn,
-		Fields:     fields,
-		ApiPath:    path.Join(util.ModName(), "api", apiModelName, "v1"), // TODO
+func NewService(setting *cli.EnvSettings) *Service {
+	return &Service{
+		Namespace:  setting.Namespace,
+		AppDirName: setting.AppDirName,
+		ApiDirName: setting.ApiDirName,
 	}
 }
 
-func (b Service) ParamFields() []field.Field {
+func (b *Service) ParamFields() []field.Field {
 	fs := make([]field.Field, 0, len(b.Fields))
 	for _, f := range b.Fields {
 		for _, predicate := range f.Predicates {
@@ -53,11 +46,11 @@ func (b Service) ParamFields() []field.Field {
 	return fs
 }
 
-func (b Service) CurrentPkgPath() string {
-	return path.Join(util.ModName(), b.AppDirName, "internal")
+func (b *Service) CurrentPkgPath() string {
+	return path.Join(util.ModName(), b.InternalPath(), "internal")
 }
 
-func (b Service) FieldsExceptPrimary() []*field.Field {
+func (b *Service) FieldsExceptPrimary() []*field.Field {
 	return util.FilterSlice(b.Fields, func(f *field.Field) bool {
 		return f.Name != "id"
 	})
@@ -69,7 +62,7 @@ var serviceTmpl string
 //go:embed tmpl/service_transfer.tmpl
 var serviceTransferTmpl string
 
-func (b Service) Generate() error {
+func (b *Service) Generate() error {
 	if err := b.genTransfer(); err != nil {
 		return err
 	}
@@ -79,7 +72,7 @@ func (b Service) Generate() error {
 	return nil
 }
 
-func (b Service) genTransfer() error {
+func (b *Service) genTransfer() error {
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
@@ -105,7 +98,7 @@ func (b Service) genTransfer() error {
 	return os.WriteFile(p, content, 0o644)
 }
 
-func (b Service) genService() error {
+func (b *Service) genService() error {
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
@@ -131,10 +124,17 @@ func (b Service) genService() error {
 	return os.WriteFile(p, content, 0o644)
 }
 
-func (b Service) OutPath() string {
+func (b *Service) OutPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(wd, b.AppDirName, "internal/service") // TODO
+	return path.Join(wd, b.InternalPath(), "internal/service") // TODO
+}
+
+func (b *Service) InternalPath() string {
+	if b.Namespace != "" {
+		return path.Join(b.AppDirName, b.Namespace) // TODO
+	}
+	return ""
 }

@@ -10,6 +10,9 @@ import (
 
 var settings = cli.New()
 
+const desc = `kratos-scaffold is a kratos-layout style scaffold.
+`
+
 func Execute() {
 	rootCmd := newRootCmd(os.Args[1:])
 	if err := rootCmd.Execute(); err != nil {
@@ -22,7 +25,7 @@ func newRootCmd(args []string) *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:                "kratos-scaffold",
 		Short:              "kratos-scaffold is a kratos-layout style scaffold.",
-		Long:               `kratos-scaffold is a kratos-layout style scaffold.`,
+		Long:               desc,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		Run: func(cmd *cobra.Command, args []string) {
 			_ = cmd.Help()

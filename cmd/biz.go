@@ -3,6 +3,8 @@ package cmd
 import (
 	"github.com/YoogoC/kratos-scaffold/generator"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
+	"github.com/YoogoC/kratos-scaffold/pkg/util"
+	"github.com/iancoleman/strcase"
 
 	"github.com/spf13/cobra"
 )
@@ -12,26 +14,32 @@ var (
 )
 
 func newBizCmd() *cobra.Command {
+	biz := generator.NewBiz(settings)
 	var bizCmd = &cobra.Command{
 		Use:                "biz [NAME] [FIELD]...",
 		Short:              "generate biz file",
 		Long:               `kratos-scaffold biz -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte`,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-		Run: func(cmd *cobra.Command, args []string) {
-			modelName := args[0]
-			biz := generator.NewBiz(modelName, namespace, field.ParseFields(args[1:]))
-			err := biz.Generate()
-			if err != nil {
-				panic(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runBiz(biz, args)
 		},
 	}
 
-	addBizFlags(bizCmd)
+	addBizFlags(bizCmd, biz)
 
 	return bizCmd
 }
 
-func addBizFlags(bizCmd *cobra.Command) {
-	bizCmd.PersistentFlags().StringVarP(&namespace, "namespace", "n", "", "app namespace")
+func addBizFlags(bizCmd *cobra.Command, biz *generator.Biz) {
+
+}
+
+func runBiz(biz *generator.Biz, args []string) error {
+	modelName := args[0]
+
+	biz.Name = util.Singular(strcase.ToCamel(modelName))
+	biz.Fields = field.ParseFields(args[1:])
+
+	err := biz.Generate()
+	return err
 }

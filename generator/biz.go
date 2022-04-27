@@ -8,6 +8,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
@@ -22,21 +23,15 @@ type Biz struct {
 	StrToPreMap map[string]field.PredicateType
 }
 
-func NewBiz(name string, ns string, fields []*field.Field) Biz {
-	adn := ""
-	if ns != "" {
-		adn = "app/" + ns // TODO
-	}
-	return Biz{
-		Name:        util.Singular(strcase.ToCamel(name)),
-		Namespace:   ns,
-		AppDirName:  adn,
-		Fields:      fields,
+func NewBiz(setting *cli.EnvSettings) *Biz {
+	return &Biz{
+		Namespace:   setting.Namespace,
+		AppDirName:  setting.AppDirName,
 		StrToPreMap: field.StrToPreMap,
 	}
 }
 
-func (b Biz) ParamFields() []field.Predicate {
+func (b *Biz) ParamFields() []field.Predicate {
 	fs := make([]field.Predicate, 0, len(b.Fields))
 	for _, f := range b.Fields {
 		for _, predicate := range f.Predicates {
@@ -53,7 +48,7 @@ func (b Biz) ParamFields() []field.Predicate {
 //go:embed tmpl/biz.tmpl
 var bizTmpl string
 
-func (b Biz) Generate() error {
+func (b *Biz) Generate() error {
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
@@ -77,10 +72,15 @@ func (b Biz) Generate() error {
 	return os.WriteFile(p, content, 0o644)
 }
 
-func (b Biz) OutPath() string {
+func (b *Biz) OutPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(wd, b.AppDirName, "internal/biz") // TODO
+	if b.Namespace != "" {
+		return path.Join(wd, b.AppDirName, b.Namespace, "internal/biz") // TODO
+	} else {
+		return path.Join(wd, b.Namespace, "internal/biz") // TODO
+	}
+
 }

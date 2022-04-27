@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 
@@ -19,27 +20,23 @@ import (
 type DataEnt struct {
 	Name        string
 	Namespace   string
-	AppDirName  string // TODO
+	AppDirName  string
 	Fields      field.Fields
 	StrToPreMap map[string]field.PredicateType
+	primaryKey  string
 }
 
-func NewDataEnt(name string, ns string, fields []*field.Field) *DataEnt {
-	adn := ""
-	if ns != "" {
-		adn = "app/" + ns // TODO
-	}
+func NewDataEnt(setting *cli.EnvSettings) *DataEnt {
 	return &DataEnt{
-		Name:        util.Singular(strcase.ToCamel(name)),
-		Namespace:   ns,
-		AppDirName:  adn,
-		Fields:      fields,
+		Namespace:   setting.Namespace,
+		AppDirName:  setting.AppDirName,
 		StrToPreMap: field.StrToPreMap,
+		primaryKey:  "id",
 	}
 }
 
 func (b *DataEnt) CreateFields() []*field.Field {
-	return b.Fields.CreateFields("id") // TODO
+	return b.Fields.CreateFields(b.primaryKey)
 }
 
 //go:embed tmpl/data_ent_data.tmpl
@@ -75,7 +72,7 @@ func (b *DataEnt) EntPath() string {
 	if err != nil {
 		panic(err)
 	}
-	p := path.Join(wd, b.AppDirName, "internal/data/ent") // TODO
+	p := path.Join(wd, b.InternalPath(), "internal/data/ent")
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		if err := os.MkdirAll(p, 0o700); err != nil {
 			panic(err)
@@ -89,11 +86,11 @@ func (b *DataEnt) OutPath() string {
 	if err != nil {
 		panic(err)
 	}
-	return path.Join(wd, b.AppDirName, "internal/data") // TODO
+	return path.Join(wd, b.InternalPath(), "internal/data")
 }
 
 func (b *DataEnt) CurrentPkgPath() string {
-	return path.Join(util.ModName(), b.AppDirName, "internal")
+	return path.Join(util.ModName(), b.InternalPath(), "internal")
 }
 
 func (b *DataEnt) genEnt() error {
@@ -239,4 +236,11 @@ func (b *DataEnt) genData() error {
 		return err
 	}
 	return os.WriteFile(p, content, 0o644)
+}
+
+func (b *DataEnt) InternalPath() string {
+	if b.Namespace != "" {
+		return path.Join(b.AppDirName, b.Namespace)
+	}
+	return ""
 }
