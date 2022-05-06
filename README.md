@@ -1,6 +1,6 @@
 # About
 
-kratos-layout脚手架，可以生成项目，proto，biz，service，data。mono库的生成未完全依照beer-shop，直接生成到app/xx而不是app/xx/service。目前很多都是硬编码，但基本能用。
+kratos-layout脚手架，可以生成项目，proto，biz，service，data。mono库的生成未完全依照beer-shop，直接生成到app/xx而不是app/xx/service。
 
 # Install
 
@@ -54,8 +54,6 @@ kratos-scaffold new user
 2. 生成proto文件
 ```shell
 kratos-scaffold proto -o api/user/v1/user.proto user id:int64:eq,in name:string:contains age:int32:gte,lte
-# 暂时是要kratos或直接生成proto client
-kratos proto client api/user/v1/user.proto
 ```
 3. 生成biz。可用flag:
 - -n --namespace 指定子服务,如果不指定则默认此库为单体库,直接生成到{{project_dir}}/internal/biz目录下
