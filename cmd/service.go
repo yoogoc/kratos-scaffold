@@ -30,7 +30,7 @@ func newServiceCmd() *cobra.Command {
 }
 
 func addServiceFlags(serviceCmd *cobra.Command, service *generator.Service) {
-
+	serviceCmd.PersistentFlags().StringVarP(&service.ApiPath, "api-path", "", "", "proto path, default is <current-mod-name>/<api-dir-name>/<namespace | name>/v1")
 }
 
 func runService(service *generator.Service, args []string) error {
@@ -39,14 +39,15 @@ func runService(service *generator.Service, args []string) error {
 	service.Name = util.Singular(strcase.ToCamel(modelName))
 	service.Fields = field.ParseFields(args[1:])
 
-	apiModelName := ""
-	if service.Namespace != "" {
-		apiModelName = path.Join(service.ApiDirName, service.Namespace)
-	} else {
-		apiModelName = path.Join(service.ApiDirName, strings.ToLower(service.Name))
+	if service.ApiPath == "" {
+		apiModelName := ""
+		if service.Namespace != "" {
+			apiModelName = path.Join(service.ApiDirName, service.Namespace)
+		} else {
+			apiModelName = path.Join(service.ApiDirName, strings.ToLower(service.Name))
+		}
+		service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
 	}
-	// TODO should can set value by flags
-	service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
 
 	err := service.Generate()
 	return err
