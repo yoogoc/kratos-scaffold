@@ -65,15 +65,15 @@ func (r userRepo) DestroyBy(ctx context.Context, param *biz.UserParam) (int, err
 	return client.User.Delete().Where(userParam2Predicates(param)...).Exec(ctx)
 }
 
-func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, pagesize int) ([]*biz.User, int, error) {
+func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, size int) ([]*biz.User, int, error) {
 	client := EntClient(ctx, r.data)
 	query := client.User.Query().Where(userParam2Predicates(param)...)
 	count, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	if pagesize > 0 {
-		query = query.Limit(pagesize).Offset((page - 1) * pagesize)
+	if size > 0 {
+		query = query.Limit(size).Offset((page - 1) * size)
 	}
 	rows, err := query.All(ctx)
 	if err != nil {

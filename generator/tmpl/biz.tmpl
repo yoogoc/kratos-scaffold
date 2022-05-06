@@ -25,7 +25,7 @@ type {{.Name}}Repo interface {
 	BulkCreate(ctx context.Context, {{.Name | ToLower | ToPlural}} []*{{.Name}}) ([]*{{.Name}}, error)
 	Update(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
 	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
-	List(ctx context.Context, param *{{.Name}}Param, page, pagesize int) ([]*{{.Name}}, int, error)
+	List(ctx context.Context, param *{{.Name}}Param, page, size int) ([]*{{.Name}}, int, error)
 	FindBy(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error)
 }
 
@@ -57,8 +57,8 @@ func (uc *{{.Name}}Usecase) Destroy{{.Name}}By(ctx context.Context, param *{{.Na
 	return uc.repo.DestroyBy(ctx, param)
 }
 
-func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}Param, page, pagesize int) ([]*{{.Name}}, int, error) {
-	return uc.repo.List(ctx, param, page, pagesize)
+func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}Param, page, size int) ([]*{{.Name}}, int, error) {
+	return uc.repo.List(ctx, param, page, size)
 }
 
 func (uc *{{.Name}}Usecase) Find{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error) {

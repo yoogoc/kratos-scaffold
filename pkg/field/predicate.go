@@ -20,7 +20,7 @@ const (
 var (
 	presMap = map[PredicateType]string{
 		PredicateTypeEq:       "Eq",
-		PredicateTypeContains: "Contains",
+		PredicateTypeContains: "Cont",
 		PredicateTypeGt:       "Gt",
 		PredicateTypeGtE:      "GTE",
 		PredicateTypeLt:       "Lt",
@@ -37,13 +37,13 @@ var (
 		PredicateTypeIn:       "In",
 	}
 	StrToPreMap = map[string]PredicateType{
-		"eq":       PredicateTypeEq,
-		"contains": PredicateTypeContains,
-		"gt":       PredicateTypeGt,
-		"gte":      PredicateTypeGtE,
-		"lt":       PredicateTypeLt,
-		"lte":      PredicateTypeLtE,
-		"in":       PredicateTypeIn,
+		"eq":   PredicateTypeEq,
+		"cont": PredicateTypeContains,
+		"gt":   PredicateTypeGt,
+		"gte":  PredicateTypeGtE,
+		"lt":   PredicateTypeLt,
+		"lte":  PredicateTypeLtE,
+		"in":   PredicateTypeIn,
 	}
 )
 

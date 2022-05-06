@@ -21,13 +21,13 @@ func newDataCmd() *cobra.Command {
 		},
 	}
 
-	addDataFlags(dataCmd)
+	addDataFlags(dataCmd, dataEnt)
 
 	return dataCmd
 }
 
-func addDataFlags(dataCmd *cobra.Command) {
-	// dataCmd.PersistentFlags().StringVar(&ormType, "orm", "ent", "app namespace")
+func addDataFlags(dataCmd *cobra.Command, dataEnt *generator.DataEnt) {
+	dataCmd.PersistentFlags().BoolVarP(&dataEnt.NeedAuditField, "audit-field", "", true, "auto generate created_at and update_at fields, default is true")
 }
 
 func runDataEnt(dataEnt *generator.DataEnt, args []string) error {

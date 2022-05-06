@@ -41,9 +41,9 @@ message GetUserReply {
 }
 message ListUserRequest {
 	uint32 page = 1;
-	uint32 pagesize = 2;
+	uint32 pageSize = 2;
 	int64 idEq = 3;
-	string nameContains = 4;
+	string nameCont = 4;
 	int32 ageGTE = 5;
 	int32 ageLTE = 6;
 }

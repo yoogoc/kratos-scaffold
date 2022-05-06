@@ -64,6 +64,14 @@ func (p *Proto) PrimaryField() *field.Field {
 	return idField
 }
 
+func (p *Proto) PageParamName() string {
+	return field.StyleFieldMap[p.FieldStyle]("page")
+}
+
+func (p *Proto) PageSizeParamName() string {
+	return field.StyleFieldMap[p.FieldStyle]("pageSize")
+}
+
 //go:embed tmpl/proto.tmpl
 var protoTmpl string
 

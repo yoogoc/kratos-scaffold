@@ -60,7 +60,7 @@ func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.
 }
 
 func (s *UserService) ListUser(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
-	list, count, err := s.uc.ListUser(ctx, listUserReq2Biz(req), int(req.Page), int(req.Pagesize))
+	list, count, err := s.uc.ListUser(ctx, listUserReq2Biz(req), int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}

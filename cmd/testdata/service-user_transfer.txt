@@ -38,9 +38,9 @@ func bulkUserBiz2Proto(list []*biz.User) []*v1.User {
 
 func listUserReq2Biz(req *v1.ListUserRequest) *biz.UserParam {
 	return &biz.UserParam{
-		IdEq:         req.IdEq,
-		NameContains: req.NameContains,
-		AgeGTE:       req.AgeGTE,
-		AgeLTE:       req.AgeLTE,
+		IdEq:     req.IdEq,
+		NameCont: req.NameCont,
+		AgeGTE:   req.AgeGTE,
+		AgeLTE:   req.AgeLTE,
 	}
 }

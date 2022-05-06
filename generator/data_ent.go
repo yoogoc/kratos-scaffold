@@ -18,12 +18,13 @@ import (
 )
 
 type DataEnt struct {
-	Name        string
-	Namespace   string
-	AppDirName  string
-	Fields      field.Fields
-	StrToPreMap map[string]field.PredicateType
-	primaryKey  string
+	Name           string
+	Namespace      string
+	AppDirName     string
+	Fields         field.Fields
+	StrToPreMap    map[string]field.PredicateType
+	primaryKey     string
+	NeedAuditField bool
 }
 
 func NewDataEnt(setting *cli.EnvSettings) *DataEnt {
@@ -37,6 +38,16 @@ func NewDataEnt(setting *cli.EnvSettings) *DataEnt {
 
 func (b *DataEnt) CreateFields() []*field.Field {
 	return b.Fields.CreateFields(b.primaryKey)
+}
+
+func (b *DataEnt) EntFields() []*field.Field {
+	if b.NeedAuditField {
+		return util.FilterSlice(b.Fields, func(f *field.Field) bool {
+			return f.Name == "updated_at" || f.Name == "created_at"
+		})
+	} else {
+		return b.Fields
+	}
 }
 
 //go:embed tmpl/data_ent_data.tmpl

@@ -42,8 +42,8 @@ message Get{{.Name}}Reply {
 	{{.Name}} {{.Name | ToLower | fieldStyle }} = 1;
 }
 message List{{.Name}}Request {
-	uint32 page = 1;
-	uint32 pagesize = 2;
+	uint32 {{.PageParamName}} = 1;
+	uint32 {{.PageSizeParamName}} = 2;
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
 	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{- end }}{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};

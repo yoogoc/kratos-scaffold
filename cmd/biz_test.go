@@ -12,9 +12,9 @@ func TestBiz(t *testing.T) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
-	
-	runTestCmd(t, "biz user id:int64:eq name:string:contains age:int32:gte,lte")
+
+	runTestCmd(t, "biz user id:int64:eq name:string:cont age:int32:gte,lte")
 	_ = os.Chdir(wd)
-	
+
 	AssertGoldenFile(t, path.Join(dir, "internal/biz/user.go"), "biz-user.txt")
 }

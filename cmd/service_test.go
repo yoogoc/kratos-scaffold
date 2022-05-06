@@ -12,10 +12,10 @@ func TestService(t *testing.T) {
 	t.Cleanup(func() {
 		_ = os.RemoveAll(dir)
 	})
-	
-	runTestCmd(t, "service user id:int64:eq name:string:contains age:int32:gte,lte")
+
+	runTestCmd(t, "service user id:int64:eq name:string:cont age:int32:gte,lte")
 	_ = os.Chdir(wd)
-	
+
 	AssertGoldenFile(t, path.Join(dir, "internal/service/user.go"), "service-user.txt")
 	AssertGoldenFile(t, path.Join(dir, "internal/service/user_transfer.go"), "service-user_transfer.txt")
 }

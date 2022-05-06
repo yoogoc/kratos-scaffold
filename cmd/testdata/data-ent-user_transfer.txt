@@ -46,8 +46,8 @@ func userParam2Predicates(param *biz.UserParam) []predicate.User {
 		ps = append(ps, user.IDEQ(param.IdEq))
 	}
 
-	if param.NameContains != "" {
-		ps = append(ps, user.NameContains(param.NameContains))
+	if param.NameCont != "" {
+		ps = append(ps, user.NameContains(param.NameCont))
 	}
 
 	if param.AgeGTE != 0 {

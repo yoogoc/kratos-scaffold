@@ -11,11 +11,13 @@ type {{ .Name }} struct {
 // Fields of the {{ .Name }}.
 func ({{ .Name }}) Fields() []ent.Field {
 	return []ent.Field{
-		{{- range $i, $f := .Fields }}
+		{{- range $i, $f := .EntFields }}
 		field.{{ $f.FieldType | ToCamel }}("{{$f.Name | ToSnake}}"),
 		{{- end }}
+		{{- if .NeedAuditField }}
 		field.Time("created_at").Immutable().Default(time.Now),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
+		{{- end }}
 	}
 }
 

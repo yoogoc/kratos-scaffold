@@ -84,3 +84,4 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 - [ ] data: 支持生成proto client和gorm
 - [ ] 支持更多类型, 目前只有字符型和数字型, 需支持time等动态类型,如time类型在proto中会体现为timestamp类型,bool和数字类型的eq谓语需要使用wrappers类型包装
 - [x] proto 生成可以指定proto风格: aa_bb, aaBb, AaBb
+- [ ] i18n

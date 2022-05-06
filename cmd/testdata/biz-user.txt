@@ -13,10 +13,10 @@ type User struct {
 }
 
 type UserParam struct {
-	IdEq         int64
-	NameContains string
-	AgeGTE       int32
-	AgeLTE       int32
+	IdEq     int64
+	NameCont string
+	AgeGTE   int32
+	AgeLTE   int32
 }
 
 type UserRepo interface {
@@ -24,7 +24,7 @@ type UserRepo interface {
 	BulkCreate(ctx context.Context, users []*User) ([]*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
 	DestroyBy(ctx context.Context, param *UserParam) (int, error)
-	List(ctx context.Context, param *UserParam, page, pagesize int) ([]*User, int, error)
+	List(ctx context.Context, param *UserParam, page, size int) ([]*User, int, error)
 	FindBy(ctx context.Context, param *UserParam) (*User, error)
 }
 
@@ -56,8 +56,8 @@ func (uc *UserUsecase) DestroyUserBy(ctx context.Context, param *UserParam) (int
 	return uc.repo.DestroyBy(ctx, param)
 }
 
-func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, page, pagesize int) ([]*User, int, error) {
-	return uc.repo.List(ctx, param, page, pagesize)
+func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, page, size int) ([]*User, int, error) {
+	return uc.repo.List(ctx, param, page, size)
 }
 
 func (uc *UserUsecase) FindUserBy(ctx context.Context, param *UserParam) (*User, error) {
