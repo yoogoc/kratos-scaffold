@@ -77,7 +77,7 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 
 # Roadmap
 
-- [ ] 在kratos proto client 的基础上更加灵活的生成proto客户端
+- [ ] 灵活的生成proto客户端
 - [ ] 丰富配置，可以使用配置文件来约定配置，更轻量的使用cli
 - [ ] biz，service，data可以通过proto文件生成
 - [ ] data: 支持生成proto client和gorm

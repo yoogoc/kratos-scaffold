@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -12,6 +13,7 @@ import (
 	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
+	"github.com/pkg/errors"
 )
 
 type Proto struct {
@@ -20,7 +22,6 @@ type Proto struct {
 	Name        string // is CamelName style
 	Fields      field.Fields
 	GenGrpc     bool
-	GenHttp     bool
 	primaryKey  string
 	FieldStyle  string
 	StrToPreMap map[string]field.PredicateType
@@ -108,7 +109,34 @@ func (p *Proto) Generate() error {
 			return err
 		}
 	}
-	return os.WriteFile(out, buf.Bytes(), 0o644)
+	if err := os.WriteFile(out, buf.Bytes(), 0o644); err != nil {
+		return err
+	}
+	if p.GenGrpc {
+		if err := p.genClient(p.OutPath()); err != nil {
+			return errors.Wrap(err, "gen proto client error")
+		}
+	}
+
+	return nil
+}
+
+// genClient OPTIMIZE
+func (p *Proto) genClient(source string) error {
+	args := []string{
+		"--proto_path=.",
+		"--proto_path=./third_party",
+		"--go_out=paths=source_relative:.",
+		"--go-http_out=paths=source_relative:.",
+		"--go-grpc_out=paths=source_relative:.",
+		"--validate_out=paths=source_relative,lang=go:.",
+		source,
+	}
+	cmd := exec.Command("protoc", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Dir = "."
+	return cmd.Run()
 }
 
 func (p *Proto) OutPath() string {
