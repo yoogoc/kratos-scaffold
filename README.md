@@ -19,7 +19,7 @@ kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:pr
 - field_type: 可以使用任何基本类型
 - predicate:谓语最终用于sql query时需要的where条件，目前支持：
   - eq 等于
-	- contains like
+	- cont like
 	- gt 大于
 	- gte 大于等于
 	- lt 小于
@@ -77,7 +77,6 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 
 # Roadmap
 
-## New Feature
 - [ ] 在kratos proto client 的基础上更加灵活的生成proto客户端
 - [ ] 丰富配置，可以使用配置文件来约定配置，更轻量的使用cli
 - [ ] biz，service，data可以通过proto文件生成
@@ -85,3 +84,5 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 - [ ] 支持更多类型, 目前只有字符型和数字型, 需支持time等动态类型,如time类型在proto中会体现为timestamp类型,bool和数字类型的eq谓语需要使用wrappers类型包装
 - [x] proto 生成可以指定proto风格: aa_bb, aaBb, AaBb
 - [ ] i18n
+- [ ] 一次生成biz, service, data
+- [ ] 完善文档
