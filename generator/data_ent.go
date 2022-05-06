@@ -165,6 +165,9 @@ func (c *Client) DB() *sql.DB {
 	}
 }
 
+func (c *Client) Driver() dialect.Driver {
+	return c.driver
+}
 {{ end }}
 `
 	err := os.WriteFile(path.Join(entPath, "external", "sql.tmpl"), []byte(externalContent), 0o644)
