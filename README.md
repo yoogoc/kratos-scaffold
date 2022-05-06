@@ -19,12 +19,12 @@ kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:pr
 - field_type: 可以使用任何基本类型
 - predicate:谓语最终用于sql query时需要的where条件，目前支持：
   - eq 等于
-	- cont like
-	- gt 大于
-	- gte 大于等于
-	- lt 小于
-	- lte 小于等于
-	- in 数组
+  - cont like
+  - gt 大于
+  - gte 大于等于
+  - lt 小于
+  - lte 小于等于
+  - in 数组
 
 # Usage
 
