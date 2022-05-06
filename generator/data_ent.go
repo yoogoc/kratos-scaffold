@@ -43,7 +43,7 @@ func (b *DataEnt) CreateFields() []*field.Field {
 func (b *DataEnt) EntFields() []*field.Field {
 	if b.NeedAuditField {
 		return util.FilterSlice(b.Fields, func(f *field.Field) bool {
-			return f.Name == "updated_at" || f.Name == "created_at"
+			return f.Name != "updated_at" && f.Name != "created_at"
 		})
 	} else {
 		return b.Fields
