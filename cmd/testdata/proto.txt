@@ -4,6 +4,8 @@ option go_package = "test/api/user/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.user.v1";
 
+import "google/protobuf/wrappers.proto";
+
 service UserService {
 	rpc CreateUser (CreateUserRequest) returns (CreateUserReply);
 	rpc UpdateUser (UpdateUserRequest) returns (UpdateUserReply);
@@ -42,10 +44,11 @@ message GetUserReply {
 message ListUserRequest {
 	uint32 page = 1;
 	uint32 pageSize = 2;
-	int64 idEq = 3;
-	string nameCont = 4;
-	int32 ageGTE = 5;
-	int32 ageLTE = 6;
+	google.protobuf.Int64Value idEq = 3;
+	repeated int64 idIn = 4;
+	google.protobuf.StringValue nameCont = 5;
+	google.protobuf.Int32Value ageGTE = 6;
+	google.protobuf.Int32Value ageLTE = 7;
 }
 message ListUserReply {
 	repeated User users = 1;

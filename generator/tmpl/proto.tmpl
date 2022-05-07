@@ -4,6 +4,9 @@ package {{.Package}};
 option go_package = "{{.GoPackage}}";
 option java_multiple_files = true;
 option java_package = "{{.JavaPackage}}";
+{{ range $i, $pi := .Fields.ProtoImports }}
+import "{{ $pi }}";
+{{- end }}
 
 service {{.Name}}Service {
 	rpc Create{{.Name}} (Create{{.Name}}Request) returns (Create{{.Name}}Reply);
@@ -15,28 +18,28 @@ service {{.Name}}Service {
 
 message {{.Name}} {
 	{{- range $i, $f := .Fields }}
-	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
 message Create{{.Name}}Request {
 	{{- range $i, $f := .CreateFields }}
-	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
 message Create{{.Name}}Reply {}
 message Update{{.Name}}Request {
 	{{- range $i, $f := .UpdateFields }}
-	{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
 message Update{{.Name}}Reply {}
 {{$primaryField := .PrimaryField }}
 message Delete{{.Name}}Request {
-	{{ $primaryField.FieldType }} {{ $primaryField.Name | fieldStyle }} = 1;
+	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
 message Delete{{.Name}}Reply {}
 message Get{{.Name}}Request {
-	{{ $primaryField.FieldType }} {{ $primaryField.Name | fieldStyle }} = 1;
+	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
 message Get{{.Name}}Reply {
 	{{.Name}} {{.Name | ToLower | fieldStyle }} = 1;
@@ -46,7 +49,7 @@ message List{{.Name}}Request {
 	uint32 {{.PageSizeParamName}} = 2;
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
-	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{- end }}{{ $f.FieldType }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
+	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{ $f.FieldType.StringProto }}{{- else }}{{ $f.FieldType.StringProtoParam }}{{- end }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
 	{{- end }}
 }
 message List{{.Name}}Reply {

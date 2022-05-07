@@ -13,7 +13,7 @@ func TestBiz(t *testing.T) {
 		_ = os.RemoveAll(dir)
 	})
 
-	runTestCmd(t, "biz user id:int64:eq name:string:cont age:int32:gte,lte")
+	runTestCmd(t, "biz user id:int64:eq,in name:string:cont age:int32:gte,lte")
 	_ = os.Chdir(wd)
 
 	AssertGoldenFile(t, path.Join(dir, "internal/biz/user.go"), "biz-user.txt")

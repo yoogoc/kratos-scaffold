@@ -16,33 +16,21 @@ import (
 )
 
 type Biz struct {
-	Name        string
-	Namespace   string
-	AppDirName  string // TODO
-	Fields      field.Fields
-	StrToPreMap map[string]field.PredicateType
+	Name            string
+	Namespace       string
+	AppDirName      string
+	Fields          field.Fields
+	StrToPreMap     map[string]field.PredicateType
+	MaybeGoPackages []string
 }
 
 func NewBiz(setting *cli.EnvSettings) *Biz {
 	return &Biz{
-		Namespace:   setting.Namespace,
-		AppDirName:  setting.AppDirName,
-		StrToPreMap: field.StrToPreMap,
+		Namespace:       setting.Namespace,
+		AppDirName:      setting.AppDirName,
+		StrToPreMap:     field.StrToPreMap,
+		MaybeGoPackages: field.MaybeGoPackages,
 	}
-}
-
-func (b *Biz) ParamFields() []field.Predicate {
-	fs := make([]field.Predicate, 0, len(b.Fields))
-	for _, f := range b.Fields {
-		for _, predicate := range f.Predicates {
-			fs = append(fs, field.Predicate{
-				Name:      f.Name + predicate.Type.String(),
-				FieldType: f.FieldType,
-				Type:      predicate.Type,
-			})
-		}
-	}
-	return fs
 }
 
 //go:embed tmpl/biz.tmpl

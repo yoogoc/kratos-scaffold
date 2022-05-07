@@ -38,7 +38,11 @@ func runBiz(biz *generator.Biz, args []string) error {
 	modelName := args[0]
 
 	biz.Name = util.Singular(strcase.ToCamel(modelName))
-	biz.Fields = field.ParseFields(args[1:])
+	if fs, err := field.ParseFields(args[1:]); err != nil {
+		return err
+	} else {
+		biz.Fields = fs
+	}
 
 	err := biz.Generate()
 	return err

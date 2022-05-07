@@ -5,12 +5,17 @@ import (
 	"fmt"
 	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
+	{{- range $i, $s := .MaybeGoPackages }}
+	"{{ $s }}"
+	{{- end }}
 )
 
 func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 	return &biz.{{.Name}}{
 		{{- range $i, $f := .FieldsExceptPrimary }}
-		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
+		{{- if $f.FieldType.NeedProto2Biz }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
+		{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}
 	}
 }
@@ -18,7 +23,9 @@ func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 	return &biz.{{.Name}}{
 		{{- range $i, $f := .Fields }}
-		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
+		{{- if $f.FieldType.NeedProto2Biz }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
+		{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}
 	}
 }
@@ -26,7 +33,9 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
 	return &v1.{{.Name}}{
 		{{- range $i, $f := .Fields }}
-		{{ $f.Name | ToCamel }}: item.{{ $f.Name | ToCamel }},
+		{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
+		{{- if $f.FieldType.IsTime }}{{- $reqf = printf $f.FieldType.Biz2Proto $reqf }}{{- end }}
+		{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}
 	}
 }
@@ -40,9 +49,24 @@ func bulk{{.Name}}Biz2Proto(list []*biz.{{.Name}}) []*v1.{{.Name}} {
 }
 
 func list{{.Name}}Req2Biz(req *v1.List{{.Name}}Request) *biz.{{.Name}}Param {
+	{{- range $i, $f := .Fields.ParamFields }}
+	{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.String }}
+	{{- if and $f.FieldType.IsTime (eq $f.Type.String "In") }}
+	{{ $f.Name }} := make([]time.Time, 0, len({{$reqf}}))
+	for _, timestamp := range {{$reqf}} {
+		{{ $f.Name }} = append({{ $f.Name }}, timestamp.AsTime())
+	}
+	{{- end }}
+	{{- end }}
 	return &biz.{{.Name}}Param{
-		{{- range $i, $f := .ParamFields }}
-		{{ $f.Name | ToCamel }}: req.{{ $f.Name | ToCamel }},
+		{{- range $i, $f := .Fields.ParamFields }}
+		{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.String }}
+		{{- if and $f.FieldType.NeedProto2Biz (not (eq $f.Type.String "In")) }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
+		{{- if and $f.FieldType.IsTime (eq $f.Type.String "In") }}
+		{{ $f.Name | ToCamel }}: {{$f.Name}},
+		{{- else }}
+		{{ $f.Name | ToCamel }}: {{$reqf}},
+		{{- end }}
 		{{- end }}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type User struct {
@@ -13,10 +14,11 @@ type User struct {
 }
 
 type UserParam struct {
-	IdEq     int64
-	NameCont string
-	AgeGTE   int32
-	AgeLTE   int32
+	IdEq     *wrapperspb.Int64Value
+	IdIn     []int64
+	NameCont *wrapperspb.StringValue
+	AgeGTE   *wrapperspb.Int32Value
+	AgeLTE   *wrapperspb.Int32Value
 }
 
 type UserRepo interface {

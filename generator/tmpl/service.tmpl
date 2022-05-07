@@ -6,6 +6,9 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
+	{{- range $i, $s := .MaybeGoPackages }}
+	"{{ $s }}"
+	{{- end }}
 )
 
 type {{.Name}}Service struct {
@@ -39,7 +42,7 @@ func (s *{{.Name}}Service) Update{{.Name}}(ctx context.Context, req *v1.Update{{
 
 func (s *{{.Name}}Service) Delete{{.Name}}(ctx context.Context, req *v1.Delete{{.Name}}Request) (*v1.Delete{{.Name}}Reply, error) {
 	_, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		IdEq: req.Id,
+		IdEq: wrapperspb.Int64(req.Id),
 	})
 	if err != nil {
 		return nil, err
@@ -49,7 +52,7 @@ func (s *{{.Name}}Service) Delete{{.Name}}(ctx context.Context, req *v1.Delete{{
 
 func (s *{{.Name}}Service) Get{{.Name}}(ctx context.Context, req *v1.Get{{.Name}}Request) (*v1.Get{{.Name}}Reply, error) {
 	item, err := s.uc.Find{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		IdEq: req.Id,
+		IdEq: wrapperspb.Int64(req.Id),
 	})
 	if err != nil {
 		return nil, err

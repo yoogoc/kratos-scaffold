@@ -1,10 +1,12 @@
 package field
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
+	"github.com/pkg/errors"
 )
 
 const DefaultStyleField = "low-camel"
@@ -22,7 +24,7 @@ type Fields []*Field
 
 type Field struct {
 	Name       string
-	FieldType  string
+	FieldType  TypeField
 	Predicates []*Predicate
 }
 
@@ -46,14 +48,51 @@ func (fs Fields) ParamFields() []*Predicate {
 	for _, f := range fs {
 		for _, predicate := range f.Predicates {
 			result = append(result, &Predicate{
-				Name:      f.Name + predicate.Type.String(),
-				FieldType: f.FieldType,
-				Type:      predicate.Type,
-				EntName:   EntName(f.Name) + predicate.Type.EntString(),
+				Name:       f.Name + predicate.Type.StringProto(),
+				SourceName: f.Name,
+				FieldType:  f.FieldType,
+				Type:       predicate.Type,
+				EntName:    EntName(f.Name) + predicate.Type.EntString(),
 			})
 		}
 	}
 	return result
+}
+
+func (fs Fields) PrimaryField(primaryKey string) *Field {
+	idField, ok := util.FindSlice(fs, func(f *Field) bool {
+		return f.Name == primaryKey
+	})
+	if !ok {
+		idField = &Field{
+			Name:      primaryKey,
+			FieldType: DefaultPrimaryFieldType,
+			Predicates: []*Predicate{
+				{
+					Name:      primaryKey,
+					Type:      PredicateTypeEq,
+					FieldType: DefaultPrimaryFieldType,
+				},
+			},
+		}
+	}
+	return idField
+}
+
+func (fs Fields) ProtoImports() []string {
+	ps := fs.ParamFields()
+	ss := make([]string, 0, len(ps)+len(fs))
+	for _, f := range fs {
+		if f.FieldType.ImportProto() != "" {
+			ss = append(ss, f.FieldType.ImportProto())
+		}
+	}
+	for _, p := range ps {
+		if p.FieldType.ImportProtoParam() != "" && p.Type != PredicateTypeIn {
+			ss = append(ss, p.FieldType.ImportProtoParam())
+		}
+	}
+	return util.Uniq(ss)
 }
 
 func EntName(s string) string {
@@ -64,25 +103,29 @@ func EntName(s string) string {
 	return s[:len(s)-2] + "ID"
 }
 
-func ParseFields(strs []string) []*Field {
+func ParseFields(strs []string) ([]*Field, error) {
 	var fs []*Field
 	for _, str := range strs {
 		ss := strings.Split(str, ":")
 		var pres []*Predicate
+		t, ok := types[ss[1]]
+		if !ok {
+			return nil, errors.New(fmt.Sprintf("unknown type: %s\n", ss[1]))
+		}
 		if len(ss) > 2 {
 			for _, p := range strings.Split(ss[2], ",") {
 				pres = append(pres, &Predicate{
 					Name:      ss[0],
 					Type:      NewPredicateType(p),
-					FieldType: ss[1],
+					FieldType: t,
 				})
 			}
 		}
 		fs = append(fs, &Field{
 			Name:       ss[0],
-			FieldType:  ss[1],
+			FieldType:  t,
 			Predicates: pres,
 		})
 	}
-	return fs
+	return fs, nil
 }

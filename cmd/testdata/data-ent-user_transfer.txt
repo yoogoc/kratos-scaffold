@@ -42,20 +42,24 @@ func bulkUserEnt2Biz(source []*ent.User) []*biz.User {
 func userParam2Predicates(param *biz.UserParam) []predicate.User {
 	var ps []predicate.User
 
-	if param.IdEq != 0 {
-		ps = append(ps, user.IDEQ(param.IdEq))
+	if param.IdEq != nil {
+		ps = append(ps, user.IDEQ(param.IdEq.Value))
 	}
 
-	if param.NameCont != "" {
-		ps = append(ps, user.NameContains(param.NameCont))
+	if len(param.IdIn) > 0 {
+		ps = append(ps, user.IDIn(param.IdIn...))
 	}
 
-	if param.AgeGTE != 0 {
-		ps = append(ps, user.AgeGTE(param.AgeGTE))
+	if param.NameCont != nil {
+		ps = append(ps, user.NameContains(param.NameCont.Value))
 	}
 
-	if param.AgeLTE != 0 {
-		ps = append(ps, user.AgeLTE(param.AgeLTE))
+	if param.AgeGTE != nil {
+		ps = append(ps, user.AgeGTE(param.AgeGTE.Value))
+	}
+
+	if param.AgeLTE != nil {
+		ps = append(ps, user.AgeLTE(param.AgeLTE.Value))
 	}
 	return ps
 }

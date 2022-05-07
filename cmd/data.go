@@ -34,7 +34,11 @@ func runDataEnt(dataEnt *generator.DataEnt, args []string) error {
 	modelName := args[0]
 
 	dataEnt.Name = util.Singular(strcase.ToCamel(modelName))
-	dataEnt.Fields = field.ParseFields(args[1:])
+	if fs, err := field.ParseFields(args[1:]); err != nil {
+		return err
+	} else {
+		dataEnt.Fields = fs
+	}
 
 	err := dataEnt.Generate()
 	return err

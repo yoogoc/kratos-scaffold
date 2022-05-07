@@ -51,17 +51,13 @@ func {{.Name | ToLowerCamel}}Param2Predicates(param *biz.{{.Name | ToCamel}}Para
 		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}...))
 	}
 	{{- else }}
-	{{- $isString := eq $f.FieldType "string" }}
-	{{- $isNotString := not $isString }}
-	{{ if $isString  }}
-	if param.{{ $f.Name | ToCamel }} != "" {
+	{{ if $f.FieldType.IsTime }}
+	if !param.{{ $f.Name | ToCamel }}.IsZero() {
 		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}))
 	}
-	{{- end }}
-	{{ if $isNotString }}
-	{{- /* FIXME 现在除了string都判定为数字类型 */ -}}
-	if param.{{ $f.Name | ToCamel }} != 0 {
-		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}{{ if eq $f.Type $strToPreMap.in }}...{{- end }}))
+	{{ else }}
+	if param.{{ $f.Name | ToCamel }} != nil {
+		ps = append(ps, {{$modelName}}.{{ $f.EntName }}(param.{{ $f.Name | ToCamel }}.Value))
 	}
 	{{- end}}
 	{{- end }}

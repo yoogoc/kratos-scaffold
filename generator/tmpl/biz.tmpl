@@ -4,19 +4,21 @@ package biz
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2/log"
-	"time"
+	{{- range $i, $s := .MaybeGoPackages }}
+	"{{ $s }}"
+	{{- end }}
 )
 
 type {{.Name}} struct {
 	{{- range $i, $f := .Fields }}
-	{{ $f.Name | ToCamel }} {{ $f.FieldType }}
+	{{ $f.Name | ToCamel }} {{ $f.FieldType.String }}
 	{{- end }}
 }
 
 type {{.Name}}Param struct {
 	{{- $strToPreMap := .StrToPreMap}}
-	{{- range $i, $f := .ParamFields }}
-	{{ $f.Name | ToCamel }} {{ if eq $f.Type $strToPreMap.in }}[]{{- end }}{{ $f.FieldType }}
+	{{- range $i, $f := .Fields.ParamFields }}
+	{{ $f.Name | ToCamel }} {{ if eq $f.Type $strToPreMap.in }}[]{{ $f.FieldType.String }}{{ else }}{{ $f.FieldType.StringParam }}{{- end }}
 	{{- end }}
 }
 

@@ -27,6 +27,15 @@ var (
 		PredicateTypeLtE:      "LTE",
 		PredicateTypeIn:       "In",
 	}
+	presReqMap = map[PredicateType]string{
+		PredicateTypeEq:       "Eq",
+		PredicateTypeContains: "Cont",
+		PredicateTypeGt:       "Gt",
+		PredicateTypeGtE:      "Gte",
+		PredicateTypeLt:       "Lt",
+		PredicateTypeLtE:      "Lte",
+		PredicateTypeIn:       "In",
+	}
 	presEntMap = map[PredicateType]string{
 		PredicateTypeEq:       "EQ",
 		PredicateTypeContains: "Contains",
@@ -47,8 +56,12 @@ var (
 	}
 )
 
-func (pred PredicateType) String() string {
+func (pred PredicateType) StringProto() string {
 	return presMap[pred]
+}
+
+func (pred PredicateType) String() string {
+	return presReqMap[pred]
 }
 
 func (pred PredicateType) EntString() string {
@@ -64,8 +77,9 @@ func NewPredicateType(s string) PredicateType {
 }
 
 type Predicate struct {
-	Name      string
-	Type      PredicateType
-	FieldType string
-	EntName   string
+	Name       string
+	SourceName string
+	Type       PredicateType
+	FieldType  TypeField
+	EntName    string
 }

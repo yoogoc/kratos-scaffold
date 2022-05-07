@@ -16,7 +16,21 @@ go install github.com/yoogoc/kratos-scaffold@lastest
 kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:predicate1,predicate2]...
 ```
 
-- field_type: 可以使用任何基本类型
+- field_type: 
+
+| 类型    | go实体类型 | go参数类型             |             proto实体类型             | proto参数类型 |
+| :-----: | ------ |:------------------:|:---------------------------------:|:---------:|
+| float64 |float64| *wrapperspb.DoubleValue |              double               |     google.protobuf.DoubleValue      |
+| float32 |float32| *wrapperspb.FloatValue |               float               |      google.protobuf.FloatValue     |
+| int32 |int32| *wrapperspb.Int32Value |               int32               |          google.protobuf.Int32Value |
+| int64 |int64| *wrapperspb.Int64Value |               int64               |          google.protobuf.Int64Value |
+| uint32  |uint32| *wrapperspb.UInt32Value |              uint32               |      google.protobuf.UInt32Value     |
+| uint64  |uint64| *wrapperspb.UInt64Value |              uint64               |      google.protobuf.UInt64Value     |
+| bool  |bool| *wrapperspb.BoolValue |               bool                |         google.protobuf.BoolValue  |
+| string|string| *wrapperspb.StringValue |              string               |      google.protobuf.StringValue     |
+| time |time.Time| time.Time          |       google.protobuf.Timestamp   |  google.protobuf.Timestamp         |
+
+
 - predicate:谓语最终用于sql query时需要的where条件，目前支持：
   - eq 等于
   - cont like
@@ -79,7 +93,6 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 - [ ] 丰富配置，可以使用配置文件来约定配置，更轻量的使用cli
 - [ ] biz，service，data可以通过proto文件生成
 - [ ] data: 支持生成proto client和gorm
-- [ ] 支持更多类型, 目前只有字符型和数字型, 需支持time等动态类型,如time类型在proto中会体现为timestamp类型,bool和数字类型的eq谓语需要使用wrappers类型包装
 - [x] proto 生成可以指定proto风格: aa_bb, aaBb, AaBb
 - [ ] i18n
 - [ ] 一次生成biz, service, data

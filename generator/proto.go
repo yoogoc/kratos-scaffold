@@ -17,23 +17,25 @@ import (
 )
 
 type Proto struct {
-	ApiDirName  string
-	Namespace   string
-	Name        string // is CamelName style
-	Fields      field.Fields
-	GenGrpc     bool
-	primaryKey  string
-	FieldStyle  string
-	StrToPreMap map[string]field.PredicateType
+	ApiDirName      string
+	Namespace       string
+	Name            string // is CamelName style
+	Fields          field.Fields
+	GenGrpc         bool
+	primaryKey      string
+	FieldStyle      string
+	StrToPreMap     map[string]field.PredicateType
+	MaybeGoPackages []string
 }
 
 func NewProto(setting *cli.EnvSettings) *Proto {
 	return &Proto{
-		primaryKey:  "id", // TODO
-		FieldStyle:  setting.FieldStyle,
-		StrToPreMap: field.StrToPreMap,
-		ApiDirName:  setting.ApiDirName,
-		Namespace:   setting.Namespace,
+		primaryKey:      "id", // TODO
+		FieldStyle:      setting.FieldStyle,
+		StrToPreMap:     field.StrToPreMap,
+		ApiDirName:      setting.ApiDirName,
+		Namespace:       setting.Namespace,
+		MaybeGoPackages: field.MaybeGoPackages,
 	}
 }
 
@@ -46,23 +48,7 @@ func (p *Proto) UpdateFields() []*field.Field {
 }
 
 func (p *Proto) PrimaryField() *field.Field {
-	idField, ok := util.FindSlice(p.Fields, func(f *field.Field) bool {
-		return f.Name == p.primaryKey
-	})
-	if !ok {
-		idField = &field.Field{
-			Name:      p.primaryKey,
-			FieldType: "int64", // TODO
-			Predicates: []*field.Predicate{
-				{
-					Name:      p.primaryKey,
-					Type:      field.PredicateTypeEq,
-					FieldType: "int64",
-				},
-			},
-		}
-	}
-	return idField
+	return p.Fields.PrimaryField(p.primaryKey)
 }
 
 func (p *Proto) PageParamName() string {

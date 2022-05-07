@@ -17,33 +17,22 @@ import (
 )
 
 type Service struct {
-	Name       string
-	Namespace  string
-	AppDirName string
-	ApiDirName string
-	Fields     field.Fields
-	ApiPath    string
+	Name            string
+	Namespace       string
+	AppDirName      string
+	ApiDirName      string
+	Fields          field.Fields
+	ApiPath         string
+	MaybeGoPackages []string
 }
 
 func NewService(setting *cli.EnvSettings) *Service {
 	return &Service{
-		Namespace:  setting.Namespace,
-		AppDirName: setting.AppDirName,
-		ApiDirName: setting.ApiDirName,
+		Namespace:       setting.Namespace,
+		AppDirName:      setting.AppDirName,
+		ApiDirName:      setting.ApiDirName,
+		MaybeGoPackages: field.MaybeGoPackages,
 	}
-}
-
-func (b *Service) ParamFields() []field.Field {
-	fs := make([]field.Field, 0, len(b.Fields))
-	for _, f := range b.Fields {
-		for _, predicate := range f.Predicates {
-			fs = append(fs, field.Field{
-				Name:      f.Name + predicate.Type.String(),
-				FieldType: f.FieldType,
-			})
-		}
-	}
-	return fs
 }
 
 func (b *Service) CurrentPkgPath() string {

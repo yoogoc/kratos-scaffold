@@ -37,7 +37,11 @@ func runService(service *generator.Service, args []string) error {
 	modelName := args[0]
 
 	service.Name = util.Singular(strcase.ToCamel(modelName))
-	service.Fields = field.ParseFields(args[1:])
+	if fs, err := field.ParseFields(args[1:]); err != nil {
+		return err
+	} else {
+		service.Fields = fs
+	}
 
 	if service.ApiPath == "" {
 		apiModelName := ""

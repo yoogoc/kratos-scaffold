@@ -33,7 +33,11 @@ func runProto(proto *generator.Proto, args []string) error {
 	modelName := args[0]
 
 	proto.Name = util.Singular(strcase.ToCamel(modelName))
-	proto.Fields = field.ParseFields(args[1:])
+	if fs, err := field.ParseFields(args[1:]); err != nil {
+		return err
+	} else {
+		proto.Fields = fs
+	}
 
 	err := proto.Generate()
 	return err
