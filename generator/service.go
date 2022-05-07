@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -62,6 +63,7 @@ func (b *Service) Generate() error {
 }
 
 func (b *Service) genTransfer() error {
+	fmt.Println("generating service transfer...")
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
@@ -88,6 +90,7 @@ func (b *Service) genTransfer() error {
 }
 
 func (b *Service) genService() error {
+	fmt.Println("generating service...")
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{

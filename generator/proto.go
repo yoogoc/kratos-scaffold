@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -63,6 +64,7 @@ func (p *Proto) PageSizeParamName() string {
 var protoTmpl string
 
 func (p *Proto) Generate() error {
+	fmt.Println("generating proto...")
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
@@ -99,6 +101,7 @@ func (p *Proto) Generate() error {
 		return err
 	}
 	if p.GenGrpc {
+		fmt.Println("exec protoc...")
 		if err := p.genClient(p.OutPath()); err != nil {
 			return errors.Wrap(err, "gen proto client error")
 		}

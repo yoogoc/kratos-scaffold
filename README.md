@@ -64,11 +64,11 @@ kratos-scaffold new user
 
 > new 生成单体库与mono子服务库的区别是通过当前目录下是否存在`go.mod`文件来判断
 
-
 2. 生成proto文件
 ```shell
 kratos-scaffold proto -o api/user/v1/user.proto user id:int64:eq,in name:string:contains age:int32:gte,lte
 ```
+
 3. 生成biz。可用flag:
 - -n --namespace 指定子服务,如果不指定则默认此库为单体库,直接生成到{{project_dir}}/internal/biz目录下
 
@@ -78,13 +78,20 @@ kratos-scaffold proto -o api/user/v1/user.proto user id:int64:eq,in name:string:
 ```shell
 kratos-scaffold biz -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte
 ```
+
 4. 生成data
 ```shell
 kratos-scaffold data -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte
 ```
+
 5. 生成service
 ```shell
 kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte
+```
+
+6. 一键生成proto, biz, data, service
+```shell
+kratos-scaffold g -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte
 ```
 
 # Roadmap
@@ -95,5 +102,5 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 - [ ] data: 支持生成proto client和gorm
 - [x] proto 生成可以指定proto风格: aa_bb, aaBb, AaBb
 - [ ] i18n
-- [ ] 一次生成biz, service, data
+- [x] 一次生成biz, service, data
 - [ ] 完善文档

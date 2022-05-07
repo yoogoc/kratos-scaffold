@@ -3,6 +3,7 @@ package generator
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -37,6 +38,7 @@ func NewBiz(setting *cli.EnvSettings) *Biz {
 var bizTmpl string
 
 func (b *Biz) Generate() error {
+	fmt.Println("generating biz...")
 	buf := new(bytes.Buffer)
 
 	funcMap := template.FuncMap{
