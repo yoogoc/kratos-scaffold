@@ -28,6 +28,7 @@ type EnvSettings struct {
 	TemplatePath         string               `yaml:"template_path"` // TODO
 	PolicyIfExistsTarget PolicyIfExistsTarget `yaml:"policy_if_exists_target"`
 	FieldStyle           string               `yaml:"field_style"`
+	PrimaryKey           string               `yaml:"primary_key"`
 }
 
 func New() *EnvSettings {
@@ -63,6 +64,7 @@ func New() *EnvSettings {
 	env := &EnvSettings{
 		AppDirName: "app",
 		ApiDirName: "api",
+		PrimaryKey: "id",
 		FieldStyle: field.DefaultStyleField,
 	}
 
@@ -74,6 +76,7 @@ func New() *EnvSettings {
 	env.ApiDirName = util.EnvOr("KRATOS_APIDIRNAME", env.ApiDirName)
 	env.Namespace = util.EnvOr("KRATOS_NAMESPACE", env.Namespace)
 	env.FieldStyle = util.EnvOr("KRATOS_FIELD_STYLE", env.FieldStyle)
+	env.PrimaryKey = util.EnvOr("KRATOS_PRIMARY_KEY", env.PrimaryKey)
 	env.PolicyIfExistsTarget = PolicyIfExistsTarget(util.EnvIntOr("KRATOS_IF_EXISTS", int(env.PolicyIfExistsTarget)))
 
 	return env

@@ -18,25 +18,15 @@ import (
 )
 
 type Proto struct {
-	ApiDirName      string
-	Namespace       string
-	Name            string // is CamelName style
-	Fields          field.Fields
-	GenGrpc         bool
-	primaryKey      string
-	FieldStyle      string
-	StrToPreMap     map[string]field.PredicateType
-	MaybeGoPackages []string
+	Base
+	GenGrpc    bool
+	FieldStyle string
 }
 
 func NewProto(setting *cli.EnvSettings) *Proto {
 	return &Proto{
-		primaryKey:      "id", // TODO
-		FieldStyle:      setting.FieldStyle,
-		StrToPreMap:     field.StrToPreMap,
-		ApiDirName:      setting.ApiDirName,
-		Namespace:       setting.Namespace,
-		MaybeGoPackages: field.MaybeGoPackages,
+		Base:       NewBase(setting, false),
+		FieldStyle: setting.FieldStyle,
 	}
 }
 

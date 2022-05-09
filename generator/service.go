@@ -18,21 +18,13 @@ import (
 )
 
 type Service struct {
-	Name            string
-	Namespace       string
-	AppDirName      string
-	ApiDirName      string
-	Fields          field.Fields
-	ApiPath         string
-	MaybeGoPackages []string
+	Base
+	ApiPath string
 }
 
 func NewService(setting *cli.EnvSettings) *Service {
 	return &Service{
-		Namespace:       setting.Namespace,
-		AppDirName:      setting.AppDirName,
-		ApiDirName:      setting.ApiDirName,
-		MaybeGoPackages: field.MaybeGoPackages,
+		Base: NewBase(setting, true),
 	}
 }
 
@@ -42,7 +34,7 @@ func (b *Service) CurrentPkgPath() string {
 
 func (b *Service) FieldsExceptPrimary() []*field.Field {
 	return util.FilterSlice(b.Fields, func(f *field.Field) bool {
-		return f.Name != "id"
+		return f.Name != b.primaryKey
 	})
 }
 

@@ -18,23 +18,13 @@ import (
 )
 
 type DataEnt struct {
-	Name            string
-	Namespace       string
-	AppDirName      string
-	Fields          field.Fields
-	StrToPreMap     map[string]field.PredicateType
-	primaryKey      string
-	NeedAuditField  bool
-	MaybeGoPackages []string
+	Base
+	NeedAuditField bool
 }
 
 func NewDataEnt(setting *cli.EnvSettings) *DataEnt {
 	return &DataEnt{
-		Namespace:       setting.Namespace,
-		AppDirName:      setting.AppDirName,
-		StrToPreMap:     field.StrToPreMap,
-		primaryKey:      "id",
-		MaybeGoPackages: field.MaybeGoPackages,
+		Base: NewBase(setting, true),
 	}
 }
 

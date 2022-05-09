@@ -10,27 +10,18 @@ import (
 	"text/template"
 
 	"github.com/YoogoC/kratos-scaffold/pkg/cli"
-	"github.com/YoogoC/kratos-scaffold/pkg/field"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/imports"
 )
 
 type Biz struct {
-	Name            string
-	Namespace       string
-	AppDirName      string
-	Fields          field.Fields
-	StrToPreMap     map[string]field.PredicateType
-	MaybeGoPackages []string
+	Base
 }
 
 func NewBiz(setting *cli.EnvSettings) *Biz {
 	return &Biz{
-		Namespace:       setting.Namespace,
-		AppDirName:      setting.AppDirName,
-		StrToPreMap:     field.StrToPreMap,
-		MaybeGoPackages: field.MaybeGoPackages,
+		Base: NewBase(setting, true),
 	}
 }
 

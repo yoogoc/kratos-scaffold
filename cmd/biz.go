@@ -9,10 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	namespace string
-)
-
 func newBizCmd() *cobra.Command {
 	biz := generator.NewBiz(settings)
 	var bizCmd = &cobra.Command{
