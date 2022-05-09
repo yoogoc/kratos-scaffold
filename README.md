@@ -5,7 +5,7 @@ kratos-layout脚手架，可以生成项目，proto，biz，service，data。mon
 # Install
 
 ```shell
-go install github.com/yoogoc/kratos-scaffold@lastest
+go install github.com/yoogoc/kratos-scaffold@latest
 ```
 
 # Command
@@ -16,7 +16,7 @@ go install github.com/yoogoc/kratos-scaffold@lastest
 kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:predicate1,predicate2]...
 ```
 
-- field_type: 
+- field_type:
 
 | 类型    | go实体类型 | go参数类型             |             proto实体类型             | proto参数类型 |
 | :-----: | ------ |:------------------:|:---------------------------------:|:---------:|
