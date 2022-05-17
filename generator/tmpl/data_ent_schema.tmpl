@@ -1,7 +1,12 @@
 {{- /*gotype: github.com/YoogoC/kratos-scaffold/generator.DataEnt*/ -}}
 package schema
 
-import "entgo.io/ent"
+import (
+	"time"
+
+	"entgo.io/ent"
+	"entgo.io/ent/schema/field"
+)
 
 // {{ .Name }} holds the schema definition for the {{ .Name }} entity.
 type {{ .Name }} struct {
