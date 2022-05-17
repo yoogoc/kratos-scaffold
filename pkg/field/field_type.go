@@ -42,7 +42,7 @@ var (
 	}
 
 	typeEntSchemaNames = [...]string{
-		TypeDouble: "Float64",
+		TypeDouble: "Float",
 		TypeFloat:  "Float32",
 		TypeInt32:  "Int32",
 		TypeInt64:  "Int64",
