@@ -12,6 +12,7 @@ import (
 
 	"github.com/YoogoC/kratos-scaffold/generator"
 	"github.com/YoogoC/kratos-scaffold/pkg/util"
+	"golang.org/x/tools/imports"
 )
 
 func GenMono(name string) error {
@@ -416,21 +417,15 @@ func (dt DataTmpl) Generate() error {
 	if err := tmpl.Execute(dataBuf, dt); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(dt.DataPath, "data.go"), dataBuf.Bytes(), 0o644); err != nil {
-		return err
-	}
-	fmt.Println("generate data/tx.go ...")
-	txBuf := new(bytes.Buffer)
-	txTmpl, err := template.New("txTmpl").Parse(txTmpl)
+	dp := path.Join(dt.DataPath, "data.go")
+	content, err := imports.Process(dp, dataBuf.Bytes(), nil)
 	if err != nil {
 		return err
 	}
-	if err := txTmpl.Execute(txBuf, dt); err != nil {
+	if err := os.WriteFile(dp, content, 0o644); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(dt.DataPath, "tx.go"), txBuf.Bytes(), 0o644); err != nil {
-		return err
-	}
+	fmt.Println("generate data/tx.go ...")
 	return nil
 }
 

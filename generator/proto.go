@@ -108,7 +108,7 @@ func (p *Proto) genClient(source string) error {
 		"--go_out=paths=source_relative:.",
 		"--go-http_out=paths=source_relative:.",
 		"--go-grpc_out=paths=source_relative:.",
-		"--validate_out=paths=source_relative,lang=go:.",
+		// "--validate_out=paths=source_relative,lang=go:.",
 		source,
 	}
 	cmd := exec.Command("protoc", args...)

@@ -24,7 +24,7 @@ func New{{.Name | ToCamel}}Repo(data *Data, logger log.Logger) biz.{{.Name | ToC
 }
 
 func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	row, err := client.{{.Name | ToCamel}}.Create().
 		{{- range $i, $f := .CreateFields }}
 		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
@@ -37,7 +37,7 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 }
 
 func (r {{$modelName}}Repo) BulkCreate(ctx context.Context, list []*biz.{{.Name | ToCamel}}) ([]*biz.{{.Name | ToCamel}}, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	var builders []*ent.{{.Name | ToCamel}}Create
 	for _, item := range list {
 		builders = append(builders, client.{{.Name | ToCamel}}.Create().
@@ -54,7 +54,7 @@ func (r {{$modelName}}Repo) BulkCreate(ctx context.Context, list []*biz.{{.Name 
 }
 
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	row, err := client.{{.Name | ToCamel}}.UpdateOne({{$modelName}}Biz2Ent({{$modelName}})).
 		Save(ctx)
 	if err != nil {
@@ -64,12 +64,12 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 }
 
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	return client.{{.Name | ToCamel}}.Delete().Where({{$modelName}}Param2Predicates(param)...).Exec(ctx)
 }
 
 func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, size int) ([]*biz.{{.Name | ToCamel}}, int, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	query := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...)
 	count, err := query.Clone().Count(ctx)
 	if err != nil {
@@ -86,7 +86,7 @@ func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCam
 }
 
 func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (*biz.{{.Name | ToCamel}}, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	rows, err := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).First(ctx)
 	if err != nil {
 		return nil, err

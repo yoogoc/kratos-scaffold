@@ -24,9 +24,6 @@ var entSchemaNeedRemove string
 //go:embed resources/data.data.go.tmpl
 var dataTmpl string
 
-//go:embed resources/data.tx.go.tmpl
-var txTmpl string
-
 //go:embed resources/server.grpc.go.tmpl
 var grpcServerTmpl string
 

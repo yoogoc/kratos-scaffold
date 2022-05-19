@@ -42,7 +42,7 @@ message Get{{.Name}}Request {
 	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
 message Get{{.Name}}Reply {
-	{{.Name}} {{.Name | ToLower | fieldStyle }} = 1;
+	{{.Name}} {{.Name | fieldStyle }} = 1;
 }
 message List{{.Name}}Request {
 	uint32 {{.PageParamName}} = 1;

@@ -2,6 +2,8 @@
 package data
 
 import (
+	"context"
+	"{{.AppPkgPath}}/internal/biz"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/data/ent"
 
@@ -11,7 +13,7 @@ import (
 	{{- if eq .DBDriverType "mysql"}}
 	_ "github.com/go-sql-driver/mysql"
 	{{- end}}
-	_ "{{.AppPkgPath}}/internal/data/ent/runtime"
+	"github.com/pkg/errors"
 )
 
 // ProviderSet is data providers.
@@ -20,6 +22,46 @@ var ProviderSet = wire.NewSet(NewEntClient, NewData, NewTxRepo)
 type Data struct {
 	log *log.Helper
 	db  *ent.Client
+}
+
+func (d *Data) WithEntTx(ctx context.Context, fn func(ctx context.Context) error) error {
+	// 如果事务内嵌套事务,则交由上层处理
+	if tx := ent.TxFromContext(ctx); tx != nil {
+		return fn(ctx)
+	}
+	tx, err := d.db.Tx(ctx)
+	txContext := ent.NewTxContext(ctx, tx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			_ = tx.Rollback()
+			panic(v)
+		}
+	}()
+	if err := fn(txContext); err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = errors.Wrapf(err, "rolling back transaction: %v", rerr)
+		}
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return errors.Wrapf(err, "committing transaction: %v", err)
+	}
+	return nil
+}
+
+func (d *Data) EntClient(ctx context.Context) *ent.Client {
+	tx := ent.TxFromContext(ctx)
+	if tx != nil {
+		return tx.Client()
+	}
+	return d.db
+}
+
+func NewTxRepo(d *Data) biz.TxRepo {
+	return d
 }
 
 func NewEntClient(conf *conf.Data, logger log.Logger) *ent.Client {
