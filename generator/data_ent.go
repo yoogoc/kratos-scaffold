@@ -9,36 +9,19 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/yoogoc/kratos-scaffold/pkg/cli"
+	"github.com/iancoleman/strcase"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
-
-	"github.com/iancoleman/strcase"
 	"golang.org/x/tools/imports"
 )
 
-type DataEnt struct {
-	Base
-	NeedAuditField bool
-}
-
-func NewDataEnt(setting *cli.EnvSettings) *DataEnt {
-	return &DataEnt{
-		Base: NewBase(setting, true),
-	}
-}
-
-func (b *DataEnt) CreateFields() []*field.Field {
-	return b.Fields.CreateFields(b.primaryKey)
-}
-
-func (b *DataEnt) EntFields() []*field.Field {
-	if b.NeedAuditField {
-		return util.FilterSlice(b.Fields, func(f *field.Field) bool {
+func (d *Data) EntFields() []*field.Field {
+	if d.NeedAuditField {
+		return util.FilterSlice(d.Fields, func(f *field.Field) bool {
 			return f.Name != "updated_at" && f.Name != "created_at"
 		})
 	} else {
-		return b.Fields
+		return d.Fields
 	}
 }
 
@@ -51,31 +34,31 @@ var dataEntSchemaTmpl string
 //go:embed tmpl/data_ent_transfer.tmpl
 var dataEntTransferTmpl string
 
-func (b *DataEnt) Generate() error {
+func (d *Data) GenerateEnt() error {
 	// 1. gen ent schema and entity
-	err := b.genEnt()
+	err := d.genEnt()
 	if err != nil {
 		return err
 	}
 	// 2. gen data transfer
-	err = b.genTransfer()
+	err = d.genTransferEnt()
 	if err != nil {
 		return err
 	}
 	// 3. gen data
-	err = b.genData()
+	err = d.genDataEnt()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *DataEnt) EntPath() string {
+func (d *Data) EntPath() string {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic(err)
 	}
-	p := path.Join(wd, b.InternalPath(), "internal/data/ent")
+	p := path.Join(wd, d.InternalPath(), "internal/data/ent")
 	if _, err := os.Stat(p); os.IsNotExist(err) {
 		if err := os.MkdirAll(p, 0o700); err != nil {
 			panic(err)
@@ -84,19 +67,7 @@ func (b *DataEnt) EntPath() string {
 	return p
 }
 
-func (b *DataEnt) OutPath() string {
-	wd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	return path.Join(wd, b.InternalPath(), "internal/data")
-}
-
-func (b *DataEnt) CurrentPkgPath() string {
-	return path.Join(util.ModName(), b.InternalPath(), "internal")
-}
-
-func (b *DataEnt) genEnt() error {
+func (d *Data) genEnt() error {
 	fmt.Println("generating ent schema...")
 	schemaBuf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
@@ -109,13 +80,13 @@ func (b *DataEnt) genEnt() error {
 	if err != nil {
 		return err
 	}
-	err = entSchemaTmpl.Execute(schemaBuf, b)
+	err = entSchemaTmpl.Execute(schemaBuf, d)
 	if err != nil {
 		return err
 	}
-	p := path.Join(b.EntPath(), "schema", strings.ToLower(b.Name)+".go")
-	if _, err := os.Stat(path.Join(b.EntPath(), "schema")); os.IsNotExist(err) {
-		if err := os.MkdirAll(path.Join(b.EntPath(), "schema"), 0o700); err != nil {
+	p := path.Join(d.EntPath(), "schema", strings.ToLower(d.Name)+".go")
+	if _, err := os.Stat(path.Join(d.EntPath(), "schema")); os.IsNotExist(err) {
+		if err := os.MkdirAll(path.Join(d.EntPath(), "schema"), 0o700); err != nil {
 			return err
 		}
 	}
@@ -127,9 +98,9 @@ func (b *DataEnt) genEnt() error {
 	if err != nil {
 		return err
 	}
-	entGengoPath := path.Join(b.EntPath(), "generate.go")
+	entGengoPath := path.Join(d.EntPath(), "generate.go")
 	if _, err := os.Stat(entGengoPath); os.IsNotExist(err) {
-		err := GenEntBase(b.EntPath())
+		err := GenEntBase(d.EntPath())
 		if err != nil {
 			return err
 		}
@@ -139,57 +110,23 @@ func (b *DataEnt) genEnt() error {
 		return err
 	}
 	fmt.Println("exec ent generate...")
-	return util.Go("generate", b.EntPath())
+	return util.Go("generate", d.EntPath())
 }
 
 func GenEntBase(entPath string) error {
-	if err := os.MkdirAll(path.Join(entPath, "external"), 0o700); err != nil {
-		return err
-	}
-	fmt.Println("generating ent external...")
-	externalContent := `{{ define "external" }}
-package ent
-
-import (
-	"database/sql"
-
-	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
-)
-
-func (c *Client) DB() *sql.DB {
-	switch d := c.driver.(type) {
-	case *entsql.Driver:
-		return d.DB()
-	case *dialect.DebugDriver:
-		return d.Driver.(*entsql.Driver).DB()
-	default:
-		panic("unknown driver")
-	}
-}
-
-func (c *Client) Driver() dialect.Driver {
-	return c.driver
-}
-{{ end }}
-`
-	err := os.WriteFile(path.Join(entPath, "external", "sql.tmpl"), []byte(externalContent), 0o644)
-	if err != nil {
-		return err
-	}
 	fmt.Println("generating ent generate...")
 	content := `package ent
 
-//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --template ./external --feature privacy,sql/modifier,sql/lock ./schema
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,sql/modifier,sql/lock,sql/execquery ./schema
 `
-	err = os.WriteFile(path.Join(entPath, "generate.go"), []byte(content), 0o644)
+	err := os.WriteFile(path.Join(entPath, "generate.go"), []byte(content), 0o644)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *DataEnt) genTransfer() error {
+func (d *Data) genTransferEnt() error {
 	fmt.Println("generating data transfer...")
 	buf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
@@ -203,11 +140,11 @@ func (b *DataEnt) genTransfer() error {
 	if err != nil {
 		return err
 	}
-	err = tmpl.Execute(buf, b)
+	err = tmpl.Execute(buf, d)
 	if err != nil {
 		return err
 	}
-	p := path.Join(b.OutPath(), strcase.ToSnake(b.Name)+"_transfer.go")
+	p := path.Join(d.OutPath(), strcase.ToSnake(d.Name)+"_transfer.go")
 	content, err := imports.Process(p, buf.Bytes(), nil)
 	if err != nil {
 		return err
@@ -215,7 +152,7 @@ func (b *DataEnt) genTransfer() error {
 	return os.WriteFile(p, content, 0o644)
 }
 
-func (b *DataEnt) genData() error {
+func (d *Data) genDataEnt() error {
 	fmt.Println("generating data...")
 	buf := new(bytes.Buffer)
 	funcMap := template.FuncMap{
@@ -232,21 +169,14 @@ func (b *DataEnt) genData() error {
 	if err != nil {
 		return err
 	}
-	err = tmpl.Execute(buf, b)
+	err = tmpl.Execute(buf, d)
 	if err != nil {
 		return err
 	}
-	p := path.Join(b.OutPath(), strcase.ToSnake(b.Name)+".go")
+	p := path.Join(d.OutPath(), strcase.ToSnake(d.Name)+".go")
 	content, err := imports.Process(p, buf.Bytes(), nil)
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(p, content, 0o644)
-}
-
-func (b *DataEnt) InternalPath() string {
-	if b.Namespace != "" {
-		return path.Join(b.AppDirName, b.Namespace)
-	}
-	return ""
 }

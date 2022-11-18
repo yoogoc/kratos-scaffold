@@ -26,7 +26,7 @@ kratos-scaffold user -n user id:int64:eq,in name:string:contains age:int32:gte,l
 }
 
 func addProtoFlags(protoCmd *cobra.Command, proto *generator.Proto) {
-	protoCmd.PersistentFlags().BoolVarP(&proto.GenGrpc, "grpc", "", true, "generate xx.grpc.pb.go")
+	protoCmd.PersistentFlags().BoolVarP(&proto.GenHttp, "http", "", false, "generate xx.http.pb.go")
 }
 
 func runProto(proto *generator.Proto, args []string) error {

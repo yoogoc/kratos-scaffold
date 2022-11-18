@@ -24,7 +24,6 @@ type {{.Name}}Param struct {
 
 type {{.Name}}Repo interface {
 	Create(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
-	BulkCreate(ctx context.Context, {{.Name | ToLower | ToPlural}} []*{{.Name}}) ([]*{{.Name}}, error)
 	Update(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
 	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
 	List(ctx context.Context, param *{{.Name}}Param, page, size int) ([]*{{.Name}}, int, error)
@@ -45,10 +44,6 @@ func New{{.Name}}Usecase(repo {{.Name}}Repo, logger log.Logger) *{{.Name}}Usecas
 
 func (uc *{{.Name}}Usecase) Create{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {
 	return uc.repo.Create(ctx, {{.Name | ToLower}})
-}
-
-func (uc *{{.Name}}Usecase) BulkCreate{{.Name}}(ctx context.Context, {{.Name | ToLower | ToPlural}} []*{{.Name}}) ([]*{{.Name}}, error) {
-	return uc.repo.BulkCreate(ctx, {{.Name | ToLower | ToPlural}})
 }
 
 func (uc *{{.Name}}Usecase) Update{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {

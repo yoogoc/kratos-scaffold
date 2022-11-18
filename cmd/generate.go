@@ -12,16 +12,16 @@ func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
 		Long:               `gen proto, biz, data, service`,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := proto.RunE(cmd, args); err != nil {
+			if err := proto.Execute(); err != nil {
 				return err
 			}
-			if err := biz.RunE(cmd, args); err != nil {
+			if err := biz.Execute(); err != nil {
 				return err
 			}
-			if err := data.RunE(cmd, args); err != nil {
+			if err := data.Execute(); err != nil {
 				return err
 			}
-			if err := service.RunE(cmd, args); err != nil {
+			if err := service.Execute(); err != nil {
 				return err
 			}
 			return nil

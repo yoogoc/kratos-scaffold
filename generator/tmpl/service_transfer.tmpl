@@ -48,7 +48,7 @@ func bulk{{.Name}}Biz2Proto(list []*biz.{{.Name}}) []*v1.{{.Name}} {
 	return target
 }
 
-func list{{.Name}}Req2Biz(req *v1.List{{.Name}}Request) *biz.{{.Name}}Param {
+func param{{.Name}}Proto2Biz(req *v1.{{.Name}}Param) *biz.{{.Name}}Param {
 	{{- range $i, $f := .Fields.ParamFields }}
 	{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.String }}
 	{{- if and $f.FieldType.IsTime (eq $f.Type.String "In") }}

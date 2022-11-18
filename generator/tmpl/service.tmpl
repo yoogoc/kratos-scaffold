@@ -24,35 +24,39 @@ func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger log.Logger) *{{.Name}}
 	}
 }
 
-func (s *{{.Name}}Service) Create{{.Name}}(ctx context.Context, req *v1.Create{{.Name}}Request) (*v1.Create{{.Name}}Reply, error) {
-	_, err := s.uc.Create{{.Name}}(ctx, create{{.Name}}Req2Biz(req))
+func (s *{{.Name}}Service) Create(ctx context.Context, req *v1.Create{{.Name}}Request) (*v1.Create{{.Name}}Reply, error) {
+	item, err := s.uc.Create{{.Name}}(ctx, create{{.Name}}Req2Biz(req))
 	if err != nil {
 		return nil, err
 	}
-	return &v1.Create{{.Name}}Reply{}, nil
+	return &v1.Create{{.Name}}Reply{
+		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+	}, nil
 }
 
-func (s *{{.Name}}Service) Update{{.Name}}(ctx context.Context, req *v1.Update{{.Name}}Request) (*v1.Update{{.Name}}Reply, error) {
-	_, err := s.uc.Update{{.Name}}(ctx, update{{.Name}}Req2Biz(req))
+func (s *{{.Name}}Service) Update(ctx context.Context, req *v1.Update{{.Name}}Request) (*v1.Update{{.Name}}Reply, error) {
+	item, err := s.uc.Update{{.Name}}(ctx, update{{.Name}}Req2Biz(req))
 	if err != nil {
 		return nil, err
 	}
-	return &v1.Update{{.Name}}Reply{}, nil
+	return &v1.Update{{.Name}}Reply{
+		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+	}, nil
 }
-
-func (s *{{.Name}}Service) Delete{{.Name}}(ctx context.Context, req *v1.Delete{{.Name}}Request) (*v1.Delete{{.Name}}Reply, error) {
-	_, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		IdEq: wrapperspb.Int64(req.Id),
+{{- if .GenHttp }}
+func (s *{{.Name}}Service) Destroy(ctx context.Context, req *v1.Destroy{{.Name}}Request) (*v1.Destroy{{.Name}}Reply, error) {
+	count, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{
+		{{.PrimaryKey | ToCamel }}Eq: wrapperspb.Int64(req.{{.PrimaryKey | ToCamel}}),
 	})
 	if err != nil {
 		return nil, err
 	}
-	return &v1.Delete{{.Name}}Reply{}, nil
+	return &v1.Destroy{{.Name}}Reply{}, nil
 }
 
-func (s *{{.Name}}Service) Get{{.Name}}(ctx context.Context, req *v1.Get{{.Name}}Request) (*v1.Get{{.Name}}Reply, error) {
+func (s *{{.Name}}Service) Get(ctx context.Context, req *v1.Get{{.Name}}Request) (*v1.Get{{.Name}}Reply, error) {
 	item, err := s.uc.Find{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		IdEq: wrapperspb.Int64(req.Id),
+		{{.PrimaryKey | ToCamel }}Eq: wrapperspb.Int64(req.{{.PrimaryKey | ToCamel}}),
 	})
 	if err != nil {
 		return nil, err
@@ -62,8 +66,30 @@ func (s *{{.Name}}Service) Get{{.Name}}(ctx context.Context, req *v1.Get{{.Name}
 	}, nil
 }
 
-func (s *{{.Name}}Service) List{{.Name}}(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {
-	list, count, err := s.uc.List{{.Name}}(ctx, list{{.Name}}Req2Biz(req), int(req.Page), int(req.PageSize))
+{{- else }}
+func (s *{{.Name}}Service) DestroyBy(ctx context.Context, req *v1.Destroy{{.Name}}ByRequest) (*v1.Destroy{{.Name}}ByReply, error) {
+	count, err := s.uc.Destroy{{.Name}}By(ctx, param{{.Name}}Proto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Destroy{{.Name}}ByReply{
+		Count: int32(count),
+	}, nil
+}
+
+func (s *{{.Name}}Service) FindBy(ctx context.Context, req *v1.Find{{.Name}}ByRequest) (*v1.Find{{.Name}}ByReply, error) {
+	item, err := s.uc.Find{{.Name}}By(ctx, param{{.Name}}Proto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Find{{.Name}}ByReply{
+		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+	}, nil
+}
+{{- end }}
+
+func (s *{{.Name}}Service) List(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {
+	list, count, err := s.uc.List{{.Name}}(ctx, param{{.Name}}Proto2Biz(req.Param), int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}

@@ -7,13 +7,43 @@ option java_package = "{{.JavaPackage}}";
 {{ range $i, $pi := .Fields.ProtoImports }}
 import "{{ $pi }}";
 {{- end }}
+{{- if .GenHttp}}
+import "google/api/annotations.proto";
+{{- end }}
 
 service {{.Name}}Service {
-	rpc Create{{.Name}} (Create{{.Name}}Request) returns (Create{{.Name}}Reply);
-	rpc Update{{.Name}} (Update{{.Name}}Request) returns (Update{{.Name}}Reply);
-	rpc Delete{{.Name}} (Delete{{.Name}}Request) returns (Delete{{.Name}}Reply);
-	rpc Get{{.Name}} (Get{{.Name}}Request) returns (Get{{.Name}}Reply);
-	rpc List{{.Name}} (List{{.Name}}Request) returns (List{{.Name}}Reply);
+	rpc Create (Create{{.Name}}Request) returns (Create{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			post: "/api/v1/{{.Name | ToPlural | fieldStyle }}"
+			body: "*"
+		};
+	}{{- end }};
+	rpc Update (Update{{.Name}}Request) returns (Update{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			put: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			body: "*"
+		};
+	}{{- end }};
+	{{- if .GenHttp }}
+	rpc Destroy (Destroy{{.Name}}Request) returns (Destroy{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			delete: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+		};
+	}{{- end }};
+	rpc Get (Get{{.Name}}Request) returns (Get{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			get: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+		};
+	}{{- end }};
+	{{- else }}
+	rpc DestroyBy (Destroy{{.Name}}ByRequest) returns (Destroy{{.Name}}ByReply);
+	rpc FindBy (Find{{.Name}}ByRequest) returns (Find{{.Name}}ByReply);
+	{{- end }}
+	rpc List (List{{.Name}}Request) returns (List{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			get: "/api/v1/{{.Name | ToPlural | fieldStyle }}"
+		};
+	}{{- end }};
 }
 
 message {{.Name}} {
@@ -26,31 +56,53 @@ message Create{{.Name}}Request {
 	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
-message Create{{.Name}}Reply {}
+message Create{{.Name}}Reply {
+	{{.Name}} {{.Name | fieldStyle }} = 1;
+}
 message Update{{.Name}}Request {
 	{{- range $i, $f := .UpdateFields }}
 	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
-message Update{{.Name}}Reply {}
+message Update{{.Name}}Reply {
+	{{.Name}} {{.Name | fieldStyle }} = 1;
+}
 {{$primaryField := .PrimaryField }}
-message Delete{{.Name}}Request {
+{{- if .GenHttp }}
+message Destroy{{.Name}}Request {
 	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
-message Delete{{.Name}}Reply {}
+message Destroy{{.Name}}Reply {}
 message Get{{.Name}}Request {
 	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
 message Get{{.Name}}Reply {
 	{{.Name}} {{.Name | fieldStyle }} = 1;
 }
-message List{{.Name}}Request {
-	uint32 {{.PageParamName}} = 1;
-	uint32 {{.PageSizeParamName}} = 2;
+{{- else }}
+message Destroy{{.Name}}ByRequest {
+	{{.Name}}Param param = 1;
+}
+message Destroy{{.Name}}ByReply {
+	int32 count = 1;
+}
+message Find{{.Name}}ByRequest {
+	{{.Name}}Param param = 1;
+}
+message Find{{.Name}}ByReply {
+	{{.Name}} {{.Name | fieldStyle }} = 1;
+}
+{{- end }}
+message {{.Name}}Param {
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
 	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{ $f.FieldType.StringProto }}{{- else }}{{ $f.FieldType.StringProtoParam }}{{- end }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
 	{{- end }}
+}
+message List{{.Name}}Request {
+	uint32 {{.PageParamName}} = 1;
+	uint32 {{.PageSizeParamName}} = 2;
+	{{.Name}}Param param = 3;
 }
 message List{{.Name}}Reply {
 	repeated {{.Name}} {{.Name | ToPlural | fieldStyle }} = 1;

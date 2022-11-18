@@ -21,8 +21,11 @@ var bizTxGo string
 //go:embed resources/data.ent.schema.needremove.go.example
 var entSchemaNeedRemove string
 
-//go:embed resources/data.data.go.tmpl
-var dataTmpl string
+//go:embed resources/data.ent.data.go.tmpl
+var dataEntTmpl string
+
+//go:embed resources/data.grpc.data.go.tmpl
+var dataGrpcTmpl string
 
 //go:embed resources/server.grpc.go.tmpl
 var grpcServerTmpl string
@@ -32,6 +35,9 @@ var httpServerTmpl string
 
 //go:embed resources/conf.proto.example
 var confProto string
+
+//go:embed resources/conf.bff.proto.example
+var confBffProto string
 
 //go:embed resources/annotations.proto
 var annotationsProto string

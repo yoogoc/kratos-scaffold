@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/yoogoc/kratos-scaffold/project_generator"
+	pg "github.com/yoogoc/kratos-scaffold/project_generator"
 
 	"github.com/spf13/cobra"
 )
@@ -11,30 +11,24 @@ var (
 )
 
 func newNewCmd() *cobra.Command {
+	project := pg.NewProject()
 	var newCmd = &cobra.Command{
 		Use:                "new",
 		Short:              "generate a new project",
 		Long:               `kratos-scaffold new beer-shop`,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-		Run: func(cmd *cobra.Command, args []string) {
-			if isMono {
-				err := project_generator.GenMono(args[0])
-				if err != nil {
-					panic(err)
-				}
-				return
-			}
-			err := project_generator.Gen(args[0])
-			if err != nil {
-				panic(err)
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			project.Name = args[0]
+			project.SetProjectType(isMono)
+			return project.Gen()
 		},
 	}
-	addNewFlags(newCmd) // inject config struct
+	addNewFlags(newCmd, project) // inject config struct
 
 	return newCmd
 }
 
-func addNewFlags(newCmd *cobra.Command) {
+func addNewFlags(newCmd *cobra.Command, project *pg.Project) {
 	newCmd.PersistentFlags().BoolVarP(&isMono, "mono", "", false, "is mono parent repo?")
+	newCmd.PersistentFlags().BoolVarP(&project.IsBff, "bff", "", false, "is bff repo?")
 }

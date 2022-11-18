@@ -30,6 +30,7 @@ func newServiceCmd() *cobra.Command {
 
 func addServiceFlags(serviceCmd *cobra.Command, service *generator.Service) {
 	serviceCmd.PersistentFlags().StringVarP(&service.ApiPath, "api-path", "", "", "proto path, default is <current-mod-name>/<api-dir-name>/<namespace | name>/v1")
+	serviceCmd.PersistentFlags().BoolVarP(&service.GenHttp, "http", "", false, "generate xx.http.pb.go")
 }
 
 func runService(service *generator.Service, args []string) error {

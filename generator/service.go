@@ -20,6 +20,7 @@ import (
 type Service struct {
 	Base
 	ApiPath string
+	GenHttp bool
 }
 
 func NewService(setting *cli.EnvSettings) *Service {
@@ -34,7 +35,7 @@ func (b *Service) CurrentPkgPath() string {
 
 func (b *Service) FieldsExceptPrimary() []*field.Field {
 	return util.FilterSlice(b.Fields, func(f *field.Field) bool {
-		return f.Name != b.primaryKey
+		return f.Name != b.PrimaryKey
 	})
 }
 

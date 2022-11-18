@@ -19,7 +19,7 @@ import (
 
 type Proto struct {
 	Base
-	GenGrpc    bool
+	GenHttp    bool
 	FieldStyle string
 }
 
@@ -31,7 +31,7 @@ func NewProto(setting *cli.EnvSettings) *Proto {
 }
 
 func (p *Proto) CreateFields() []*field.Field {
-	return p.Fields.CreateFields(p.primaryKey)
+	return p.Fields.CreateFields(p.PrimaryKey)
 }
 
 func (p *Proto) UpdateFields() []*field.Field {
@@ -39,7 +39,15 @@ func (p *Proto) UpdateFields() []*field.Field {
 }
 
 func (p *Proto) PrimaryField() *field.Field {
-	return p.Fields.PrimaryField(p.primaryKey)
+	return p.Fields.PrimaryField(p.PrimaryKey)
+}
+
+func (p *Proto) PrimaryFieldName() string {
+	return p.PrimaryField().Name
+}
+
+func (p *Proto) PrimaryFieldURLName() string {
+	return fmt.Sprintf("{%s}", p.PrimaryField().Name)
 }
 
 func (p *Proto) PageParamName() string {
@@ -90,28 +98,30 @@ func (p *Proto) Generate() error {
 	if err := os.WriteFile(out, buf.Bytes(), 0o644); err != nil {
 		return err
 	}
-	if p.GenGrpc {
-		fmt.Println("exec protoc...")
-		if err := p.genClient(p.OutPath()); err != nil {
-			return errors.Wrap(err, "gen proto client error")
-		}
+	fmt.Println("exec protoc...")
+	if err := p.genClient(p.OutPath(), p.GenHttp); err != nil {
+		return errors.Wrap(err, "gen proto client error")
 	}
-
 	return nil
 }
 
 // genClient OPTIMIZE
-func (p *Proto) genClient(source string) error {
+func (p *Proto) genClient(source string, genHttp bool) error {
 	args := []string{
 		"--proto_path=.",
 		"--proto_path=./third_party",
 		"--go_out=paths=source_relative:.",
-		"--go-http_out=paths=source_relative:.",
 		"--go-grpc_out=paths=source_relative:.",
 		// "--validate_out=paths=source_relative,lang=go:.",
-		source,
 	}
-	cmd := exec.Command("protoc", args...)
+	if genHttp {
+		args = append(args, "--go-http_out=paths=source_relative:.",
+			"--openapiv2_out=.",
+			"--openapiv2_opt=logtostderr=true",
+			"--openapiv2_opt=json_names_for_fields=false",
+		)
+	}
+	cmd := exec.Command("protoc", append(args, source)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = "."

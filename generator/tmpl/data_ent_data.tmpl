@@ -1,4 +1,4 @@
-{{- /*gotype: github.com/yoogoc/kratos-scaffold/generator.DataEnt*/ -}}
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/generator.Data*/ -}}
 {{$modelName := .Name |ToLowerCamel}}
 package data
 
@@ -34,23 +34,6 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 		return nil, err
 	}
 	return {{$modelName}}Ent2Biz(row), nil
-}
-
-func (r {{$modelName}}Repo) BulkCreate(ctx context.Context, list []*biz.{{.Name | ToCamel}}) ([]*biz.{{.Name | ToCamel}}, error) {
-	client := r.data.EntClient(ctx)
-	var builders []*ent.{{.Name | ToCamel}}Create
-	for _, item := range list {
-		builders = append(builders, client.{{.Name | ToCamel}}.Create().
-			{{- range $i, $f := .CreateFields }}
-			Set{{ $f.Name | ToEntName }}(item.{{ $f.Name | ToCamel }}){{- if last $i $.CreateFields}},{{- else}}.{{- end}}
-			{{- end }}
-		)
-	}
-	rows, err := client.{{.Name | ToCamel}}.CreateBulk(builders...).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return bulk{{.Name | ToCamel}}Ent2Biz(rows), nil
 }
 
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {

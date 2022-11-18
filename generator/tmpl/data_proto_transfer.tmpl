@@ -1,0 +1,74 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/generator.Data*/ -}}
+{{$modelName := .Name |ToLowerCamel}}
+package data
+
+import (
+	"{{.CurrentPkgPath}}/biz"
+	{{$modelName}}V1 "{{ .ProtoPkgPath }}"
+)
+
+func {{.Name | ToLowerCamel}}Biz2Proto(source *biz.{{.Name | ToCamel}}) *{{$modelName}}V1.{{.Name | ToCamel}} {
+	return &{{$modelName}}V1.{{.Name | ToCamel}}{
+		{{- range $i, $f := .Fields }}
+		{{- if eq $f.FieldType 8 }}
+		{{ $f.Name | ToCamel }}: timestamppb.New(source.{{ $f.Name | ToCamel }}),
+		{{- else }}
+		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
+		{{- end }}
+		{{- end }}
+	}
+}
+
+func bulk{{.Name | ToCamel}}Biz2Proto(source []*biz.{{.Name | ToCamel}}) []*{{$modelName}}V1.{{.Name | ToCamel}} {
+	var list []*{{$modelName}}V1.{{.Name | ToCamel}}
+	for _, item := range source {
+		list = append(list, {{.Name | ToLowerCamel}}Biz2Proto(item))
+	}
+	return list
+}
+
+func {{.Name | ToLowerCamel}}Proto2Biz(source *{{$modelName}}V1.{{.Name | ToCamel}}) *biz.{{.Name | ToCamel}} {
+	return &biz.{{.Name | ToCamel}}{
+		{{- range $i, $f := .Fields }}
+		{{- if eq $f.FieldType 8 }}
+		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }}.AsTime(),
+		{{- else }}
+		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
+		{{- end }}
+		{{- end }}
+	}
+}
+
+func bulk{{.Name | ToCamel}}Proto2Biz(source []*{{$modelName}}V1.{{.Name | ToCamel}}) []*biz.{{.Name | ToCamel}} {
+	var list []*biz.{{.Name | ToCamel}}
+	for _, item := range source {
+		list = append(list, {{.Name | ToLowerCamel}}Proto2Biz(item))
+	}
+	return list
+}
+
+func {{.Name | ToLowerCamel}}ParamBiz2Proto(param *biz.{{.Name | ToCamel}}Param) *{{$modelName}}V1.{{.Name | ToCamel}}Param {
+	{{- range $i, $f := .ParamFields }}
+	{{- if eq $f.FieldType 8 }}
+	{{- if eq $f.Type 6 }}
+	var {{ $f.Name }} []*timestamppb.Timestamp
+	for _, item := range param.{{ $f.Name | ToCamel }} {
+		{{ $f.Name }} = append({{ $f.Name }}, timestamppb.New(item))
+	}
+	{{- end }}
+	{{- end }}
+	{{- end }}
+	return &{{$modelName}}V1.{{.Name | ToCamel}}Param{
+		{{- range $i, $f := .ParamFields }}
+		{{- if eq $f.FieldType 8 }}
+		{{- if eq $f.Type 6 }}
+		{{ $f.Name | ToCamel }}: {{ $f.Name }},
+		{{- else }}
+		{{ $f.Name | ToCamel }}: timestamppb.New(param.{{ $f.Name | ToCamel }}),
+		{{- end }}
+		{{- else }}
+		{{ $f.Name | ToCamel }}: param.{{ $f.Name | ToCamel }},
+		{{- end }}
+		{{- end }}
+	}
+}
