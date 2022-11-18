@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"path"
-	"strings"
 
 	"github.com/YoogoC/kratos-scaffold/generator"
 	"github.com/YoogoC/kratos-scaffold/pkg/field"
@@ -48,7 +47,7 @@ func runService(service *generator.Service, args []string) error {
 		if service.Namespace != "" {
 			apiModelName = path.Join(service.ApiDirName, service.Namespace)
 		} else {
-			apiModelName = path.Join(service.ApiDirName, strings.ToLower(service.Name))
+			apiModelName = service.ApiDirName
 		}
 		service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
 	}
