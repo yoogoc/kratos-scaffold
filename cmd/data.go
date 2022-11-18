@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"github.com/YoogoC/kratos-scaffold/generator"
-	"github.com/YoogoC/kratos-scaffold/pkg/field"
-	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
+	"github.com/yoogoc/kratos-scaffold/generator"
+	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
 
 	"github.com/spf13/cobra"
 )

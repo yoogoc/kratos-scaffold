@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/YoogoC/kratos-scaffold/pkg/cli"
 	"github.com/spf13/cobra"
+	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 )
 
 var settings = cli.New()

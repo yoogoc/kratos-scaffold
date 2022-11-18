@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
 const DefaultStyleField = "low-camel"

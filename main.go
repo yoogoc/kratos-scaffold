@@ -1,6 +1,6 @@
 package main
 
-import "github.com/YoogoC/kratos-scaffold/cmd"
+import "github.com/yoogoc/kratos-scaffold/cmd"
 
 func main() {
 	cmd.Execute()

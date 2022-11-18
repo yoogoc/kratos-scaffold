@@ -9,9 +9,9 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/YoogoC/kratos-scaffold/pkg/cli"
-	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/iancoleman/strcase"
+	"github.com/yoogoc/kratos-scaffold/pkg/cli"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
 

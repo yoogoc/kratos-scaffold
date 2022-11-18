@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/YoogoC/kratos-scaffold/internal/merge"
-	"github.com/YoogoC/kratos-scaffold/pkg/field"
-	"github.com/YoogoC/kratos-scaffold/pkg/util"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/pflag"
+	"github.com/yoogoc/kratos-scaffold/internal/merge"
+	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"gopkg.in/yaml.v2"
 )
 

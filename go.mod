@@ -1,4 +1,4 @@
-module github.com/YoogoC/kratos-scaffold
+module github.com/yoogoc/kratos-scaffold
 
 go 1.18
 

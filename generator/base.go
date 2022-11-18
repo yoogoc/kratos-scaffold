@@ -3,8 +3,8 @@ package generator
 import (
 	"os"
 
-	"github.com/YoogoC/kratos-scaffold/pkg/cli"
-	"github.com/YoogoC/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/cli"
+	"github.com/yoogoc/kratos-scaffold/pkg/field"
 )
 
 type Base struct {

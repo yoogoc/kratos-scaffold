@@ -10,8 +10,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/YoogoC/kratos-scaffold/generator"
-	"github.com/YoogoC/kratos-scaffold/pkg/util"
+	"github.com/yoogoc/kratos-scaffold/generator"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
 
