@@ -47,7 +47,7 @@ func runService(service *generator.Service, args []string) error {
 		if service.Namespace != "" {
 			apiModelName = path.Join(service.ApiDirName, service.Namespace)
 		} else {
-			apiModelName = service.ApiDirName
+			apiModelName = path.Join(service.ApiDirName, modelName)
 		}
 		service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
 	}

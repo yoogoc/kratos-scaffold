@@ -3,11 +3,11 @@ package service
 
 import (
 	"fmt"
-	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
 	{{- range $i, $s := .MaybeGoPackages }}
 	"{{ $s }}"
 	{{- end }}
+	v1 "{{.ApiPath}}"
 )
 
 func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
@@ -60,7 +60,7 @@ func list{{.Name}}Req2Biz(req *v1.List{{.Name}}Request) *biz.{{.Name}}Param {
 	{{- end }}
 	return &biz.{{.Name}}Param{
 		{{- range $i, $f := .Fields.ParamFields }}
-		{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.String }}
+		{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
 		{{- if and $f.FieldType.NeedProto2Biz (not (eq $f.Type.String "In")) }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
 		{{- if and $f.FieldType.IsTime (eq $f.Type.String "In") }}
 		{{ $f.Name | ToCamel }}: {{$f.Name}},

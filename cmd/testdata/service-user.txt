@@ -6,6 +6,7 @@ import (
 	"test/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type UserService struct {
@@ -39,7 +40,7 @@ func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest)
 
 func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserReply, error) {
 	_, err := s.uc.DestroyUserBy(ctx, &biz.UserParam{
-		IdEq: req.Id,
+		IdEq: wrapperspb.Int64(req.Id),
 	})
 	if err != nil {
 		return nil, err
@@ -49,7 +50,7 @@ func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest)
 
 func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
 	item, err := s.uc.FindUserBy(ctx, &biz.UserParam{
-		IdEq: req.Id,
+		IdEq: wrapperspb.Int64(req.Id),
 	})
 	if err != nil {
 		return nil, err
