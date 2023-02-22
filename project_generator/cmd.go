@@ -13,7 +13,7 @@ import (
 
 func genCmd(name string, appPath string, isSubMono bool) error {
 	// mkdir cmd/server. gen main.go, wire.go, wire_gen.go
-	mainPath := path.Join(appPath, "cmd/server")
+	mainPath := path.Join(appPath, "cmd")
 	if err := os.MkdirAll(mainPath, 0o700); err != nil {
 		return err
 	}
