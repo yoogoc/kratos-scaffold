@@ -4,6 +4,7 @@ package data
 
 import (
 	"context"
+	"time"
 	"github.com/go-kratos/kratos/v2/log"
 	"{{.CurrentPkgPath}}/biz"
 	"{{.CurrentPkgPath}}/data/ent"
@@ -38,7 +39,10 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	client := r.data.EntClient(ctx)
-	row, err := client.{{.Name | ToCamel}}.UpdateOne({{$modelName}}Biz2Ent({{$modelName}})).
+	row, err := client.{{.Name | ToCamel}}.UpdateOneID({{$modelName}}.Id).
+		{{- range $i, $f := .UpdateFields }}
+		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
+		{{- end }}
 		Save(ctx)
 	if err != nil {
 		return nil, err
@@ -48,7 +52,11 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
 	client := r.data.EntClient(ctx)
+	{{- if .NeedAuditField }}
+	return client.{{.Name | ToCamel}}.Update().Where({{$modelName}}Param2Predicates(param)...).SetDeletedAt(time.Now()).Save(ctx)
+	{{- else }}
 	return client.{{.Name | ToCamel}}.Delete().Where({{$modelName}}Param2Predicates(param)...).Exec(ctx)
+	{{- end }}
 }
 
 func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, size int) ([]*biz.{{.Name | ToCamel}}, int, error) {

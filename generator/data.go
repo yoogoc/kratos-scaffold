@@ -26,6 +26,10 @@ func (d *Data) CreateFields() []*field.Field {
 	return d.Fields.CreateFields(d.PrimaryKey)
 }
 
+func (d *Data) SoftDelete() bool {
+	return d.Fields.HasField("deleted_at")
+}
+
 func (d *Data) UpdateFields() []*field.Field {
 	return d.Fields.UpdateFields(d.Fields.PrimaryField(d.PrimaryKey))
 }

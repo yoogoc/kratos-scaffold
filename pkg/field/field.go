@@ -30,17 +30,33 @@ type Field struct {
 
 func (fs Fields) CreateFields(primaryKey string) []*Field {
 	return util.FilterSlice(fs, func(f *Field) bool {
-		return f.Name != primaryKey
+		fn := strcase.ToSnake(f.Name)
+		return fn != strcase.ToSnake(primaryKey) &&
+			fn != "created_at" &&
+			fn != "updated_at" &&
+			fn != "created_by" &&
+			fn != "updated_by" &&
+			fn != "deleted_at"
 	})
 }
 
-func (fs Fields) UpdateFields(primaryField *Field) []*Field {
-	result := make([]*Field, 0, len(fs))
-	result = append(result, primaryField)
+func (fs Fields) HasField(field string) bool {
+	_, ok := util.FindSlice(fs, func(f *Field) bool {
+		return strcase.ToSnake(f.Name) == strcase.ToSnake(field)
+	})
+	return ok
+}
 
-	return append(result, util.FilterSlice(fs, func(f *Field) bool {
-		return f.Name != primaryField.Name
-	})...)
+func (fs Fields) UpdateFields(primaryField *Field) []*Field {
+	return util.FilterSlice(fs, func(f *Field) bool {
+		fn := strcase.ToSnake(f.Name)
+		return fn != strcase.ToSnake(primaryField.Name) &&
+			fn != "created_at" &&
+			fn != "updated_at" &&
+			fn != "created_by" &&
+			fn != "updated_by" &&
+			fn != "deleted_at"
+	})
 }
 
 func (fs Fields) ParamFields() []*Predicate {
