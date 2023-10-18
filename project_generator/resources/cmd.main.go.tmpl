@@ -2,19 +2,16 @@
 package main
 
 import (
-	"flag"
-	"github.com/go-kratos/kratos/v2/config/env"
+	"fmt"
+	"{{.AppPkgPath}}/internal/conf"
+	ilog "{{.AppPkgPath}}/internal/log"
 	"os"
 
-	"{{.AppPkgPath}}/internal/conf"
-
-	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/config/env"
 	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/go-kratos/kratos/v2/transport/grpc"
-	"github.com/go-kratos/kratos/v2/transport/http"
-	_ "go.uber.org/automaxprocs"
+
+	"github.com/spf13/cobra"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -23,35 +20,26 @@ var (
 	Name = "{{.ServiceName}}"
 	// Version is the version of the compiled software.
 	Version string
-	// flagconf is the config flag.
+
 	flagconf string
 )
 
-func init() {
-	flag.StringVar(&flagconf, "conf", "./configs", "config path, eg: -conf config.yaml")
-}
-
-func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
-	return kratos.New(
-		kratos.Name(Name),
-		kratos.Version(Version),
-		kratos.Metadata(map[string]string{}),
-		kratos.Logger(logger),
-		kratos.Server(
-			gs,
-			hs,
-		),
-	)
-}
+type RootCommand cobra.Command
 
 func main() {
-	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"service.name", Name,
-		"service.version", Version,
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
-	)
+	cmd, _, _ := initApp(ilog.NameString(Name), ilog.VersionString(Version))
+
+	if err := cmd.Execute(); err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func newConf(rootCmd *RootCommand) *conf.Bootstrap {
+	flags := (*cobra.Command)(rootCmd).PersistentFlags()
+	flags.StringVarP(&flagconf, "config", "c", "./configs", "config path, eg: --config=config.yaml")
+	var bc conf.Bootstrap
+	_ = flags.Parse(os.Args[1:])
 
 	c := config.New(
 		config.WithSource(
@@ -62,31 +50,45 @@ func main() {
 	if err := c.Load(); err != nil {
 		panic(err)
 	}
-
-	var bc conf.Bootstrap
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+	return &bc
+}
 
-	//exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(bc.Trace.Endpoint)))
-	//if err != nil {
-	//	panic(err)
-	//}
-	//tp := tracesdk.NewTracerProvider(
-	//	tracesdk.WithBatcher(exp),
-	//	tracesdk.WithResource(resource.NewSchemaless(
-	//		semconv.ServiceNameKey.String(Name),
-	//	)),
-	//)
+func newDataConf(bc *conf.Bootstrap) *conf.Data {
+	return bc.Data
+}
 
-	app, cleanup, err := initApp(bc.Server, bc.Data, logger)
-	if err != nil {
-		panic(err)
+func newLogConf(bc *conf.Bootstrap) *conf.Log {
+	return bc.Log
+}
+
+func newServerConf(bc *conf.Bootstrap) *conf.Server {
+	return bc.Server
+}
+
+func newRootCmd() *RootCommand {
+	root := &RootCommand{
+		Short:              "assign service",
+		Long:               "assign service",
+		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+		Run: func(cmd *cobra.Command, args []string) {
+			_ = cmd.Help()
+		},
 	}
-	defer cleanup()
 
-	// start and wait for stop signal
-	if err := app.Run(); err != nil {
-		panic(err)
-	}
+	return root
+}
+
+{{- if .IsBff }}
+func newCmd(root *RootCommand, server *ServerCommand) *cobra.Command {
+{{- else }}
+func newCmd(root *RootCommand, server *ServerCommand, migrate *MigrateCommand) *cobra.Command {
+{{- end }}
+	(*cobra.Command)(root).AddCommand(
+		(*cobra.Command)(server),
+		(*cobra.Command)(migrate),
+	)
+	return (*cobra.Command)(root)
 }

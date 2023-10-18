@@ -17,3 +17,14 @@ func Go(command string, path ...string) error {
 	}
 	return nil
 }
+
+// Exec command
+func Exec(command string, arg ...string) error {
+	cmd := exec.Command(command, arg...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	return nil
+}

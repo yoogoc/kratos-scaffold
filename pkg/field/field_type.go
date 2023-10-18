@@ -53,6 +53,18 @@ var (
 		TypeTime:   "Time",
 	}
 
+	typeMysqlNames = [...]string{
+		TypeDouble: "numeric",
+		TypeFloat:  "numeric",
+		TypeInt32:  "int",
+		TypeInt64:  "bigint",
+		TypeUint32: "int",
+		TypeUint64: "bigint",
+		TypeBool:   "tinyint",
+		TypeString: "varchar(255)",
+		TypeTime:   "timestamp",
+	}
+
 	typePramNames = [...]string{
 		TypeDouble: "*wrapperspb.DoubleValue",
 		TypeFloat:  "*wrapperspb.FloatValue",
@@ -157,6 +169,10 @@ func (t TypeField) StringParam() string {
 
 func (t TypeField) StringEnt() string {
 	return typeEntSchemaNames[t]
+}
+
+func (t TypeField) StringMysql() string {
+	return typeMysqlNames[t]
 }
 
 func (t TypeField) StringProto() string {

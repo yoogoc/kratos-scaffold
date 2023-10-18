@@ -10,29 +10,29 @@ import (
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
-type serverTmpl struct {
+type ServerTmpl struct {
 	AppPkgPath string
 	ServerPath string
 	GenGrpc    bool
 	GenHttp    bool
 }
 
-type ServerTmplOption func(*serverTmpl)
+type ServerTmplOption func(*ServerTmpl)
 
 func NonGenGrpc() ServerTmplOption {
-	return func(st *serverTmpl) {
+	return func(st *ServerTmpl) {
 		st.GenGrpc = false
 	}
 }
 
 func NonGenHttp() ServerTmplOption {
-	return func(st *serverTmpl) {
+	return func(st *ServerTmpl) {
 		st.GenHttp = false
 	}
 }
 
-func NewServerTmpl(appPkgPath, serverPath string, options ...ServerTmplOption) *serverTmpl {
-	st := &serverTmpl{
+func NewServerTmpl(appPkgPath, serverPath string, options ...ServerTmplOption) *ServerTmpl {
+	st := &ServerTmpl{
 		AppPkgPath: appPkgPath,
 		ServerPath: serverPath,
 		GenGrpc:    true,
@@ -44,7 +44,7 @@ func NewServerTmpl(appPkgPath, serverPath string, options ...ServerTmplOption) *
 	return st
 }
 
-func (st serverTmpl) Generate() error {
+func (st ServerTmpl) Generate() error {
 	if st.GenGrpc {
 		fmt.Println("generate server/grpc.go ...")
 		grpcBuf := new(bytes.Buffer)

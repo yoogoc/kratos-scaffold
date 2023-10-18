@@ -5,6 +5,7 @@ import (
 	"path"
 
 	"golang.org/x/mod/modfile"
+	"golang.org/x/tools/imports"
 )
 
 func GenNullPath(p string) error {
@@ -22,4 +23,15 @@ func ModName() string {
 		}
 	}
 	return modfile.ModulePath(modBytes)
+}
+
+func WhiteGo(path string, buf []byte) error {
+	content, err := imports.Process(path, buf, nil)
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+		return err
+	}
+	return nil
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
-func genCmd(name string, appPath string, isSubMono bool) error {
+func genCmd(name string, appPath string, isSubMono, isBff bool) error {
 	// mkdir cmd/server. gen main.go, wire.go, wire_gen.go
 	mainPath := path.Join(appPath, "cmd")
 	if err := os.MkdirAll(mainPath, 0o700); err != nil {
@@ -27,6 +27,7 @@ func genCmd(name string, appPath string, isSubMono bool) error {
 		AppPkgPath:  appPkgPath,
 		ServiceName: serviceName,
 		OutPath:     mainPath,
+		IsBff:       isBff,
 	}
 	if err := cmdTmpl.Generate(); err != nil {
 		return err
@@ -38,6 +39,7 @@ type CmdTmpl struct {
 	AppPkgPath  string
 	ServiceName string
 	OutPath     string
+	IsBff       bool
 }
 
 func (ct CmdTmpl) Generate() error {
@@ -50,8 +52,36 @@ func (ct CmdTmpl) Generate() error {
 	if err := tmpl.Execute(mainBuf, ct); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(ct.OutPath, "main.go"), mainBuf.Bytes(), 0o644); err != nil {
+	if err := util.WhiteGo(path.Join(ct.OutPath, "main.go"), mainBuf.Bytes()); err != nil {
 		return err
+	}
+
+	fmt.Println("generate cmd/server/server.go ...")
+	serverBuf := new(bytes.Buffer)
+	serverTmpl, err := template.New("serverTmpl").Parse(cmdServerTmpl)
+	if err != nil {
+		return err
+	}
+	if err := serverTmpl.Execute(serverBuf, ct); err != nil {
+		return err
+	}
+	if err := util.WhiteGo(path.Join(ct.OutPath, "server.go"), serverBuf.Bytes()); err != nil {
+		return err
+	}
+
+	if !ct.IsBff {
+		fmt.Println("generate cmd/server/migration.go ...")
+		migrationBuf := new(bytes.Buffer)
+		migrationTmpl, err := template.New("migrationTmpl").Parse(cmdMigrationTmpl)
+		if err != nil {
+			return err
+		}
+		if err := migrationTmpl.Execute(migrationBuf, ct); err != nil {
+			return err
+		}
+		if err := util.WhiteGo(path.Join(ct.OutPath, "migration.go"), migrationBuf.Bytes()); err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("generate cmd/server/wire.go ...")
@@ -63,23 +93,10 @@ func (ct CmdTmpl) Generate() error {
 	if err := wireTmpl.Execute(wireBuf, ct); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(ct.OutPath, "wire.go"), wireBuf.Bytes(), 0o644); err != nil {
+	if err := util.WhiteGo(path.Join(ct.OutPath, "wire.go"), wireBuf.Bytes()); err != nil {
 		return err
 	}
 
-	// if err := util.Go("get", "github.com/google/wire"); err != nil {
-	// 	return err
-	// }
-	// if err := util.Go("mod", "tidy"); err != nil {
-	// 	return err
-	// }
-	// fd := exec.Command("wire", ct.OutPath)
-	// fd.Stdout = os.Stdout
-	// fd.Stderr = os.Stderr
-	// fd.Dir = "."
-	// if err := fd.Run(); err != nil {
-	// 	return err
-	// }
 	fmt.Println("skip wire generate")
 
 	return nil

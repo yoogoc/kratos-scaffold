@@ -1,0 +1,73 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.LogTmpl*/ -}}
+package log
+
+import (
+	"{{.AppPkgPath}}/internal/conf"
+	"{{.ModName}}/pkg/contrib"
+	"os"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/google/wire"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+)
+
+// log level: debug info warn error dpanic panic fatal
+
+type VersionString string
+type NameString string
+
+var ProviderSet = wire.NewSet(NewZapLogger, NewKratosLogger)
+
+func NewZapLogger(config *conf.Log) *zap.Logger {
+	encoderConfig := zapcore.EncoderConfig{
+		TimeKey:        "t",
+		LevelKey:       "level",
+		NameKey:        "logger",
+		CallerKey:      "caller",
+		MessageKey:     "msg",
+		StacktraceKey:  "stack",
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.FullCallerEncoder,
+	}
+
+	if config == nil {
+		config = new(conf.Log)
+	}
+
+	if config.Level == "" {
+		config.Level = "debug"
+	}
+	level, _ := zap.ParseAtomicLevel(config.Level)
+
+	encoder := zapcore.NewJSONEncoder(encoderConfig)
+	core := zapcore.NewCore(
+		encoder,
+		zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout)),
+		level,
+	)
+	zapLogger := zap.New(core,
+		zap.AddStacktrace(zap.NewAtomicLevelAt(zapcore.ErrorLevel)),
+		zap.AddCaller(),
+		zap.AddCallerSkip(2),
+		zap.Development())
+	return zapLogger
+}
+
+func NewKratosLogger(zlog *zap.Logger, conf *conf.Log, name NameString, version VersionString) log.Logger {
+	if conf != nil && conf.Type == "zap" {
+		return log.With(contrib.NewLogger(zlog),
+			"service.name", name,
+			"service.version", version,
+		)
+	}
+	return log.With(log.NewStdLogger(os.Stdout),
+		"service.name", name,
+		"service.version", version,
+		"ts", log.DefaultTimestamp,
+		"caller", log.DefaultCaller,
+	)
+}

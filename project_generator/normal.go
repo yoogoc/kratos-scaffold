@@ -84,6 +84,26 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 	}
 
 	// 5 gen conf
+	confPath := path.Join(appPath, "conf")
+	if err := os.MkdirAll(confPath, 0o700); err != nil {
+		return err
+	}
+	if err := os.WriteFile(path.Join(confPath, "conf.proto"), []byte(confProto), 0o644); err != nil {
+		return err
+	}
+
+	if err := util.Exec("make", "config-"+name); err != nil {
+		return err
+	}
+
+	// 6 gen log
+	logPath := path.Join(appPath, "log")
+	if err := os.MkdirAll(logPath, 0o700); err != nil {
+		return err
+	}
+	if err := NewLogTmpl(appPkgPath, logPath).Generate(); err != nil {
+		return err
+	}
 
 	return nil
 }

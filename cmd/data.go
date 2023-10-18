@@ -48,8 +48,14 @@ func runDataEnt(dataEnt *generator.Data, args []string) error {
 		dataEnt.Fields = fs
 	}
 
-	err := dataEnt.GenerateEnt()
-	return err
+	if err := dataEnt.GenerateMigration(); err != nil {
+		return err
+	}
+
+	if err := dataEnt.GenerateEnt(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func runDataProto(dataEnt *generator.Data, args []string) error {

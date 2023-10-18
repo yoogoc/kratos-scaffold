@@ -9,6 +9,7 @@ message Bootstrap {
     Trace trace = 1;
     Server server = 2;
     Data data = 3;
+    Log log = 4;
 }
 
 message Trace {
@@ -43,4 +44,9 @@ message Data {
     google.protobuf.Duration write_timeout = 4;
   }
   Database database = 1;
+}
+
+message Log {
+  string type = 1;
+  string level = 2;
 }

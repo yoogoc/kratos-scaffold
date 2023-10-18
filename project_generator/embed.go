@@ -9,14 +9,29 @@ import (
 //go:embed resources/config.yaml.example
 var configContent string
 
+//go:embed resources/zap.go.example
+var zapGoExample string
+
+//go:embed resources/create-migration.sh.example
+var createMigrationSh string
+
 //go:embed resources/cmd.main.go.tmpl
 var cmdMainTmpl string
 
 //go:embed resources/cmd.wire.go.tmpl
 var cmdWireTmpl string
 
+//go:embed resources/cmd.server.go.tmpl
+var cmdServerTmpl string
+
+//go:embed resources/cmd.migration.go.tmpl
+var cmdMigrationTmpl string
+
 //go:embed resources/biz.tx.go.example
 var bizTxGo string
+
+//go:embed resources/log.log.go.tmpl
+var logTmpl string
 
 //go:embed resources/data.ent.schema.needremove.go.example
 var entSchemaNeedRemove string

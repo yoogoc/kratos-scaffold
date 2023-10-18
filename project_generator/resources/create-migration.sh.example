@@ -1,0 +1,1 @@
+go run ./cmd migrate create -c ./configs/ --dir ./db/migration $2 $3

@@ -1,0 +1,15 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/generator.Data*/ -}}
+-- +goose Up
+-- +goose StatementBegin
+create table {{.TableName}} (
+{{- range $i, $f := .Fields }}
+{{$f.Name | ToSnake | ToLower}} {{ $f.FieldType.StringMysql }},
+{{- end }}
+PRIMARY KEY (id)
+);
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+drop table {{.TableName}};
+-- +goose StatementEnd

@@ -9,6 +9,7 @@ message Bootstrap {
     Trace trace = 1;
     Server server = 2;
     Data data = 3;
+    Log log = 4;
 }
 
 message Trace {
@@ -35,4 +36,9 @@ message Data {
     string url = 1;
   }
   Service example_service = 1;
+}
+
+message Log {
+  string type = 1;
+  string level = 2;
 }

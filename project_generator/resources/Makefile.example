@@ -1,0 +1,41 @@
+modules = $(shell ls app)
+
+migrate-modules := $(addprefix migrate-, $(modules))
+rollup-modules := $(addprefix rollup-, $(modules))
+wire-modules := $(addprefix wire-, $(modules))
+config-modules := $(addprefix config-, $(modules))
+ent-modules := $(addprefix ent-, $(modules))
+proto-modules := $(addprefix proto-, $(modules))
+
+API_PROTO_FILES=$(shell find api -name *.proto)
+
+$(migrate-modules):
+	go run ./app/$(patsubst migrate-%,%,$@)/cmd migrate up -c ./configs/$(patsubst migrate-%,%,$@) --dir ./app/$(patsubst migrate-%,%,$@)/db/migration
+
+$(rollup-modules):
+	go run ./app/$(patsubst rollup-%,%,$@)/cmd migrate down -c ./configs/$(patsubst rollup-%,%,$@) --dir ./app/$(patsubst rollup-%,%,$@)/db/migration
+
+$(wire-modules):
+	wire ./app/$(patsubst wire-%,%,$@)/cmd
+
+$(ent-modules):
+	go generate ./app/$(patsubst ent-%,%,$@)/internal/data/ent/generate.go
+
+$(config-modules):
+	protoc --proto_path=./app/$(patsubst config-%,%,$@)/internal/conf \
+	       --proto_path=./third_party \
+ 	       --go_out=paths=source_relative:./app/$(patsubst config-%,%,$@)/internal/conf \
+	       $(shell find ./app/$(patsubst config-%,%,$@)/internal/conf -name *.proto)
+
+$(proto-modules):
+	kratos proto client ./api/$(patsubst proto-%,%,$@)
+
+.PHONY: api
+api:
+	protoc --proto_path=. \
+	       --proto_path=./third_party \
+ 	       --go_out=paths=source_relative:. \
+ 	       --go-http_out=paths=source_relative:. \
+ 	       --go-grpc_out=paths=source_relative:. \
+           --openapiv2_out . \
+	       $(API_PROTO_FILES)

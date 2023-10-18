@@ -108,11 +108,20 @@ func GenMono(name string) error {
 		return err
 	}
 	fmt.Println("generating pkg/ ...")
-	if err := util.GenNullPath(path.Join(projectPath, "pkg")); err != nil {
+	servicePath := path.Join(projectPath, "pkg/contrib")
+	if err := os.MkdirAll(servicePath, 0o700); err != nil {
 		return err
 	}
 	// 6. cp common proto
 	if err := cpProto(projectPath); err != nil {
+		return err
+	}
+	// 7. cp create-migration.sh
+	if err = os.WriteFile(path.Join(projectPath, "create-migration.sh"), []byte(createMigrationSh), 0o644); err != nil {
+		return err
+	}
+	// 7. cp log
+	if err = os.WriteFile(path.Join(projectPath, "pkg/contrib/zap.go"), []byte(zapGoExample), 0o644); err != nil {
 		return err
 	}
 	return nil
@@ -128,7 +137,7 @@ func GenSubMono(name string, isBff bool) error {
 	}
 	// 2. gen internal: biz,data,service,server,conf
 	if isBff {
-		if err := genBffInternal(name, path.Join(subAppPath, "internal")); err != nil {
+		if err := genBffInternal(name, path.Join(subAppPath, "internal"), true); err != nil {
 			return err
 		}
 	} else {
@@ -138,7 +147,7 @@ func GenSubMono(name string, isBff bool) error {
 	}
 
 	// 3. gen cmd
-	if err := genCmd(name, subAppPath, true); err != nil {
+	if err := genCmd(name, subAppPath, true, isBff); err != nil {
 		return err
 	}
 	// 4. init configs/conf.yaml
@@ -171,7 +180,7 @@ func GenSingle(name string) error {
 		return err
 	}
 	// 5. gen cmd
-	if err := genCmd(name, appPath, false); err != nil {
+	if err := genCmd(name, appPath, false, false); err != nil {
 		return err
 	}
 	// 6. init configs/conf.yaml

@@ -52,7 +52,7 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
 	client := r.data.EntClient(ctx)
-	{{- if .NeedAuditField }}
+	{{- if .SoftDelete }}
 	return client.{{.Name | ToCamel}}.Update().Where({{$modelName}}Param2Predicates(param)...).SetDeletedAt(time.Now()).Save(ctx)
 	{{- else }}
 	return client.{{.Name | ToCamel}}.Delete().Where({{$modelName}}Param2Predicates(param)...).Exec(ctx)
