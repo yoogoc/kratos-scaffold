@@ -30,8 +30,8 @@ type Field struct {
 
 func (fs Fields) CreateFields(primaryKey string) []*Field {
 	return util.FilterSlice(fs, func(f *Field) bool {
-		fn := strcase.ToSnake(f.Name)
-		return fn != strcase.ToSnake(primaryKey) &&
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != strings.ToLower(strcase.ToSnake(primaryKey)) &&
 			fn != "created_at" &&
 			fn != "updated_at" &&
 			fn != "created_by" &&
@@ -49,8 +49,8 @@ func (fs Fields) HasField(field string) bool {
 
 func (fs Fields) UpdateFields(primaryField *Field) []*Field {
 	return util.FilterSlice(fs, func(f *Field) bool {
-		fn := strcase.ToSnake(f.Name)
-		return fn != strcase.ToSnake(primaryField.Name) &&
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != strings.ToLower(strcase.ToSnake(primaryField.Name)) &&
 			fn != "created_at" &&
 			fn != "updated_at" &&
 			fn != "created_by" &&

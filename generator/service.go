@@ -39,6 +39,18 @@ func (b *Service) FieldsExceptPrimary() []*field.Field {
 	})
 }
 
+func (b *Service) CreateFields() []*field.Field {
+	return b.Fields.CreateFields(b.PrimaryKey)
+}
+
+func (b *Service) UpdateFields() []*field.Field {
+	return b.Fields.UpdateFields(b.Fields.PrimaryField(b.PrimaryKey))
+}
+
+func (b *Service) PrimaryField() *field.Field {
+	return b.Fields.PrimaryField(b.PrimaryKey)
+}
+
 //go:embed tmpl/service.tmpl
 var serviceTmpl string
 

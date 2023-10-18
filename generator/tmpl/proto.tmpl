@@ -60,8 +60,9 @@ message Create{{.Name}}Reply {
 	{{.Name}} {{.Name | fieldStyle }} = 1;
 }
 message Update{{.Name}}Request {
+	{{ .PrimaryField.FieldType.StringProto }} {{ .PrimaryFieldName | fieldStyle }} = 1;
 	{{- range $i, $f := .UpdateFields }}
-	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
 	{{- end }}
 }
 message Update{{.Name}}Reply {

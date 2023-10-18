@@ -12,7 +12,7 @@ import (
 
 func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 	return &biz.{{.Name}}{
-		{{- range $i, $f := .FieldsExceptPrimary }}
+		{{- range $i, $f := .CreateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.NeedProto2Biz }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
 		{{ $f.Name | ToCamel }}: {{$reqf}},
@@ -22,7 +22,9 @@ func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 
 func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 	return &biz.{{.Name}}{
-		{{- range $i, $f := .Fields }}
+		{{- $reqf := printf "req.%s" (.PrimaryField.Name | ToCamel) }}
+		{{ .PrimaryField.Name | ToCamel }}: {{$reqf}},
+		{{- range $i, $f := .UpdateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.NeedProto2Biz }}{{- $reqf = printf $f.FieldType.Proto2Biz $reqf }}{{- end }}
 		{{ $f.Name | ToCamel }}: {{$reqf}},
