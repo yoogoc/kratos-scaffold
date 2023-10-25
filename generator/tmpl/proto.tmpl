@@ -97,7 +97,7 @@ message Find{{.Name}}ByReply {
 message {{.Name}}Param {
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
-	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{ $f.FieldType.StringProto }}{{- else }}{{ $f.FieldType.StringProtoParam }}{{- end }} {{ $f.Name | fieldStyle }} = {{ add $i 3 }};
+	{{ if eq $f.Type $strToPreMap.in }}{{ "repeated " }}{{ $f.FieldType.StringProto }}{{- else }}{{ $f.FieldType.StringProtoParam }}{{- end }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
 	{{- end }}
 }
 message List{{.Name}}Request {
