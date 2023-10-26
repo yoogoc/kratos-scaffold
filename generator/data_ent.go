@@ -117,7 +117,7 @@ func GenEntBase(entPath string) error {
 	fmt.Println("generating ent generate...")
 	content := `package ent
 
-//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,sql/modifier,sql/lock,sql/execquery ./schema
+//go:generate go run -mod=mod entgo.io/ent/cmd/ent generate --feature privacy,entql,sql/modifier,sql/lock,sql/execquery,sql/upsert,namedges,sql/schemaconfig ./schema
 `
 	err := os.WriteFile(path.Join(entPath, "generate.go"), []byte(content), 0o644)
 	if err != nil {

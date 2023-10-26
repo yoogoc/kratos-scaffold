@@ -8,6 +8,7 @@ import (
 	"path"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/iancoleman/strcase"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
@@ -31,7 +32,7 @@ func (d *Data) MigrationPath() string {
 }
 
 func (d *Data) TableName() string {
-	return util.Plural(strings.ToLower(d.Name))
+	return util.Plural(strcase.ToSnake(d.Name))
 }
 func (d *Data) GenerateMigration() error {
 	fmt.Println("generating migration...")
@@ -50,7 +51,7 @@ func (d *Data) GenerateMigration() error {
 	if err != nil {
 		return err
 	}
-	p := path.Join(d.MigrationPath(), fmt.Sprintf("create_%s.sql", util.Plural(strings.ToLower(d.Name))))
+	p := path.Join(d.MigrationPath(), fmt.Sprintf("%s_create_%s.sql", time.Now().Format("20060102150405"), util.Plural(strings.ToLower(d.Name))))
 
 	if err := os.WriteFile(p, schemaBuf.Bytes(), 0o644); err != nil {
 		return err
