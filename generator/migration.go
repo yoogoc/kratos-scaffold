@@ -51,7 +51,7 @@ func (d *Data) GenerateMigration() error {
 	if err != nil {
 		return err
 	}
-	p := path.Join(d.MigrationPath(), fmt.Sprintf("%s_create_%s.sql", time.Now().Format("20060102150405"), util.Plural(strings.ToLower(d.Name))))
+	p := path.Join(d.MigrationPath(), fmt.Sprintf("%s_create_%s.sql", time.Now().Format("20060102150405"), util.Plural(strcase.ToSnake(d.Name))))
 
 	if err := os.WriteFile(p, schemaBuf.Bytes(), 0o644); err != nil {
 		return err
