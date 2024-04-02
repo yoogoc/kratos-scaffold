@@ -18,17 +18,19 @@ kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:pr
 
 - field_type:
 
-| 类型    | go实体类型 | go参数类型             |             proto实体类型             | proto参数类型 |
-| :-----: | ------ |:------------------:|:---------------------------------:|:---------:|
-| float64 |float64| *wrapperspb.DoubleValue |              double               |     google.protobuf.DoubleValue      |
-| float32 |float32| *wrapperspb.FloatValue |               float               |      google.protobuf.FloatValue     |
-| int32 |int32| *wrapperspb.Int32Value |               int32               |          google.protobuf.Int32Value |
-| int64 |int64| *wrapperspb.Int64Value |               int64               |          google.protobuf.Int64Value |
-| uint32  |uint32| *wrapperspb.UInt32Value |              uint32               |      google.protobuf.UInt32Value     |
-| uint64  |uint64| *wrapperspb.UInt64Value |              uint64               |      google.protobuf.UInt64Value     |
-| bool  |bool| *wrapperspb.BoolValue |               bool                |         google.protobuf.BoolValue  |
-| string|string| *wrapperspb.StringValue |              string               |      google.protobuf.StringValue     |
-| time |time.Time| time.Time          |       google.protobuf.Timestamp   |  google.protobuf.Timestamp         |
+|   类型    | go实体类型    |  go参数类型   | proto实体类型 |    proto参数类型    |    数据库类型     |
+|:-------:|-----------|:---------:|:---------:|:---------------:|:------------:|
+| float64 | float64   | *float64  |  double   | optional double |   numeric    |
+| float32 | float32   | *float32  |   float   | optional float  |   numeric    |
+|  int32  | int32     |  *int32   |   int32   | optional int32  |     int      |
+|  int64  | int64     |  *int64   |   int64   | optional int64  |    bigint    |
+| uint32  | uint32    |  *uint32  |  uint32   | optional uint32 |     int      |
+| uint64  | uint64    |  *uint64  |  uint64   | optional uint64 |    bigint    |
+|  bool   | bool      |   *bool   |   bool    |  optional bool  |   tinyint    |
+| string  | string    |  *string  |  string   | optional string | varchar(255) |
+|  text   | string    |  *string  |  string   | optional string |     text     |
+|  time   | time.Time | time.Time |  string   | optional string |  timestamp   |
+|  date   | time.Time | time.Time |  string   | optional string |  timestamp   |
 
 
 - predicate:谓语最终用于sql query时需要的where条件，目前支持：

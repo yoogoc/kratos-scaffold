@@ -10,11 +10,11 @@ import (
 func {{.Name | ToLowerCamel}}Biz2Proto(source *biz.{{.Name | ToCamel}}) *{{$modelName}}V1.{{.Name | ToCamel}} {
 	return &{{$modelName}}V1.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
-		{{- if eq $f.FieldType 8 }}
-		{{ $f.Name | ToCamel }}: timestamppb.New(source.{{ $f.Name | ToCamel }}),
-		{{- else }}
-		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
-		{{- end }}
+			{{- if eq $f.FieldType.IsTime }}
+				{{ $f.Name | ToCamel }}: timestamppb.New(source.{{ $f.Name | ToCamel }}),
+			{{- else }}
+				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	}
 }
@@ -30,11 +30,11 @@ func bulk{{.Name | ToCamel}}Biz2Proto(source []*biz.{{.Name | ToCamel}}) []*{{$m
 func {{.Name | ToLowerCamel}}Proto2Biz(source *{{$modelName}}V1.{{.Name | ToCamel}}) *biz.{{.Name | ToCamel}} {
 	return &biz.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
-		{{- if eq $f.FieldType 8 }}
-		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }}.AsTime(),
-		{{- else }}
-		{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
-		{{- end }}
+			{{- if eq $f.FieldType.IsTime }}
+				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }}.AsTime(),
+			{{- else }}
+				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	}
 }
@@ -49,26 +49,26 @@ func bulk{{.Name | ToCamel}}Proto2Biz(source []*{{$modelName}}V1.{{.Name | ToCam
 
 func {{.Name | ToLowerCamel}}ParamBiz2Proto(param *biz.{{.Name | ToCamel}}Param) *{{$modelName}}V1.{{.Name | ToCamel}}Param {
 	{{- range $i, $f := .ParamFields }}
-	{{- if eq $f.FieldType 8 }}
-	{{- if eq $f.Type 6 }}
-	var {{ $f.Name }} []*timestamppb.Timestamp
-	for _, item := range param.{{ $f.Name | ToCamel }} {
-		{{ $f.Name }} = append({{ $f.Name }}, timestamppb.New(item))
-	}
-	{{- end }}
-	{{- end }}
+		{{- if eq $f.FieldType.IsTime }}
+			{{- if eq $f.Type.IsIn }}
+				var {{ $f.Name }} []string
+				for _, item := range param.{{ $f.Name | ToCamel }} {
+	  				{{ $f.Name }} = append({{ $f.Name }}, item.Format(time.DateTime))
+				}
+			{{- end }}
+		{{- end }}
 	{{- end }}
 	return &{{$modelName}}V1.{{.Name | ToCamel}}Param{
 		{{- range $i, $f := .ParamFields }}
-		{{- if eq $f.FieldType 8 }}
-		{{- if eq $f.Type 6 }}
-		{{ $f.Name | ToCamel }}: {{ $f.Name }},
-		{{- else }}
-		{{ $f.Name | ToCamel }}: timestamppb.New(param.{{ $f.Name | ToCamel }}),
-		{{- end }}
-		{{- else }}
-		{{ $f.Name | ToCamel }}: param.{{ $f.Name | ToCamel }},
-		{{- end }}
+			{{- if eq $f.FieldType.IsTime }}
+				{{- if eq $f.Type.IsIn }}
+					{{ $f.Name | ToCamel }}: {{ $f.Name }},
+				{{- else }}
+					{{ $f.Name | ToCamel }}: param.{{ $f.Name | ToCamel }}.Format(time.DateTime),
+				{{- end }}
+			{{- else }}
+				{{ $f.Name | ToCamel }}: param.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	}
 }

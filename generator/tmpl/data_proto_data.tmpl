@@ -26,11 +26,11 @@ func New{{.Name | ToCamel}}Repo(logger log.Logger, {{$modelName}} {{$modelName}}
 func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Create(ctx, &{{$modelName}}V1.Create{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .CreateFields }}
-		{{- if eq $f.FieldType 8 }}
-		{{ $f.Name | ToCamel }}: timestamppb.New({{$modelName}}.{{ $f.Name | ToCamel }}),
-		{{- else }}
-		{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
-		{{- end }}
+			{{- if eq $f.FieldType.IsTime }}
+				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
+			{{- else }}
+				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	})
 	if err != nil {
@@ -43,11 +43,11 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Update(ctx, &{{$modelName}}V1.Update{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .UpdateFields }}
-		{{- if eq $f.FieldType 8 }}
-		{{ $f.Name | ToCamel }}: timestamppb.New({{$modelName}}.{{ $f.Name | ToCamel }}),
-		{{- else }}
-		{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
-		{{- end }}
+			{{- if eq $f.FieldType.IsTime }}
+				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
+			{{- else }}
+				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	})
 	if err != nil {
@@ -57,16 +57,6 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 }
 
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
-	{{- range $i, $f := .ParamFields }}
-	{{- if eq $f.FieldType 8 }}
-	{{- if eq $f.Type 6 }}
-	var {{ $f.Name }} []*timestamppb.Timestamp
-	for _, item := range param.{{ $f.Name | ToCamel }} {
-	  {{ $f.Name }} = append({{ $f.Name }}, timestamppb.New(item))
-	}
-	{{- end }}
-	{{- end }}
-	{{- end }}
 	_, err := r.{{$modelName}}.DestroyBy(ctx, &{{$modelName}}V1.Destroy{{.Name | ToCamel}}ByRequest{
 		Param: {{.Name | ToLowerCamel}}ParamBiz2Proto(param),
 	})

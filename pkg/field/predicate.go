@@ -64,6 +64,10 @@ func (pred PredicateType) String() string {
 	return presReqMap[pred]
 }
 
+func (pred PredicateType) IsIn() bool {
+	return pred == PredicateTypeIn
+}
+
 func (pred PredicateType) EntString() string {
 	return presEntMap[pred]
 }

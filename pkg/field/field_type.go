@@ -11,7 +11,9 @@ const (
 	TypeUint64
 	TypeBool
 	TypeString
+	TypeText
 	TypeTime
+	TypeDate
 )
 
 const DefaultPrimaryFieldType = TypeInt64
@@ -26,7 +28,9 @@ var (
 		"uint64":  TypeUint64,
 		"bool":    TypeBool,
 		"string":  TypeString,
+		"text":    TypeText,
 		"time":    TypeTime,
+		"date":    TypeDate,
 	}
 
 	typeNames = [...]string{
@@ -38,7 +42,9 @@ var (
 		TypeUint64: "uint64",
 		TypeBool:   "bool",
 		TypeString: "string",
+		TypeText:   "string",
 		TypeTime:   "time.Time",
+		TypeDate:   "time.Time",
 	}
 
 	typeEntSchemaNames = [...]string{
@@ -50,7 +56,9 @@ var (
 		TypeUint64: "Uint64",
 		TypeBool:   "Bool",
 		TypeString: "String",
+		TypeText:   "String",
 		TypeTime:   "Time",
+		TypeDate:   "Time",
 	}
 
 	typeMysqlNames = [...]string{
@@ -62,24 +70,25 @@ var (
 		TypeUint64: "bigint",
 		TypeBool:   "tinyint",
 		TypeString: "varchar(255)",
+		TypeText:   "text",
 		TypeTime:   "timestamp",
+		TypeDate:   "timestamp",
 	}
 
 	typePramNames = [...]string{
-		TypeDouble: "*wrapperspb.DoubleValue",
-		TypeFloat:  "*wrapperspb.FloatValue",
-		TypeInt32:  "*wrapperspb.Int32Value",
-		TypeInt64:  "*wrapperspb.Int64Value",
-		TypeUint32: "*wrapperspb.UInt32Value",
-		TypeUint64: "*wrapperspb.UInt64Value",
-		TypeBool:   "*wrapperspb.BoolValue",
-		TypeString: "*wrapperspb.StringValue",
-		TypeTime:   "time.Time",
+		TypeDouble: "*float64",
+		TypeFloat:  "*float32",
+		TypeInt32:  "*int32",
+		TypeInt64:  "*int64",
+		TypeUint32: "*uint32",
+		TypeUint64: "*uint64",
+		TypeBool:   "*bool",
+		TypeString: "*string",
+		TypeTime:   "*time.Time",
+		TypeDate:   "*time.Time",
 	}
 
 	MaybeGoPackages = []string{
-		"google.golang.org/protobuf/types/known/timestamppb",
-		"google.golang.org/protobuf/types/known/wrapperspb",
 		"time",
 	}
 
@@ -92,19 +101,23 @@ var (
 		TypeUint64: "uint64",
 		TypeBool:   "bool",
 		TypeString: "string",
-		TypeTime:   "google.protobuf.Timestamp",
+		TypeText:   "string",
+		TypeTime:   "string",
+		TypeDate:   "string",
 	}
 
 	typeParamProtoNames = [...]string{
-		TypeDouble: "google.protobuf.DoubleValue",
-		TypeFloat:  "google.protobuf.FloatValue",
-		TypeInt32:  "google.protobuf.Int32Value",
-		TypeInt64:  "google.protobuf.Int64Value",
-		TypeUint32: "google.protobuf.UInt32Value",
-		TypeUint64: "google.protobuf.UInt64Value",
-		TypeBool:   "google.protobuf.BoolValue",
-		TypeString: "google.protobuf.StringValue",
-		TypeTime:   "google.protobuf.Timestamp",
+		TypeDouble: "optional double",
+		TypeFloat:  "optional float",
+		TypeInt32:  "optional int32",
+		TypeInt64:  "optional int64",
+		TypeUint32: "optional uint32",
+		TypeUint64: "optional uint64",
+		TypeBool:   "optional bool",
+		TypeString: "optional string",
+		TypeText:   "optional string",
+		TypeTime:   "optional string",
+		TypeDate:   "optional string",
 	}
 
 	typeProtoPackages = [...]string{
@@ -116,19 +129,22 @@ var (
 		TypeUint64: "",
 		TypeBool:   "",
 		TypeString: "",
-		TypeTime:   "google/protobuf/timestamp.proto",
+		TypeText:   "",
+		TypeTime:   "",
+		TypeDate:   "",
 	}
 
 	typeProtoParamPackages = [...]string{
-		TypeDouble: "google/protobuf/wrappers.proto",
-		TypeFloat:  "google/protobuf/wrappers.proto",
-		TypeInt32:  "google/protobuf/wrappers.proto",
-		TypeInt64:  "google/protobuf/wrappers.proto",
-		TypeUint32: "google/protobuf/wrappers.proto",
-		TypeUint64: "google/protobuf/wrappers.proto",
-		TypeBool:   "google/protobuf/wrappers.proto",
-		TypeString: "google/protobuf/wrappers.proto",
-		TypeTime:   "google/protobuf/timestamp.proto",
+		TypeDouble: "",
+		TypeFloat:  "",
+		TypeInt32:  "",
+		TypeInt64:  "",
+		TypeUint32: "",
+		TypeUint64: "",
+		TypeBool:   "",
+		TypeString: "",
+		TypeText:   "",
+		TypeTime:   "",
 	}
 
 	typeBiz2Proto = [...]string{
@@ -140,18 +156,8 @@ var (
 		TypeUint64: "wrapperspb.UInt64(%s)",
 		TypeBool:   "wrapperspb.Bool(%s)",
 		TypeString: "wrapperspb.String(%s)",
-		TypeTime:   "timestamppb.New(%s)",
-	}
-	typeProto2Biz = [...]string{
-		TypeDouble: "",
-		TypeFloat:  "",
-		TypeInt32:  "",
-		TypeInt64:  "",
-		TypeUint32: "",
-		TypeUint64: "",
-		TypeBool:   "",
-		TypeString: "",
-		TypeTime:   "%s.AsTime()",
+		TypeTime:   "%s.Format(time.DateTime)",
+		TypeDate:   "%s.Format(time.DateOnly)",
 	}
 )
 
@@ -191,18 +197,6 @@ func (t TypeField) ImportProtoParam() string {
 	return typeProtoParamPackages[t]
 }
 
-func (t TypeField) NeedBiz2Proto() bool {
-	return typeBiz2Proto[t] != ""
-}
-
-func (t TypeField) NeedProto2Biz() bool {
-	return typeProto2Biz[t] != ""
-}
-
 func (t TypeField) Biz2Proto() string {
 	return typeBiz2Proto[t]
-}
-
-func (t TypeField) Proto2Biz() string {
-	return typeProto2Biz[t]
 }
