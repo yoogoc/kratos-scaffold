@@ -92,9 +92,9 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 		return err
 	}
 
-	if err := util.Exec("make", "config-"+name); err != nil {
-		return err
-	}
+	// if err := util.Exec("make", "config-"+name); err != nil {
+	// 	return err
+	// }
 
 	// 6 gen log
 	logPath := path.Join(appPath, "log")
