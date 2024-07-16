@@ -30,7 +30,7 @@ func bulk{{.Name | ToCamel}}Biz2Proto(source []*biz.{{.Name | ToCamel}}) []*{{$m
 func {{.Name | ToLowerCamel}}Proto2Biz(source *{{$modelName}}V1.{{.Name | ToCamel}}) *biz.{{.Name | ToCamel}} {
 	return &biz.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
-			{{- if eq $f.FieldType.IsTime }}
+			{{- if $f.FieldType.IsTime }}
 				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }}.AsTime(),
 			{{- else }}
 				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
@@ -50,7 +50,7 @@ func bulk{{.Name | ToCamel}}Proto2Biz(source []*{{$modelName}}V1.{{.Name | ToCam
 func {{.Name | ToLowerCamel}}ParamBiz2Proto(param *biz.{{.Name | ToCamel}}Param) *{{$modelName}}V1.{{.Name | ToCamel}}Param {
 	{{- range $i, $f := .ParamFields }}
 		{{- if $f.FieldType.IsTime }}
-			{{- if eq $f.Type.IsIn }}
+			{{- if $f.Type.IsIn }}
 				var {{ $f.Name }} []string
 				for _, item := range param.{{ $f.Name | ToCamel }} {
 	  				{{ $f.Name }} = append({{ $f.Name }}, item.Format(time.DateTime))
@@ -60,8 +60,8 @@ func {{.Name | ToLowerCamel}}ParamBiz2Proto(param *biz.{{.Name | ToCamel}}Param)
 	{{- end }}
 	return &{{$modelName}}V1.{{.Name | ToCamel}}Param{
 		{{- range $i, $f := .ParamFields }}
-			{{- if eq $f.FieldType.IsTime }}
-				{{- if eq $f.Type.IsIn }}
+			{{- if $f.FieldType.IsTime }}
+				{{- if $f.Type.IsIn }}
 					{{ $f.Name | ToCamel }}: {{ $f.Name }},
 				{{- else }}
 					{{ $f.Name | ToCamel }}: param.{{ $f.Name | ToCamel }}.Format(time.DateTime),

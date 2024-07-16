@@ -26,7 +26,7 @@ func New{{.Name | ToCamel}}Repo(logger log.Logger, {{$modelName}} {{$modelName}}
 func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Create(ctx, &{{$modelName}}V1.Create{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .CreateFields }}
-			{{- if eq $f.FieldType.IsTime }}
+			{{- if $f.FieldType.IsTime }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
 			{{- else }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
@@ -43,7 +43,7 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Update(ctx, &{{$modelName}}V1.Update{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .UpdateFields }}
-			{{- if eq $f.FieldType.IsTime }}
+			{{- if $f.FieldType.IsTime }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
 			{{- else }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
