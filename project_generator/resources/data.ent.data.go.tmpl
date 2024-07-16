@@ -10,9 +10,8 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
-	{{- if eq .DBDriverType "mysql"}}
 	_ "github.com/go-sql-driver/mysql"
-	{{- end}}
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pkg/errors"
 )
 
@@ -74,15 +73,18 @@ func NewEntClient(conf *conf.Data, logger log.Logger) *ent.Client {
 		//ops = append(ops, ent.Log(log.Info))
 	}
 
-	client, err := ent.Open(
-		conf.Database.Driver,
-		conf.Database.Source,
-		ops...,
-	)
+	driverName := conf.Database.Driver
+	switch conf.Database.Driver {
+	case "postgres", "pg", "postgresql", "pgx":
+		driverName = "pgx"
+	}
+
+	db, err := stdsql.Open(driverName, conf.Database.Source)
 	if err != nil {
 		l.Fatalf("failed opening connection to db: %v", err)
 	}
-	return client
+
+	return ent.NewClient(append(ops, ent.Driver(sql.NewDriver(conf.Database.Driver, sql.Conn{ExecQuerier: db})))...)
 }
 
 func NewData(conf *conf.Data, logger log.Logger, db *ent.Client) (*Data, error) {

@@ -19,6 +19,15 @@ const (
 	ProjectTypeSingle
 )
 
+func IsProjectTypeSingle() bool {
+	wd, _ := os.Getwd()
+	if _, err := os.Stat(path.Join(wd, "app")); err == nil {
+		return false
+	} else {
+		return true
+	}
+}
+
 type Project struct {
 	Type  ProjectType
 	Name  string

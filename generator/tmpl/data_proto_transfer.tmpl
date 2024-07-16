@@ -10,7 +10,7 @@ import (
 func {{.Name | ToLowerCamel}}Biz2Proto(source *biz.{{.Name | ToCamel}}) *{{$modelName}}V1.{{.Name | ToCamel}} {
 	return &{{$modelName}}V1.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
-			{{- if eq $f.FieldType.IsTime }}
+			{{- if $f.FieldType.IsTime }}
 				{{ $f.Name | ToCamel }}: timestamppb.New(source.{{ $f.Name | ToCamel }}),
 			{{- else }}
 				{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToCamel }},
@@ -49,7 +49,7 @@ func bulk{{.Name | ToCamel}}Proto2Biz(source []*{{$modelName}}V1.{{.Name | ToCam
 
 func {{.Name | ToLowerCamel}}ParamBiz2Proto(param *biz.{{.Name | ToCamel}}Param) *{{$modelName}}V1.{{.Name | ToCamel}}Param {
 	{{- range $i, $f := .ParamFields }}
-		{{- if eq $f.FieldType.IsTime }}
+		{{- if $f.FieldType.IsTime }}
 			{{- if eq $f.Type.IsIn }}
 				var {{ $f.Name }} []string
 				for _, item := range param.{{ $f.Name | ToCamel }} {

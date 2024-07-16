@@ -7,6 +7,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/generator"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
+	"github.com/yoogoc/kratos-scaffold/project_generator"
 
 	"github.com/spf13/cobra"
 )
@@ -45,11 +46,16 @@ func runService(service *generator.Service, args []string) error {
 
 	if service.ApiPath == "" {
 		apiModelName := ""
-		if service.Namespace != "" {
-			apiModelName = path.Join(service.ApiDirName, service.Namespace)
+		if project_generator.IsProjectTypeSingle() {
+			apiModelName = service.ApiDirName
 		} else {
-			apiModelName = path.Join(service.ApiDirName, modelName)
+			if service.Namespace != "" {
+				apiModelName = path.Join(service.ApiDirName, service.Namespace)
+			} else {
+				apiModelName = path.Join(service.ApiDirName, modelName)
+			}
 		}
+
 		service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
 	}
 
