@@ -5,7 +5,7 @@ import (
 )
 
 func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
-	var protoCmd = &cobra.Command{
+	var generateCmd = &cobra.Command{
 		Use:                "generate [NAME]",
 		Aliases:            []string{"g"},
 		Short:              "gen proto, biz, data, service",
@@ -28,5 +28,5 @@ func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
 		},
 	}
 
-	return protoCmd
+	return generateCmd
 }

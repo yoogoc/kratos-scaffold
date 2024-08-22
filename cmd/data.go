@@ -9,33 +9,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newDataCmd() *cobra.Command {
-	dataEnt := generator.NewData(settings)
+func newDataCmd(args []string) *cobra.Command {
+	data := generator.NewData(settings)
 	var dataCmd = &cobra.Command{
 		Use:                "data [NAME] [FIELD]...",
 		Short:              "generate data, data and data to biz file",
 		Long:               `kratos-scaffold data -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte`,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if dataEnt.OrmType == "ent" {
-				return runDataEnt(dataEnt, args)
+			if data.OrmType == "ent" {
+				return runDataEnt(data, args)
 			}
-			if dataEnt.OrmType == "proto" {
-				return runDataProto(dataEnt, args)
+			if data.OrmType == "proto" {
+				return runDataProto(data, args)
 			}
 			return nil
 		},
 	}
 
-	addDataFlags(dataCmd, dataEnt)
+	addDataFlags(dataCmd, data, args)
 
 	return dataCmd
 }
 
-func addDataFlags(dataCmd *cobra.Command, dataEnt *generator.Data) {
-	dataCmd.PersistentFlags().BoolVarP(&dataEnt.NeedAuditField, "audit-field", "", true, "auto generate created_at and update_at fields, default is true")
-	dataCmd.PersistentFlags().StringVarP(&dataEnt.OrmType, "orm-type", "t", "ent", "orm type, value in (ent, proto), default is ent")
-	dataCmd.PersistentFlags().StringVarP(&dataEnt.TargetModel, "target-model", "m", "", "proto-orm required")
+func addDataFlags(dataCmd *cobra.Command, dataEnt *generator.Data, args []string) {
+	flags := dataCmd.PersistentFlags()
+	flags.ParseErrorsWhitelist.UnknownFlags = true
+	flags.BoolVarP(&dataEnt.NeedAuditField, "audit-field", "", true, "auto generate created_at and update_at fields, default is true")
+	flags.StringVarP(&dataEnt.OrmType, "orm-type", "t", "ent", "orm type, value in (ent, proto), default is ent")
+	flags.StringVarP(&dataEnt.TargetModel, "target-model", "m", "", "proto-orm required")
+	_ = flags.Parse(args)
 }
 
 func runDataEnt(dataEnt *generator.Data, args []string) error {

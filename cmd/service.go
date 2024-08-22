@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newServiceCmd() *cobra.Command {
+func newServiceCmd(args []string) *cobra.Command {
 	service := generator.NewService(settings)
 	var serviceCmd = &cobra.Command{
 		Use:                "service [NAME] [FIELD]...",
@@ -24,14 +24,17 @@ func newServiceCmd() *cobra.Command {
 		},
 	}
 
-	addServiceFlags(serviceCmd, service)
+	addServiceFlags(serviceCmd, service, args)
 
 	return serviceCmd
 }
 
-func addServiceFlags(serviceCmd *cobra.Command, service *generator.Service) {
-	serviceCmd.PersistentFlags().StringVarP(&service.ApiPath, "api-path", "", "", "proto path, default is <current-mod-name>/<api-dir-name>/<namespace | name>/v1")
-	serviceCmd.PersistentFlags().BoolVarP(&service.GenHttp, "http", "", false, "generate xx.http.pb.go")
+func addServiceFlags(serviceCmd *cobra.Command, service *generator.Service, args []string) {
+	flags := serviceCmd.PersistentFlags()
+	flags.ParseErrorsWhitelist.UnknownFlags = true
+	flags.StringVarP(&service.ApiPath, "api-path", "", "", "proto path, default is <current-mod-name>/<api-dir-name>/<namespace | name>/v1")
+	flags.BoolVarP(&service.GenHttp, "http", "", false, "generate xx.http.pb.go")
+	_ = flags.Parse(args)
 }
 
 func runService(service *generator.Service, args []string) error {

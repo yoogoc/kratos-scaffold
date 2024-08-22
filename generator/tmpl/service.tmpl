@@ -46,7 +46,7 @@ func (s *{{.Name}}Service) Update(ctx context.Context, req *v1.Update{{.Name}}Re
 {{- if .GenHttp }}
 func (s *{{.Name}}Service) Destroy(ctx context.Context, req *v1.Destroy{{.Name}}Request) (*v1.Destroy{{.Name}}Reply, error) {
 	_, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		{{.PrimaryKey | ToCamel }}Eq: wrapperspb.Int64(req.{{.PrimaryKey | ToCamel}}),
+		{{.PrimaryKey | ToCamel }}Eq: &req.{{.PrimaryKey | ToCamel}},
 	})
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (s *{{.Name}}Service) Destroy(ctx context.Context, req *v1.Destroy{{.Name}}
 
 func (s *{{.Name}}Service) Get(ctx context.Context, req *v1.Get{{.Name}}Request) (*v1.Get{{.Name}}Reply, error) {
 	item, err := s.uc.Find{{.Name}}By(ctx, &biz.{{.Name}}Param{
-		{{.PrimaryKey | ToCamel }}Eq: wrapperspb.Int64(req.{{.PrimaryKey | ToCamel}}),
+		{{.PrimaryKey | ToCamel }}Eq: &req.{{.PrimaryKey | ToCamel}},
 	})
 	if err != nil {
 		return nil, err

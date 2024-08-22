@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newBizCmd() *cobra.Command {
+func newBizCmd(args []string) *cobra.Command {
 	biz := generator.NewBiz(settings)
 	var bizCmd = &cobra.Command{
 		Use:                "biz [NAME] [FIELD]...",
@@ -21,12 +21,12 @@ func newBizCmd() *cobra.Command {
 		},
 	}
 
-	addBizFlags(bizCmd, biz)
+	addBizFlags(bizCmd, biz, args)
 
 	return bizCmd
 }
 
-func addBizFlags(bizCmd *cobra.Command, biz *generator.Biz) {
+func addBizFlags(bizCmd *cobra.Command, biz *generator.Biz, args []string) {
 
 }
 

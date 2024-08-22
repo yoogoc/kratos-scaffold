@@ -38,18 +38,18 @@ func newRootCmd(args []string) *cobra.Command {
 
 	_ = flags.Parse(args)
 
-	service := newServiceCmd()
-	biz := newBizCmd()
-	proto := newProtoCmd()
-	data := newDataCmd()
+	serviceCmd := newServiceCmd(args)
+	biz := newBizCmd(args)
+	protoCmd := newProtoCmd(args)
+	dataCmd := newDataCmd(args)
 
 	rootCmd.AddCommand(
 		newNewCmd(),
-		service,
+		serviceCmd,
 		biz,
-		proto,
-		data,
-		newGenerateCmd(proto, biz, data, service),
+		protoCmd,
+		dataCmd,
+		newGenerateCmd(protoCmd, biz, dataCmd, serviceCmd),
 	)
 
 	return rootCmd

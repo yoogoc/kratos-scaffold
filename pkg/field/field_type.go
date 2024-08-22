@@ -148,16 +148,8 @@ var (
 	}
 
 	typeBiz2Proto = [...]string{
-		TypeDouble: "wrapperspb.Double(%s)",
-		TypeFloat:  "wrapperspb.Float(%s)",
-		TypeInt32:  "wrapperspb.Int32(%s)",
-		TypeInt64:  "wrapperspb.Int64(%s)",
-		TypeUint32: "wrapperspb.UInt32(%s)",
-		TypeUint64: "wrapperspb.UInt64(%s)",
-		TypeBool:   "wrapperspb.Bool(%s)",
-		TypeString: "wrapperspb.String(%s)",
-		TypeTime:   "%s.Format(time.DateTime)",
-		TypeDate:   "%s.Format(time.DateOnly)",
+		TypeTime: "%s.Format(time.DateTime)",
+		TypeDate: "%s.Format(time.DateOnly)",
 	}
 )
 

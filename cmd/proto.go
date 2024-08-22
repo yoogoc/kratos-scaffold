@@ -8,7 +8,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
-func newProtoCmd() *cobra.Command {
+func newProtoCmd(args []string) *cobra.Command {
 	proto := generator.NewProto(settings)
 	var protoCmd = &cobra.Command{
 		Use:   "proto [NAME]",
@@ -21,12 +21,19 @@ kratos-scaffold user -n user id:int64:eq,in name:string:contains age:int32:gte,l
 		},
 	}
 
-	addProtoFlags(protoCmd, proto)
+	addProtoFlags(protoCmd, proto, args)
+
 	return protoCmd
 }
 
-func addProtoFlags(protoCmd *cobra.Command, proto *generator.Proto) {
-	protoCmd.PersistentFlags().BoolVarP(&proto.GenHttp, "http", "", false, "generate xx.http.pb.go")
+func addProtoFlags(protoCmd *cobra.Command, proto *generator.Proto, args []string) {
+	flags := protoCmd.PersistentFlags()
+	flags.ParseErrorsWhitelist.UnknownFlags = true
+	flags.BoolVarP(&proto.GenHttp, "http", "", false, "generate xx.http.pb.go")
+	err := flags.Parse(args)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func runProto(proto *generator.Proto, args []string) error {
