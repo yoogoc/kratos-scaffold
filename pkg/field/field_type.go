@@ -120,33 +120,6 @@ var (
 		TypeDate:   "optional string",
 	}
 
-	typeProtoPackages = [...]string{
-		TypeDouble: "",
-		TypeFloat:  "",
-		TypeInt32:  "",
-		TypeInt64:  "",
-		TypeUint32: "",
-		TypeUint64: "",
-		TypeBool:   "",
-		TypeString: "",
-		TypeText:   "",
-		TypeTime:   "",
-		TypeDate:   "",
-	}
-
-	typeProtoParamPackages = [...]string{
-		TypeDouble: "",
-		TypeFloat:  "",
-		TypeInt32:  "",
-		TypeInt64:  "",
-		TypeUint32: "",
-		TypeUint64: "",
-		TypeBool:   "",
-		TypeString: "",
-		TypeText:   "",
-		TypeTime:   "",
-	}
-
 	typeBiz2Proto = [...]string{
 		TypeTime: "%s.Format(time.DateTime)",
 		TypeDate: "%s.Format(time.DateOnly)",
@@ -179,14 +152,6 @@ func (t TypeField) StringProto() string {
 
 func (t TypeField) StringProtoParam() string {
 	return typeParamProtoNames[t]
-}
-
-func (t TypeField) ImportProto() string {
-	return typeProtoPackages[t]
-}
-
-func (t TypeField) ImportProtoParam() string {
-	return typeProtoParamPackages[t]
 }
 
 func (t TypeField) Biz2Proto() string {

@@ -4,9 +4,6 @@ package {{.Package}};
 option go_package = "{{.GoPackage}}";
 option java_multiple_files = true;
 option java_package = "{{.JavaPackage}}";
-{{ range $i, $pi := .Fields.ProtoImports }}
-import "{{ $pi }}";
-{{- end }}
 {{- if .GenHttp}}
 import "google/api/annotations.proto";
 {{- end }}

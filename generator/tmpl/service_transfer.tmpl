@@ -75,11 +75,11 @@ func param{{.Name}}Proto2Biz(req *v1.{{.Name}}Param) *biz.{{.Name}}Param {
 	{{- range $i, $f := .Fields.ParamFields }}
 		{{- if and $f.FieldType.IsTime (not $f.Type.IsIn) }}
 			{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
-			var {{ $f.Name }} *time.Time
+			var {{ $f.Name | ToLowCamel }} *time.Time
 			if {{ $reqf }} != nil {
 				item, err := time.Parse(time.DateTime, *{{$reqf}})
 				if err == nil {
-					{{ $f.Name }} = &item
+					{{ $f.Name | ToLowCamel }} = &item
 				} else {
 					// TODO return error
 				}

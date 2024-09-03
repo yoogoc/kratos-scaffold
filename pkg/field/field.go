@@ -95,22 +95,6 @@ func (fs Fields) PrimaryField(primaryKey string) *Field {
 	return idField
 }
 
-func (fs Fields) ProtoImports() []string {
-	ps := fs.ParamFields()
-	ss := make([]string, 0, len(ps)+len(fs))
-	for _, f := range fs {
-		if f.FieldType.ImportProto() != "" {
-			ss = append(ss, f.FieldType.ImportProto())
-		}
-	}
-	for _, p := range ps {
-		if p.FieldType.ImportProtoParam() != "" && p.Type != PredicateTypeIn {
-			ss = append(ss, p.FieldType.ImportProtoParam())
-		}
-	}
-	return util.Uniq(ss)
-}
-
 func EntName(s string) string {
 	s = strcase.ToCamel(s)
 	if len(s) < 2 || strings.ToLower(s[len(s)-2:]) != "id" {
