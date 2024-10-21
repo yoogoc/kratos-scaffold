@@ -139,7 +139,7 @@ func (p *Proto) Path() string {
 
 func (p *Proto) GoPackage() string {
 	s := strings.Split(p.Path(), "/")
-	return strcase.ToSnake(util.ModName()) + "/" + p.Path() + ";" + s[len(s)-1]
+	return strcase.ToSnake(util.ModName() + "/" + p.Path() + ";" + s[len(s)-1])
 }
 
 func (p *Proto) JavaPackage() string {
