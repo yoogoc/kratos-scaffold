@@ -11,7 +11,6 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/iancoleman/strcase"
 	"github.com/pkg/errors"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
@@ -139,7 +138,7 @@ func (p *Proto) Path() string {
 
 func (p *Proto) GoPackage() string {
 	s := strings.Split(p.Path(), "/")
-	return strcase.ToSnake(util.ModName() + "/" + p.Path() + ";" + s[len(s)-1])
+	return util.ModName() + "/" + p.Path() + ";" + s[len(s)-1]
 }
 
 func (p *Proto) JavaPackage() string {
@@ -147,5 +146,5 @@ func (p *Proto) JavaPackage() string {
 }
 
 func (p *Proto) Package() string {
-	return strings.ReplaceAll(p.Path(), "/", ".")
+	return strings.ReplaceAll(strings.ReplaceAll(p.Path(), "/", "."), "-", "_")
 }
