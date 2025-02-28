@@ -59,6 +59,17 @@ func (fs Fields) UpdateFields(primaryField *Field) []*Field {
 	})
 }
 
+func (fs Fields) UpdateProtoFields() []*Field {
+	return util.FilterSlice(fs, func(f *Field) bool {
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != "created_at" &&
+			fn != "updated_at" &&
+			fn != "created_by" &&
+			fn != "updated_by" &&
+			fn != "deleted_at"
+	})
+}
+
 func (fs Fields) ParamFields() []*Predicate {
 	result := make([]*Predicate, 0, len(fs))
 	for _, f := range fs {

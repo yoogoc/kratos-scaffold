@@ -51,7 +51,24 @@ func (d *Data) GenerateMigration() error {
 	if err != nil {
 		return err
 	}
-	p := path.Join(d.MigrationPath(), fmt.Sprintf("%s_create_%s.sql", time.Now().Format("20060102150405"), util.Plural(strcase.ToSnake(d.Name))))
+
+	fileSuffix := fmt.Sprintf("_create_%s.sql", util.Plural(strcase.ToSnake(d.Name)))
+
+	entries, err := os.ReadDir(d.MigrationPath())
+	if err != nil {
+		return err
+	}
+	var needRemoveFiles []string
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), fileSuffix) {
+			needRemoveFiles = append(needRemoveFiles, path.Join(d.MigrationPath(), entry.Name()))
+		}
+	}
+	for _, file := range needRemoveFiles {
+		_ = os.Remove(file)
+	}
+
+	p := path.Join(d.MigrationPath(), fmt.Sprintf("%s%s", time.Now().Format("20060102150405"), fileSuffix))
 
 	if err := os.WriteFile(p, schemaBuf.Bytes(), 0o644); err != nil {
 		return err

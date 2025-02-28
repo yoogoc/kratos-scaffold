@@ -34,6 +34,10 @@ func (d *Data) UpdateFields() []*field.Field {
 	return d.Fields.UpdateFields(d.Fields.PrimaryField(d.PrimaryKey))
 }
 
+func (d *Data) UpdateProtoFields() []*field.Field {
+	return d.Fields.UpdateProtoFields()
+}
+
 func (d *Data) ParamFields() []*field.Predicate {
 	return d.Fields.ParamFields()
 }

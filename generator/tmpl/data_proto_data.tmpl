@@ -42,12 +42,8 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Update(ctx, &{{$modelName}}V1.Update{{.Name | ToCamel}}Request{
-		{{- range $i, $f := .UpdateFields }}
-			{{- if $f.FieldType.IsTime }}
-				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
-			{{- else }}
-				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
-			{{- end }}
+		{{- range $i, $f := .UpdateProtoFields }}
+			{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
 		{{- end }}
 	})
 	if err != nil {
