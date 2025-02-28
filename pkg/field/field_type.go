@@ -130,11 +130,25 @@ func (t TypeField) String() string {
 	return typeNames[t]
 }
 
+func (t TypeField) StringByType(http bool) string {
+	if http && (t == TypeTime || t == TypeDate) {
+		return "string"
+	}
+	return typeNames[t]
+}
+
 func (t TypeField) IsTime() bool {
 	return t == TypeTime
 }
 
 func (t TypeField) StringParam() string {
+	return typePramNames[t]
+}
+
+func (t TypeField) StringParamByType(http bool) string {
+	if http && (t == TypeTime || t == TypeDate) {
+		return "*string"
+	}
 	return typePramNames[t]
 }
 

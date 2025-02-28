@@ -103,7 +103,7 @@ func param{{.Name}}Proto2Biz(req *v1.{{.Name}}Param) *biz.{{.Name}}Param {
 		{{- range $i, $f := .Fields.ParamFields }}
 			{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
 			{{- if $f.FieldType.IsTime }}
-				{{ $f.Name | ToCamel }}: {{$f.Name}},
+				{{ $f.Name | ToCamel }}: {{$f.Name | ToLowCamel }},
 			{{- else }}
 				{{ $f.Name | ToCamel }}: {{$reqf}},
 			{{- end }}

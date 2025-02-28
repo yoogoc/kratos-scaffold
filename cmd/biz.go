@@ -27,7 +27,13 @@ func newBizCmd(args []string) *cobra.Command {
 }
 
 func addBizFlags(bizCmd *cobra.Command, biz *generator.Biz, args []string) {
-
+	flags := bizCmd.PersistentFlags()
+	flags.ParseErrorsWhitelist.UnknownFlags = true
+	flags.BoolVarP(&biz.Http, "http", "", false, "generate xx.http.pb.go")
+	err := flags.Parse(args)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func runBiz(biz *generator.Biz, args []string) error {

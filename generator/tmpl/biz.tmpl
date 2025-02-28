@@ -9,16 +9,18 @@ import (
 	{{- end }}
 )
 
+{{- $http := .Http }}
+
 type {{.Name}} struct {
 	{{- range $i, $f := .Fields }}
-	{{ $f.Name | ToCamel }} {{ $f.FieldType.String }}
+	{{ $f.Name | ToCamel }} {{ $http | $f.FieldType.StringByType }}
 	{{- end }}
 }
 
 type {{.Name}}Param struct {
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
-	{{ $f.Name | ToCamel }} {{ if eq $f.Type $strToPreMap.in }}[]{{ $f.FieldType.String }}{{ else }}{{ $f.FieldType.StringParam }}{{- end }}
+	{{ $f.Name | ToCamel }} {{ if eq $f.Type $strToPreMap.in }}[]{{ $f.FieldType.String }}{{ else }}{{ $http | $f.FieldType.StringParamByType }}{{- end }}
 	{{- end }}
 }
 

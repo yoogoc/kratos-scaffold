@@ -17,6 +17,7 @@ import (
 
 type Biz struct {
 	Base
+	Http bool
 }
 
 func NewBiz(setting *cli.EnvSettings) *Biz {
