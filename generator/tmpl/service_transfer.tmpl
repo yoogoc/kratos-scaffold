@@ -14,14 +14,22 @@ func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 	{{- range $i, $f := .CreateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.IsTime }}
-			{{ $f.Name }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+			{{- if $f.IsNillable }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp, _ := time.Parse(time.DateTime, *{{ $reqf }})
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+			{{- else }}
+			{{ $f.Name | ToLowCamel }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	return &biz.{{.Name}}{
 		{{- range $i, $f := .CreateFields }}
 			{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 			{{- if $f.FieldType.IsTime }}
-				{{- $reqf = $f.Name }}
+				{{- $reqf = $f.Name | ToLowCamel }}
 			{{- end }}
 			{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}
@@ -32,7 +40,15 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 	{{- range $i, $f := .CreateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.IsTime }}
-			{{ $f.Name }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+			{{- if $f.IsNillable }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp, _ := time.Parse(time.DateTime, *{{ $reqf }})
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+			{{- else }}
+			{{ $f.Name | ToLowCamel }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	return &biz.{{.Name}}{
@@ -41,7 +57,7 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 		{{- range $i, $f := .UpdateFields }}
 			{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 			{{- if $f.FieldType.IsTime }}
-				{{- $reqf = $f.Name }}
+				{{- $reqf = $f.Name | ToLowCamel }}
 			{{- end }}
 			{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}
@@ -49,11 +65,27 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 }
 
 func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
+	{{- range $i, $f := .Fields }}
+		{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
+		{{- if and $f.FieldType.IsTime $f.IsNillable }}
+			{{ $f.Name | ToLowCamel }} := func() *string {
+				if {{ $reqf }} == nil {
+					return nil
+				}
+				tmp := {{ $reqf }}.Format(time.DateTime)
+				return &tmp
+			}()
+		{{- end }}
+	{{- end }}
 	return &v1.{{.Name}}{
 		{{- range $i, $f := .Fields }}
 			{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
 			{{- if $f.FieldType.IsTime }}
+				{{- if $f.IsNillable }}
+				{{- $reqf = $f.Name | ToLowCamel }}
+				{{- else }}
 				{{- $reqf = printf $f.FieldType.Biz2Proto $reqf }}
+				{{- end }}
 			{{- end }}
 			{{ $f.Name | ToCamel }}: {{$reqf}},
 		{{- end }}

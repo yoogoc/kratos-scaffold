@@ -7,6 +7,9 @@ option java_package = "{{.JavaPackage}}";
 {{- if .GenHttp}}
 import "google/api/annotations.proto";
 {{- end }}
+{{- range $i, $f := .Fields.ProtoImports }}
+import "{{$f}}";
+{{- end }}
 
 service {{.Name}}Service {
 	rpc Create (Create{{.Name}}Request) returns (Create{{.Name}}Reply){{- if .GenHttp }} {
@@ -45,12 +48,28 @@ service {{.Name}}Service {
 
 message {{.Name}} {
 	{{- range $i, $f := .Fields }}
-	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{- if $f.IsNillable }}
+	optional {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
+	{{- if $f.IsArray }}
+	repeated {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- end }}
+	{{- end }}
 	{{- end }}
 }
 message Create{{.Name}}Request {
 	{{- range $i, $f := .CreateFields }}
-	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 1 }};
+	{{- if $f.IsNillable }}
+	optional {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
+	{{- if $f.IsArray }}
+	repeated {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
+	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- end }}
+	{{- end }}
 	{{- end }}
 }
 message Create{{.Name}}Reply {
@@ -59,7 +78,15 @@ message Create{{.Name}}Reply {
 message Update{{.Name}}Request {
 	{{ .PrimaryField.FieldType.StringProto }} {{ .PrimaryFieldName | fieldStyle }} = 1;
 	{{- range $i, $f := .UpdateFields }}
+	{{- if $f.IsNillable }}
+	optional {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
+	{{- if $f.IsArray }}
+	repeated {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- else }}
 	{{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- end }}
+	{{- end }}
 	{{- end }}
 }
 message Update{{.Name}}Reply {

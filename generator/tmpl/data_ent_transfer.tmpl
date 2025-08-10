@@ -11,7 +11,7 @@ import (
 func {{.Name | ToLowerCamel}}Biz2Ent(source *biz.{{.Name | ToCamel}}) *ent.{{.Name | ToCamel}} {
 	return &ent.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
-			{{ $f.Name | ToEntName }}: source.{{ $f.Name | ToCamel }},
+			{{ $f.Name | ToEntName }}: source.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }},
 		{{- end }}
 	}
 }
@@ -25,9 +25,18 @@ func bulk{{.Name | ToCamel}}Biz2Ent(source []*biz.{{.Name | ToCamel}}) []*ent.{{
 }
 
 func {{.Name | ToLowerCamel}}Ent2Biz(source *ent.{{.Name | ToCamel}}) *biz.{{.Name | ToCamel}} {
+	{{- range $i, $f := .Fields }}
+	{{- if $f.FieldType.IsJson }}
+	{{ $f.Name | ToLowerCamel }}, _ := structpb.NewStruct(source.{{ $f.Name | ToEntName }})
+	{{- end }}
+	{{- end }}
 	return &biz.{{.Name | ToCamel}}{
 		{{- range $i, $f := .Fields }}
+			{{- if $f.FieldType.IsJson }}
+			{{ $f.Name | ToCamel }}: {{ $f.Name | ToLowerCamel }},
+			{{- else }}
 			{{ $f.Name | ToCamel }}: source.{{ $f.Name | ToEntName }},
+			{{- end }}
 		{{- end }}
 	}
 }

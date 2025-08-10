@@ -25,7 +25,18 @@ type Fields []*Field
 type Field struct {
 	Name       string
 	FieldType  TypeField
+	IsArray    bool
+	IsNillable bool
 	Predicates []*Predicate
+}
+
+func (fs Fields) ProtoImports() []string {
+	for _, f := range fs {
+		if f.IsArray || f.FieldType.IsJson() {
+			return []string{"google/protobuf/struct.proto"}
+		}
+	}
+	return nil
 }
 
 func (fs Fields) CreateFields(primaryKey string) []*Field {
@@ -119,10 +130,14 @@ func ParseFields(strs []string) ([]*Field, error) {
 	for _, str := range strs {
 		ss := strings.Split(str, ":")
 		var pres []*Predicate
-		t, ok := types[ss[1]]
+		ts := strings.Split(ss[1], ",")
+		t, ok := types[ts[0]]
 		if !ok {
 			return nil, errors.New(fmt.Sprintf("unknown type: %s\n", ss[1]))
 		}
+		isArray := contains(ts[1:], "a", "array", "slice")
+		isNillable := contains(ts[1:], "n", "nil", "null")
+
 		if len(ss) > 2 {
 			for _, p := range strings.Split(ss[2], ",") {
 				pres = append(pres, &Predicate{
@@ -135,6 +150,8 @@ func ParseFields(strs []string) ([]*Field, error) {
 		fs = append(fs, &Field{
 			Name:       ss[0],
 			FieldType:  t,
+			IsArray:    isArray,
+			IsNillable: isNillable,
 			Predicates: pres,
 		})
 	}

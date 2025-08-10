@@ -14,6 +14,7 @@ const (
 	TypeText
 	TypeTime
 	TypeDate
+	TypeJson
 )
 
 const DefaultPrimaryFieldType = TypeInt64
@@ -31,6 +32,7 @@ var (
 		"text":    TypeText,
 		"time":    TypeTime,
 		"date":    TypeDate,
+		"json":    TypeJson,
 	}
 
 	typeNames = [...]string{
@@ -45,6 +47,7 @@ var (
 		TypeText:   "string",
 		TypeTime:   "time.Time",
 		TypeDate:   "time.Time",
+		TypeJson:   "*structpb.Struct",
 	}
 
 	typeEntSchemaNames = [...]string{
@@ -59,6 +62,7 @@ var (
 		TypeText:   "String",
 		TypeTime:   "Time",
 		TypeDate:   "Time",
+		TypeJson:   "JSON",
 	}
 
 	typeMysqlNames = [...]string{
@@ -73,6 +77,7 @@ var (
 		TypeText:   "text",
 		TypeTime:   "timestamp",
 		TypeDate:   "timestamp",
+		TypeJson:   "jsonb",
 	}
 
 	typePramNames = [...]string{
@@ -104,6 +109,7 @@ var (
 		TypeText:   "string",
 		TypeTime:   "string",
 		TypeDate:   "string",
+		TypeJson:   "google.protobuf.Struct",
 	}
 
 	typeParamProtoNames = [...]string{
@@ -139,6 +145,10 @@ func (t TypeField) StringByType(http bool) string {
 
 func (t TypeField) IsTime() bool {
 	return t == TypeTime
+}
+
+func (t TypeField) IsJson() bool {
+	return t == TypeJson
 }
 
 func (t TypeField) StringParam() string {

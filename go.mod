@@ -1,6 +1,6 @@
 module github.com/yoogoc/kratos-scaffold
 
-go 1.20
+go 1.24.5
 
 require (
 	github.com/gertd/go-pluralize v0.2.0

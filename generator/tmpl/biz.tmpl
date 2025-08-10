@@ -13,7 +13,11 @@ import (
 
 type {{.Name}} struct {
 	{{- range $i, $f := .Fields }}
-	{{ $f.Name | ToCamel }} {{ $http | $f.FieldType.StringByType }}
+	{{- if $f.IsArray }}
+	{{ $f.Name | ToCamel }} []{{ $http | $f.FieldType.StringByType }}
+	{{- else }}
+	{{ $f.Name | ToCamel }}{{" "}}{{- if $f.IsNillable }}*{{- end }}{{ $http | $f.FieldType.StringByType }}
+	{{- end }}
 	{{- end }}
 }
 

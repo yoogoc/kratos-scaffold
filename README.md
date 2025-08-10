@@ -13,25 +13,27 @@ go install github.com/yoogoc/kratos-scaffold@latest
 脚手架的基本格式
 
 ```
-kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type:predicate1,predicate2]...
+kratos-scaffold [proto | service | biz | data] [model] [field_name:field_type[, 'a/array/slice'[, 'n,nil,null']:predicate1,predicate2]...
 ```
 
 - field_type:
 
-|   类型    | go实体类型    |  go参数类型   | proto实体类型 |    proto参数类型    |    数据库类型     |
-|:-------:|-----------|:---------:|:---------:|:---------------:|:------------:|
-| float64 | float64   | *float64  |  double   | optional double |   numeric    |
-| float32 | float32   | *float32  |   float   | optional float  |   numeric    |
-|  int32  | int32     |  *int32   |   int32   | optional int32  |     int      |
-|  int64  | int64     |  *int64   |   int64   | optional int64  |    bigint    |
-| uint32  | uint32    |  *uint32  |  uint32   | optional uint32 |     int      |
-| uint64  | uint64    |  *uint64  |  uint64   | optional uint64 |    bigint    |
-|  bool   | bool      |   *bool   |   bool    |  optional bool  |   tinyint    |
-| string  | string    |  *string  |  string   | optional string | varchar(255) |
-|  text   | string    |  *string  |  string   | optional string |     text     |
-|  time   | time.Time | time.Time |  string   | optional string |  timestamp   |
-|  date   | time.Time | time.Time |  string   | optional string |  timestamp   |
+|   类型    | go实体类型           |  go参数类型   |       proto实体类型        |    proto参数类型    |    数据库类型     |
+|:-------:|------------------|:---------:|:----------------------:|:---------------:|:------------:|
+| float64 | float64          | *float64  |         double         | optional double |   numeric    |
+| float32 | float32          | *float32  |         float          | optional float  |   numeric    |
+|  int32  | int32            |  *int32   |         int32          | optional int32  |     int      |
+|  int64  | int64            |  *int64   |         int64          | optional int64  |    bigint    |
+| uint32  | uint32           |  *uint32  |         uint32         | optional uint32 |     int      |
+| uint64  | uint64           |  *uint64  |         uint64         | optional uint64 |    bigint    |
+|  bool   | bool             |   *bool   |          bool          |  optional bool  |   tinyint    |
+| string  | string           |  *string  |         string         | optional string | varchar(255) |
+|  text   | string           |  *string  |         string         | optional string |     text     |
+|  time   | time.Time        | time.Time |         string         | optional string |  timestamp   |
+|  date   | time.Time        | time.Time |         string         | optional string |  timestamp   |
+|  json   | *structpb.Struct |     x     | google.protobuf.Struct |        x        |    jsonb     |
 
+- field_type: 用于描述数据类型，除了基础类型外，还支持json，array符合类型
 
 - predicate:谓语最终用于sql query时需要的where条件，目前支持：
   - eq 等于
@@ -95,6 +97,15 @@ kratos-scaffold service -n user-service user id:int64:eq,in name:string:contains
 ```shell
 kratos-scaffold g -n user-service user id:int64:eq,in name:string:contains age:int32:gte,lte
 ```
+
+7. 复杂用例字段
+```shell
+service user id:int64:eq,in name:string:cont age:int32:gte,lte birthday:time:eq,in,gte extra:json last_login_at:time,nil:gte,lte array:string,a -n user
+```
+
+extra: json类型
+last_login_at: time类型，允许为nil
+array: string数组类型
 
 # Roadmap
 

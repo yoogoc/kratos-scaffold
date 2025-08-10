@@ -28,7 +28,11 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 	client := r.data.EntClient(ctx)
 	row, err := client.{{.Name | ToCamel}}.Create().
 		{{- range $i, $f := .CreateFields }}
-		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
+		{{- if $f.IsNillable }}
+		SetNillable{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }}).
+		{{- else }}
+		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }}).
+		{{- end }}
 		{{- end }}
 		Save(ctx)
 	if err != nil {
@@ -39,11 +43,26 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	client := r.data.EntClient(ctx)
-	row, err := client.{{.Name | ToCamel}}.UpdateOneID({{$modelName}}.Id).
-		{{- range $i, $f := .UpdateFields }}
-		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}).
+ 	{{$fields := .UpdateFields}}
+	exec := client.{{.Name | ToCamel}}.UpdateOneID({{$modelName}}.Id).
+		{{- range $i, $f := $fields }}
+		{{$isLast := last $i $fields}}
+		{{- if $f.IsNillable }}
+		SetNillable{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }}){{- if not $isLast}}.{{- end }}
+		{{- else }}
+		Set{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }}){{- if not $isLast}}.{{- end }}
 		{{- end }}
-		Save(ctx)
+		{{- end }}
+
+	{{- range $i, $f := .UpdateFields }}
+	{{- if $f.IsNillable }}
+	if  {{$modelName}}.{{ $f.Name | ToCamel }} == nil {
+		exec.Clear{{ $f.Name | ToEntName }}()
+	}
+	{{- end }}
+	{{- end }}
+
+	row, err := exec.Save(ctx)
 	if err != nil {
 		return nil, err
 	}

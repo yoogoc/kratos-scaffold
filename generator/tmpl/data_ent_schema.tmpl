@@ -17,7 +17,20 @@ type {{ .Name }} struct {
 func ({{ .Name }}) Fields() []ent.Field {
 	return []ent.Field{
 		{{- range $i, $f := .EntFields }}
-		field.{{ $f.FieldType.StringEnt }}("{{$f.Name | ToSnake}}"),
+		{{- if $f.FieldType.IsJson }}
+			field.{{ $f.FieldType.StringEnt }}("{{$f.Name | ToSnake}}", map[string]any{}).Optional(),
+		{{- else }}
+			{{- if $f.IsArray }}
+				field.JSON("{{$f.Name | ToSnake}}", []{{$f.FieldType.String}}{}).Optional(),
+			{{- else }}
+				{{- if eq $f.Name "id" }}
+				field.{{ $f.FieldType.StringEnt }}("{{$f.Name | ToSnake}}"),
+				{{- else }}
+				field.{{ $f.FieldType.StringEnt }}("{{$f.Name | ToSnake}}"){{- if $f.IsNillable }}.Nillable(){{- end }}.Optional(),
+				{{- end }}
+
+			{{- end }}
+		{{- end }}
 		{{- end }}
 		{{- if .NeedAuditField }}
 		field.Time("created_at").Immutable().Default(time.Now),
