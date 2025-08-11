@@ -36,7 +36,7 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 	if err != nil {
 		return nil, err
 	}
-	return {{$modelName}}Proto2Biz(reply.{{.Name | ToCamel}}), nil
+	return {{$modelName}}Proto2Biz(reply.Datum), nil
 
 }
 
@@ -49,7 +49,7 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 	if err != nil {
 		return nil, err
 	}
-	return {{$modelName}}Proto2Biz(reply.{{.Name | ToCamel}}), nil
+	return {{$modelName}}Proto2Biz(reply.Datum), nil
 }
 
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
@@ -68,7 +68,7 @@ func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCam
 	if err != nil {
 		return nil, 0, err
 	}
-	return bulk{{.Name | ToCamel}}Proto2Biz(reply.{{.Name | ToCamelPlural}}), int(reply.Count), nil
+	return bulk{{.Name | ToCamel}}Proto2Biz(reply.List), int(reply.Count), nil
 }
 
 func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (*biz.{{.Name | ToCamel}}, error) {
@@ -78,5 +78,5 @@ func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToC
 	if err != nil {
 		return nil, err
 	}
-	return {{$modelName}}Proto2Biz(reply.{{ .Name | ToCamel }}), nil
+	return {{$modelName}}Proto2Biz(reply.Datum), nil
 }

@@ -30,7 +30,7 @@ func (s *{{.Name}}Service) Create(ctx context.Context, req *v1.Create{{.Name}}Re
 		return nil, err
 	}
 	return &v1.Create{{.Name}}Reply{
-		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
 
@@ -40,7 +40,7 @@ func (s *{{.Name}}Service) Update(ctx context.Context, req *v1.Update{{.Name}}Re
 		return nil, err
 	}
 	return &v1.Update{{.Name}}Reply{
-		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
 {{- if .GenHttp }}
@@ -62,7 +62,7 @@ func (s *{{.Name}}Service) Get(ctx context.Context, req *v1.Get{{.Name}}Request)
 		return nil, err
 	}
 	return &v1.Get{{.Name}}Reply{
-		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
 
@@ -83,7 +83,7 @@ func (s *{{.Name}}Service) FindBy(ctx context.Context, req *v1.Find{{.Name}}ByRe
 		return nil, err
 	}
 	return &v1.Find{{.Name}}ByReply{
-		{{.Name}}: {{.Name | ToLowCamel }}Biz2Proto(item),
+		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
 {{- end }}
@@ -94,7 +94,7 @@ func (s *{{.Name}}Service) List(ctx context.Context, req *v1.List{{.Name}}Reques
 		return nil, err
 	}
 	return &v1.List{{.Name}}Reply{
-		{{.Name| ToCamel | ToPlural}}: bulk{{.Name}}Biz2Proto(list),
+		List: bulk{{.Name}}Biz2Proto(list),
 		Count: uint32(count),
 	}, nil
 }

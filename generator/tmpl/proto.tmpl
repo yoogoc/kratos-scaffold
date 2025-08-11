@@ -73,7 +73,7 @@ message Create{{.Name}}Request {
 	{{- end }}
 }
 message Create{{.Name}}Reply {
-	{{.Name}} {{.Name | fieldStyle }} = 1;
+	{{.Name}} datum = 1;
 }
 message Update{{.Name}}Request {
 	{{ .PrimaryField.FieldType.StringProto }} {{ .PrimaryFieldName | fieldStyle }} = 1;
@@ -90,7 +90,7 @@ message Update{{.Name}}Request {
 	{{- end }}
 }
 message Update{{.Name}}Reply {
-	{{.Name}} {{.Name | fieldStyle }} = 1;
+	{{.Name}} datum = 1;
 }
 {{$primaryField := .PrimaryField }}
 {{- if .GenHttp }}
@@ -130,6 +130,6 @@ message List{{.Name}}Request {
 	{{.Name}}Param param = 3;
 }
 message List{{.Name}}Reply {
-	repeated {{.Name}} {{.Name | ToPlural | fieldStyle }} = 1;
+	repeated {{.Name}} list = 1;
 	uint32 count = 2;
 }
