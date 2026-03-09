@@ -1,7 +1,7 @@
 package service
 
 import (
-	v1 "test/api/user/v1"
+	v1 "test/api/v1"
 	"test/internal/biz"
 )
 
@@ -36,7 +36,11 @@ func bulkUserBiz2Proto(list []*biz.User) []*v1.User {
 	return target
 }
 
-func listUserReq2Biz(req *v1.ListUserRequest) *biz.UserParam {
+func paramUserProto2Biz(req *v1.UserParam) *biz.UserParam {
+	if req == nil {
+		return &biz.UserParam{}
+	}
+
 	return &biz.UserParam{
 		IdEq:     req.IdEq,
 		NameCont: req.NameCont,

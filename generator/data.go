@@ -38,6 +38,10 @@ func (d *Data) UpdateProtoFields() []*field.Field {
 	return d.Fields.UpdateProtoFields()
 }
 
+func (d *Data) TransferFields() []*field.Field {
+	return d.Fields.TransferFields()
+}
+
 func (d *Data) ParamFields() []*field.Predicate {
 	return d.Fields.ParamFields()
 }

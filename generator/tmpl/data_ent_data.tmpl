@@ -81,6 +81,9 @@ func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | 
 func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, size int) ([]*biz.{{.Name | ToCamel}}, int, error) {
 	client := r.data.EntClient(ctx)
 	query := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...)
+	{{- if .SoftDelete }}
+	query = query.Where({{$modelName}}.DeletedAtIsNil())
+	{{- end }}
 	count, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, err
@@ -97,7 +100,13 @@ func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCam
 
 func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (*biz.{{.Name | ToCamel}}, error) {
 	client := r.data.EntClient(ctx)
+	{{- if .SoftDelete }}
+	rows, err := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).
+		Where({{$modelName}}.DeletedAtIsNil()).
+		First(ctx)
+	{{- else }}
 	rows, err := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).First(ctx)
+	{{- end }}
 	if err != nil {
 		return nil, err
 	}

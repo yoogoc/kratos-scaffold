@@ -2,11 +2,10 @@ package service
 
 import (
 	"context"
-	v1 "test/api/user/v1"
+	v1 "test/api/v1"
 	"test/internal/biz"
 
 	"github.com/go-kratos/kratos/v2/log"
-	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type UserService struct {
@@ -22,51 +21,52 @@ func NewUserService(uc *biz.UserUsecase, logger log.Logger) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserReply, error) {
-	_, err := s.uc.CreateUser(ctx, createUserReq2Biz(req))
+func (s *UserService) Create(ctx context.Context, req *v1.CreateUserRequest) (*v1.CreateUserReply, error) {
+	item, err := s.uc.CreateUser(ctx, createUserReq2Biz(req))
 	if err != nil {
 		return nil, err
 	}
-	return &v1.CreateUserReply{}, nil
-}
-
-func (s *UserService) UpdateUser(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserReply, error) {
-	_, err := s.uc.UpdateUser(ctx, updateUserReq2Biz(req))
-	if err != nil {
-		return nil, err
-	}
-	return &v1.UpdateUserReply{}, nil
-}
-
-func (s *UserService) DeleteUser(ctx context.Context, req *v1.DeleteUserRequest) (*v1.DeleteUserReply, error) {
-	_, err := s.uc.DestroyUserBy(ctx, &biz.UserParam{
-		IdEq: wrapperspb.Int64(req.Id),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &v1.DeleteUserReply{}, nil
-}
-
-func (s *UserService) GetUser(ctx context.Context, req *v1.GetUserRequest) (*v1.GetUserReply, error) {
-	item, err := s.uc.FindUserBy(ctx, &biz.UserParam{
-		IdEq: wrapperspb.Int64(req.Id),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &v1.GetUserReply{
-		User: userBiz2Proto(item),
+	return &v1.CreateUserReply{
+		Datum: userBiz2Proto(item),
 	}, nil
 }
 
-func (s *UserService) ListUser(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
-	list, count, err := s.uc.ListUser(ctx, listUserReq2Biz(req), int(req.Page), int(req.PageSize))
+func (s *UserService) Update(ctx context.Context, req *v1.UpdateUserRequest) (*v1.UpdateUserReply, error) {
+	item, err := s.uc.UpdateUser(ctx, updateUserReq2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.UpdateUserReply{
+		Datum: userBiz2Proto(item),
+	}, nil
+}
+func (s *UserService) DestroyBy(ctx context.Context, req *v1.DestroyUserByRequest) (*v1.DestroyUserByReply, error) {
+	count, err := s.uc.DestroyUserBy(ctx, paramUserProto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.DestroyUserByReply{
+		Count: int32(count),
+	}, nil
+}
+
+func (s *UserService) FindBy(ctx context.Context, req *v1.FindUserByRequest) (*v1.FindUserByReply, error) {
+	item, err := s.uc.FindUserBy(ctx, paramUserProto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.FindUserByReply{
+		Datum: userBiz2Proto(item),
+	}, nil
+}
+
+func (s *UserService) List(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
+	list, count, err := s.uc.ListUser(ctx, paramUserProto2Biz(req.Param), int(req.Page), int(req.PageSize))
 	if err != nil {
 		return nil, err
 	}
 	return &v1.ListUserReply{
-		Users: bulkUserBiz2Proto(list),
+		List:  bulkUserBiz2Proto(list),
 		Count: uint32(count),
 	}, nil
 }

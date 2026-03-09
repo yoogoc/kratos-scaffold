@@ -65,7 +65,7 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 }
 
 func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
-	{{- range $i, $f := .Fields }}
+	{{- range $i, $f := .TransferFields }}
 		{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
 		{{- if and $f.FieldType.IsTime $f.IsNillable }}
 			{{ $f.Name | ToLowCamel }} := func() *string {
@@ -78,7 +78,7 @@ func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
 		{{- end }}
 	{{- end }}
 	return &v1.{{.Name}}{
-		{{- range $i, $f := .Fields }}
+		{{- range $i, $f := .TransferFields }}
 			{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
 			{{- if $f.FieldType.IsTime }}
 				{{- if $f.IsNillable }}

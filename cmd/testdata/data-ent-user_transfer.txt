@@ -43,7 +43,7 @@ func userParam2Predicates(param *biz.UserParam) []predicate.User {
 	var ps []predicate.User
 
 	if param.IdEq != nil {
-		ps = append(ps, user.IDEQ(param.IdEq.Value))
+		ps = append(ps, user.IDEQ(*param.IdEq))
 	}
 
 	if len(param.IdIn) > 0 {
@@ -51,15 +51,15 @@ func userParam2Predicates(param *biz.UserParam) []predicate.User {
 	}
 
 	if param.NameCont != nil {
-		ps = append(ps, user.NameContains(param.NameCont.Value))
+		ps = append(ps, user.NameContains(*param.NameCont))
 	}
 
 	if param.AgeGTE != nil {
-		ps = append(ps, user.AgeGTE(param.AgeGTE.Value))
+		ps = append(ps, user.AgeGTE(*param.AgeGTE))
 	}
 
 	if param.AgeLTE != nil {
-		ps = append(ps, user.AgeLTE(param.AgeLTE.Value))
+		ps = append(ps, user.AgeLTE(*param.AgeLTE))
 	}
 	return ps
 }

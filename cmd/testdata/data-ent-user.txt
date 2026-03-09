@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"test/internal/biz"
-	"test/internal/data/ent"
 
 	"github.com/go-kratos/kratos/v2/log"
 )
@@ -23,7 +22,7 @@ func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
 }
 
 func (r userRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	row, err := client.User.Create().
 		SetName(user.Name).
 		SetAge(user.Age).
@@ -34,26 +33,14 @@ func (r userRepo) Create(ctx context.Context, user *biz.User) (*biz.User, error)
 	return userEnt2Biz(row), nil
 }
 
-func (r userRepo) BulkCreate(ctx context.Context, list []*biz.User) ([]*biz.User, error) {
-	client := EntClient(ctx, r.data)
-	var builders []*ent.UserCreate
-	for _, item := range list {
-		builders = append(builders, client.User.Create().
-			SetName(item.Name).
-			SetAge(item.Age),
-		)
-	}
-	rows, err := client.User.CreateBulk(builders...).Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return bulkUserEnt2Biz(rows), nil
-}
-
 func (r userRepo) Update(ctx context.Context, user *biz.User) (*biz.User, error) {
-	client := EntClient(ctx, r.data)
-	row, err := client.User.UpdateOne(userBiz2Ent(user)).
-		Save(ctx)
+	client := r.data.EntClient(ctx)
+
+	exec := client.User.UpdateOneID(user.Id).
+		SetName(user.Name).
+		SetAge(user.Age)
+
+	row, err := exec.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -61,12 +48,12 @@ func (r userRepo) Update(ctx context.Context, user *biz.User) (*biz.User, error)
 }
 
 func (r userRepo) DestroyBy(ctx context.Context, param *biz.UserParam) (int, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	return client.User.Delete().Where(userParam2Predicates(param)...).Exec(ctx)
 }
 
 func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, size int) ([]*biz.User, int, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	query := client.User.Query().Where(userParam2Predicates(param)...)
 	count, err := query.Clone().Count(ctx)
 	if err != nil {
@@ -83,7 +70,7 @@ func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, size int
 }
 
 func (r userRepo) FindBy(ctx context.Context, param *biz.UserParam) (*biz.User, error) {
-	client := EntClient(ctx, r.data)
+	client := r.data.EntClient(ctx)
 	rows, err := client.User.Query().Where(userParam2Predicates(param)...).First(ctx)
 	if err != nil {
 		return nil, err

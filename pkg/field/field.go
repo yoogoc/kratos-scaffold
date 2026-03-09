@@ -81,6 +81,13 @@ func (fs Fields) UpdateProtoFields() []*Field {
 	})
 }
 
+func (fs Fields) TransferFields() []*Field {
+	return util.FilterSlice(fs, func(f *Field) bool {
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != "deleted_at"
+	})
+}
+
 func (fs Fields) ParamFields() []*Predicate {
 	result := make([]*Predicate, 0, len(fs))
 	for _, f := range fs {
