@@ -115,7 +115,7 @@ message Find{{.Name}}ByRequest {
 	{{.Name}}Param param = 1;
 }
 message Find{{.Name}}ByReply {
-	{{.Name}} {{.Name | fieldStyle }} = 1;
+	{{.Name}} datum = 1;
 }
 {{- end }}
 message {{.Name}}Param {
