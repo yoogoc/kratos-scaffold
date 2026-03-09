@@ -38,6 +38,10 @@ func (p *Proto) UpdateFields() []*field.Field {
 	return p.Fields.UpdateFields(p.PrimaryField())
 }
 
+func (p *Proto) EntityFields() []*field.Field {
+	return p.Fields.EntityFields()
+}
+
 func (p *Proto) PrimaryField() *field.Field {
 	return p.Fields.PrimaryField(p.PrimaryKey)
 }

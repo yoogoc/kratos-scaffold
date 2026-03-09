@@ -88,9 +88,22 @@ func (fs Fields) TransferFields() []*Field {
 	})
 }
 
+// EntityFields returns fields for entity struct, excluding deleted_at
+func (fs Fields) EntityFields() []*Field {
+	return util.FilterSlice(fs, func(f *Field) bool {
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != "deleted_at"
+	})
+}
+
+// ParamFields returns predicates for query params, excluding deleted_at
 func (fs Fields) ParamFields() []*Predicate {
 	result := make([]*Predicate, 0, len(fs))
 	for _, f := range fs {
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		if fn == "deleted_at" {
+			continue
+		}
 		for _, predicate := range f.Predicates {
 			result = append(result, &Predicate{
 				Name:       f.Name + predicate.Type.StringProto(),

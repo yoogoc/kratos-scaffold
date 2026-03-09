@@ -12,7 +12,7 @@ import (
 {{- $http := .Http }}
 
 type {{.Name}} struct {
-	{{- range $i, $f := .Fields }}
+	{{- range $i, $f := .Fields.EntityFields }}
 	{{- if $f.IsArray }}
 	{{ $f.Name | ToCamel }} []{{ $http | $f.FieldType.StringByType }}
 	{{- else }}

@@ -43,7 +43,7 @@ message FindUserByRequest {
 	UserParam param = 1;
 }
 message FindUserByReply {
-	User user = 1;
+	User datum = 1;
 }
 message UserParam {
 	optional int64 idEq = 1;

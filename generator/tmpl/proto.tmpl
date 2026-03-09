@@ -47,7 +47,7 @@ service {{.Name}}Service {
 }
 
 message {{.Name}} {
-	{{- range $i, $f := .Fields }}
+	{{- range $i, $f := .EntityFields }}
 	{{- if $f.IsNillable }}
 	optional {{ $f.FieldType.StringProto }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
 	{{- else }}
