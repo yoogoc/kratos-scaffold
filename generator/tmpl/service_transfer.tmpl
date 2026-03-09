@@ -122,11 +122,11 @@ func param{{.Name}}Proto2Biz(req *v1.{{.Name}}Param) *biz.{{.Name}}Param {
 	{{- range $i, $f := .Fields.ParamFields }}
 		{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
 		{{- if and $f.FieldType.IsTime $f.Type.IsIn }}
-			{{ $f.Name }} := make([]time.Time, 0, len({{$reqf}}))
+			{{ $f.Name | ToLowCamel }} := make([]time.Time, 0, len({{$reqf}}))
 			for _, timestamp := range {{$reqf}} {
 				item, _ := time.Parse(time.DateTime, timestamp)
 				// TODO return error
-				{{ $f.Name }} = append({{ $f.Name }}, item)
+				{{ $f.Name | ToLowCamel }} = append({{ $f.Name | ToLowCamel }}, item)
 			}
 		{{- end }}
 	{{- end }}
