@@ -28,14 +28,21 @@ $(config-modules):
 	       $(shell find ./app/$(patsubst config-%,%,$@)/internal/conf -name *.proto)
 
 $(proto-modules):
-	kratos proto client ./api/$(patsubst proto-%,%,$@)
-
-.PHONY: api
-api:
+	@service=$(patsubst proto-%,%,$@); \
+	proto_files=$$(find ./api/$$service/ -name '*.proto'); \
+	protoc_flags=""; \
+	if grep -ql "google.api.http" $$proto_files 2>/dev/null; then \
+		mkdir -p ./openapi/$$service; \
+		protoc_flags="$$protoc_flags --openapiv2_out=allow_merge,include_package_in_tags=false,merge_file_name=openapi.json:./openapi/$$service"; \
+	fi; \
+	if grep -ql "buf/validate" $$proto_files 2>/dev/null; then \
+		protoc_flags="$$protoc_flags --validate_out=paths=source_relative,lang=go:."; \
+	fi; \
+	set -x; \
 	protoc --proto_path=. \
 	       --proto_path=./third_party \
- 	       --go_out=paths=source_relative:. \
- 	       --go-http_out=paths=source_relative:. \
- 	       --go-grpc_out=paths=source_relative:. \
-           --openapiv2_out . \
-	       $(API_PROTO_FILES)
+	       --go_out=paths=source_relative:. \
+	       --go-http_out=paths=source_relative:. \
+	       --go-grpc_out=paths=source_relative:. \
+	       $$protoc_flags \
+	       $$proto_files
