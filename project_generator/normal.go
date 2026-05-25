@@ -3,6 +3,7 @@ package project_generator
 import (
 	"os"
 	"path"
+	"strings"
 
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
@@ -102,6 +103,16 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 		return err
 	}
 	if err := NewLogTmpl(appPkgPath, logPath).Generate(); err != nil {
+		return err
+	}
+
+	// 7 gen otel
+	otelPath := path.Join(appPath, "otel")
+	if err := os.MkdirAll(otelPath, 0o700); err != nil {
+		return err
+	}
+	serviceName := strings.ReplaceAll(appPkgPath, "/", ".")
+	if err := NewOtelTmpl(appPkgPath, serviceName, otelPath).Generate(); err != nil {
 		return err
 	}
 

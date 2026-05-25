@@ -68,6 +68,10 @@ func newServerConf(bc *conf.Bootstrap) *conf.Server {
 	return bc.Server
 }
 
+func newTraceConf(bc *conf.Bootstrap) *conf.Trace {
+	return bc.Trace
+}
+
 func newRootCmd() *RootCommand {
 	root := &RootCommand{
 		Short:              "assign service",

@@ -100,6 +100,9 @@ func GenMono(name string) error {
 		"github.com/google/wire",
 		"github.com/pkg/errors",
 		"github.com/gorilla/handlers",
+		"go.opentelemetry.io/otel",
+		"go.opentelemetry.io/otel/sdk",
+		"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
 	)
 	if err != nil {
 		return err
