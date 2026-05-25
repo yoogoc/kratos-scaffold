@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
+	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
@@ -30,6 +31,11 @@ func (d *Data) GenerateProto() error {
 	// 3. gen data
 	if err := d.genDataProto(); err != nil {
 		return err
+	}
+
+	providerSetPath := path.Join(d.OutPath(), "data.go")
+	if err := wire.AddToProviderSet(providerSetPath, "New"+d.Name+"Repo"); err != nil {
+		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
 	}
 	return nil
 }

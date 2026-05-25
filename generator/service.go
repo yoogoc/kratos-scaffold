@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
@@ -122,7 +123,15 @@ func (b *Service) genService() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(p, content, 0o644)
+	if err := os.WriteFile(p, content, 0o644); err != nil {
+		return err
+	}
+
+	providerSetPath := path.Join(b.OutPath(), "service.go")
+	if err := wire.AddToProviderSet(providerSetPath, "New"+b.Name+"Service"); err != nil {
+		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
+	}
+	return nil
 }
 
 func (b *Service) OutPath() string {
