@@ -1,0 +1,45 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.OtelTmpl*/ -}}
+package otel
+
+import (
+	"context"
+
+	"{{.AppPkgPath}}/internal/conf"
+
+	"github.com/google/wire"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
+	tracesdk "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
+	"go.opentelemetry.io/otel/trace"
+)
+
+var ProviderSet = wire.NewSet(NewTracerProvider)
+
+func NewTracerProvider(c *conf.Trace) (trace.TracerProvider, func(), error) {
+	if c == nil || c.Endpoint == "" {
+		return otel.GetTracerProvider(), func() {}, nil
+	}
+
+	exp, err := otlptracegrpc.New(context.Background(),
+		otlptracegrpc.WithEndpoint(c.Endpoint),
+		otlptracegrpc.WithInsecure(),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	tp := tracesdk.NewTracerProvider(
+		tracesdk.WithBatcher(exp),
+		tracesdk.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String("{{.ServiceName}}"),
+		)),
+	)
+	otel.SetTracerProvider(tp)
+
+	return tp, func() {
+		_ = tp.Shutdown(context.Background())
+	}, nil
+}

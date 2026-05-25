@@ -48,6 +48,9 @@ var grpcServerTmpl string
 //go:embed resources/server.http.go.tmpl
 var httpServerTmpl string
 
+//go:embed resources/otel.otel.go.tmpl
+var otelTmpl string
+
 //go:embed resources/conf.proto.example
 var confProto string
 
