@@ -15,7 +15,7 @@ func genService(appPath string) error {
 import "github.com/google/wire"
 
 // ProviderSet is service providers.
-var ProviderSet = wire.NewSet()
+var ProviderSet = wire.NewSet(NewGreeterService)
 `
 	if err := os.WriteFile(path.Join(servicePath, "service.go"), []byte(serviceContent), 0o644); err != nil {
 		return err

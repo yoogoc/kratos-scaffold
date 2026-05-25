@@ -1,0 +1,31 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.DemoTmpl*/ -}}
+package service
+
+import (
+	"context"
+
+	"github.com/go-kratos/kratos/v2/log"
+	v1 "{{.ApiPkgPath}}"
+	"{{.AppPkgPath}}/internal/biz"
+)
+
+type GreeterService struct {
+	v1.UnimplementedGreeterServer
+	uc  *biz.GreeterUsecase
+	log *log.Helper
+}
+
+func NewGreeterService(uc *biz.GreeterUsecase, logger log.Logger) *GreeterService {
+	return &GreeterService{
+		uc:  uc,
+		log: log.NewHelper(log.With(logger, "module", "service/greeter")),
+	}
+}
+
+func (s *GreeterService) SayHello(ctx context.Context, req *v1.HelloRequest) (*v1.HelloReply, error) {
+	msg, err := s.uc.SayHello(ctx, req.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &v1.HelloReply{Message: msg}, nil
+}

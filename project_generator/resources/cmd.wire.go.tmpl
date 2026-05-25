@@ -10,7 +10,6 @@ import (
 	"{{.AppPkgPath}}/internal/biz"
 	"{{.AppPkgPath}}/internal/data"
 	"{{.AppPkgPath}}/internal/log"
-	"{{.AppPkgPath}}/internal/middleware"
 	iotel "{{.AppPkgPath}}/internal/otel"
 	"{{.AppPkgPath}}/internal/server"
 	"{{.AppPkgPath}}/internal/service"
@@ -27,7 +26,6 @@ func initApp(log.NameString, log.VersionString) (*cobra.Command, func(), error) 
 		data.ProviderSet,
 		service.ProviderSet,
 		server.ProviderSet,
-		middleware.ProviderSet,
 		iotel.ProviderSet,
 		newRootCmd,
 		newCmd,

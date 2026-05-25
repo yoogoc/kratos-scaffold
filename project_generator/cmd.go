@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"text/template"
@@ -28,6 +29,8 @@ func genCmd(name string, appPath string, isSubMono, isBff bool) error {
 		ServiceName: serviceName,
 		OutPath:     mainPath,
 		IsBff:       isBff,
+		IsSubMono:   isSubMono,
+		Name:        name,
 	}
 	if err := cmdTmpl.Generate(); err != nil {
 		return err
@@ -40,6 +43,8 @@ type CmdTmpl struct {
 	ServiceName string
 	OutPath     string
 	IsBff       bool
+	IsSubMono   bool
+	Name        string
 }
 
 func (ct CmdTmpl) Generate() error {
@@ -97,7 +102,23 @@ func (ct CmdTmpl) Generate() error {
 		return err
 	}
 
-	fmt.Println("skip wire generate")
+	if _, err := exec.LookPath("wire"); err != nil {
+		fmt.Println("wire not found, installing...")
+		if err := util.Go("install", "github.com/google/wire/cmd/wire@latest"); err != nil {
+			fmt.Println("wire install failed, please install manually: go install github.com/google/wire/cmd/wire@latest")
+			return nil
+		}
+	}
+	fmt.Println("running wire generate ...")
+	if ct.IsSubMono {
+		if err := util.Exec("make", "wire-"+ct.Name); err != nil {
+			fmt.Printf("wire generate failed, please run manually: make wire-%s\n", ct.Name)
+		}
+	} else {
+		if err := util.Exec("wire", path.Join(".", ct.OutPath)); err != nil {
+			fmt.Printf("wire generate failed, please run manually: wire ./%s\n", ct.OutPath)
+		}
+	}
 
 	return nil
 }

@@ -58,5 +58,26 @@ func genBffInternal(name string, appPath string, isSubMono bool) error {
 	if err := NewOtelTmpl(appPkgPath, serviceName, otelPath).Generate(); err != nil {
 		return err
 	}
+
+	// 8 gen middleware
+	middlewarePath := path.Join(appPath, "middleware")
+	if err := os.MkdirAll(middlewarePath, 0o700); err != nil {
+		return err
+	}
+	middlewareContent := `package middleware
+
+import "github.com/google/wire"
+
+var ProviderSet = wire.NewSet()
+`
+	if err := os.WriteFile(path.Join(middlewarePath, "middleware.go"), []byte(middlewareContent), 0o644); err != nil {
+		return err
+	}
+
+	// 9 gen demo greeter
+	if err := genDemo(name, appPath, isSubMono); err != nil {
+		return err
+	}
+
 	return nil
 }

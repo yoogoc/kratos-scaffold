@@ -87,12 +87,17 @@ func newRootCmd() *RootCommand {
 
 {{- if .IsBff }}
 func newCmd(root *RootCommand, server *ServerCommand) *cobra.Command {
+	(*cobra.Command)(root).AddCommand(
+		(*cobra.Command)(server),
+	)
+	return (*cobra.Command)(root)
+}
 {{- else }}
 func newCmd(root *RootCommand, server *ServerCommand, migrate *MigrateCommand) *cobra.Command {
-{{- end }}
 	(*cobra.Command)(root).AddCommand(
 		(*cobra.Command)(server),
 		(*cobra.Command)(migrate),
 	)
 	return (*cobra.Command)(root)
 }
+{{- end }}

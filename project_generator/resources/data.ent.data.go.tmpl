@@ -3,10 +3,12 @@ package data
 
 import (
 	"context"
+	stdsql "database/sql"
 	"{{.AppPkgPath}}/internal/biz"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/data/ent"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
 
@@ -16,7 +18,7 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewEntClient, NewData, NewTxRepo)
+var ProviderSet = wire.NewSet(NewEntClient, NewData, NewTxRepo, NewGreeterRepo)
 
 type Data struct {
 	log *log.Helper
