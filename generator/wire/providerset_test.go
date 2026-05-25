@@ -26,11 +26,19 @@ var ProviderSet = wire.NewSet(NewTxUsecase)
 	}
 
 	content, _ := os.ReadFile(p)
-	if !strings.Contains(string(content), "NewUserUsecase") {
-		t.Fatalf("expected NewUserUsecase in ProviderSet, got:\n%s", content)
+	s := string(content)
+	if !strings.Contains(s, "NewUserUsecase") {
+		t.Fatalf("expected NewUserUsecase in ProviderSet, got:\n%s", s)
 	}
-	if !strings.Contains(string(content), "NewTxUsecase") {
-		t.Fatalf("expected NewTxUsecase still in ProviderSet, got:\n%s", content)
+	if !strings.Contains(s, "NewTxUsecase") {
+		t.Fatalf("expected NewTxUsecase still in ProviderSet, got:\n%s", s)
+	}
+	// verify separate lines
+	if !strings.Contains(s, "\tNewTxUsecase,\n") {
+		t.Fatalf("expected NewTxUsecase on its own line, got:\n%s", s)
+	}
+	if !strings.Contains(s, "\tNewUserUsecase,\n") {
+		t.Fatalf("expected NewUserUsecase on its own line, got:\n%s", s)
 	}
 
 	// idempotent
@@ -62,7 +70,12 @@ var ProviderSet = wire.NewSet()
 	}
 
 	content, _ := os.ReadFile(p)
-	if !strings.Contains(string(content), "NewGreeterService") {
-		t.Fatalf("expected NewGreeterService in ProviderSet, got:\n%s", content)
+	s := string(content)
+	if !strings.Contains(s, "NewGreeterService") {
+		t.Fatalf("expected NewGreeterService in ProviderSet, got:\n%s", s)
+	}
+	// verify separate line format
+	if !strings.Contains(s, "\tNewGreeterService,\n") {
+		t.Fatalf("expected NewGreeterService on its own line, got:\n%s", s)
 	}
 }

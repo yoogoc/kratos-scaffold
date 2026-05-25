@@ -7,6 +7,8 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -28,7 +30,44 @@ func AddToProviderSet(filePath string, constructorNames ...string) error {
 	if err := format.Node(&buf, fset, f); err != nil {
 		return errors.Wrap(err, "format AST")
 	}
-	return os.WriteFile(filePath, buf.Bytes(), 0o644)
+
+	output := formatNewSetMultiLine(buf.String())
+	return os.WriteFile(filePath, []byte(output), 0o644)
+}
+
+var newSetRe = regexp.MustCompile(`wire\.NewSet\(([^)]*)\)`)
+
+func formatNewSetMultiLine(src string) string {
+	return newSetRe.ReplaceAllStringFunc(src, func(match string) string {
+		inner := newSetRe.FindStringSubmatch(match)[1]
+		inner = strings.TrimSpace(inner)
+		if inner == "" {
+			return match
+		}
+		args := strings.Split(inner, ",")
+		for i := range args {
+			args[i] = strings.TrimSpace(args[i])
+		}
+		// filter empty
+		var cleaned []string
+		for _, a := range args {
+			if a != "" {
+				cleaned = append(cleaned, a)
+			}
+		}
+		if len(cleaned) == 0 {
+			return match
+		}
+		var b strings.Builder
+		b.WriteString("wire.NewSet(\n")
+		for _, a := range cleaned {
+			b.WriteString("\t")
+			b.WriteString(a)
+			b.WriteString(",\n")
+		}
+		b.WriteString(")")
+		return b.String()
+	})
 }
 
 func addOneToProviderSet(f *ast.File, constructorName string) error {
