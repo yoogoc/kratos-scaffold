@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/iancoleman/strcase"
+	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
@@ -51,7 +52,15 @@ func (b *Biz) Generate() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(p, content, 0o644)
+	if err := os.WriteFile(p, content, 0o644); err != nil {
+		return err
+	}
+
+	providerSetPath := path.Join(b.OutPath(), "biz.go")
+	if err := wire.AddToProviderSet(providerSetPath, "New"+b.Name+"Usecase"); err != nil {
+		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
+	}
+	return nil
 }
 
 func (b *Biz) OutPath() string {
