@@ -12,10 +12,12 @@ import (
 	"github.com/gorilla/handlers"
 	"go.opentelemetry.io/otel/trace"
 	"{{.AppPkgPath}}/internal/conf"
+	"{{.AppPkgPath}}/internal/service"
+	v1 "{{.ApiPkgPath}}"
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, logger log.Logger, tp trace.TracerProvider) *http.Server {
+func NewHTTPServer(c *conf.Server, logger log.Logger, tp trace.TracerProvider, greeter *service.GreeterService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -39,7 +41,7 @@ func NewHTTPServer(c *conf.Server, logger log.Logger, tp trace.TracerProvider) *
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-
+	v1.RegisterGreeterHTTPServer(srv, greeter)
 	health(srv)
 
 	return srv

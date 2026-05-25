@@ -21,7 +21,7 @@ func genInternal(name string, appPath string, isSubMono bool) error {
 import "github.com/google/wire"
 
 // ProviderSet is biz providers.
-var ProviderSet = wire.NewSet(NewTxUsecase)
+var ProviderSet = wire.NewSet(NewTxUsecase, NewGreeterUsecase)
 `
 	if err := os.WriteFile(path.Join(bizPath, "biz.go"), []byte(bizContent), 0o644); err != nil {
 		return err
@@ -39,7 +39,7 @@ var ProviderSet = wire.NewSet(NewTxUsecase)
 import "github.com/google/wire"
 
 // ProviderSet is service providers.
-var ProviderSet = wire.NewSet()
+var ProviderSet = wire.NewSet(NewGreeterService)
 `
 	if err := os.WriteFile(path.Join(servicePath, "service.go"), []byte(serviceContent), 0o644); err != nil {
 		return err
@@ -80,22 +80,26 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 		return err
 	}
 	// 4.3 gen grpc,http
-	if err := NewServerTmpl(appPkgPath, serverPath).Generate(); err != nil {
+	apiPkgPath := appPkgPath
+	if isSubMono {
+		apiPkgPath = path.Join(util.ModName(), "api", name, "v1")
+	} else {
+		apiPkgPath = path.Join(name, "api", "v1")
+	}
+	if err := NewServerTmpl(appPkgPath, apiPkgPath, serverPath).Generate(); err != nil {
 		return err
 	}
 
-	// 5 gen conf
-	confPath := path.Join(appPath, "conf")
-	if err := os.MkdirAll(confPath, 0o700); err != nil {
-		return err
+	// 5 gen conf + protoc
+	if isSubMono {
+		if err := genConf(name, appPath, confProto); err != nil {
+			return err
+		}
+	} else {
+		if err := genConfSingle(appPath, confProto); err != nil {
+			return err
+		}
 	}
-	if err := os.WriteFile(path.Join(confPath, "conf.proto"), []byte(confProto), 0o644); err != nil {
-		return err
-	}
-
-	// if err := util.Exec("make", "config-"+name); err != nil {
-	// 	return err
-	// }
 
 	// 6 gen log
 	logPath := path.Join(appPath, "log")
@@ -113,6 +117,26 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 	}
 	serviceName := strings.ReplaceAll(appPkgPath, "/", ".")
 	if err := NewOtelTmpl(appPkgPath, serviceName, otelPath).Generate(); err != nil {
+		return err
+	}
+
+	// 8 gen middleware
+	middlewarePath := path.Join(appPath, "middleware")
+	if err := os.MkdirAll(middlewarePath, 0o700); err != nil {
+		return err
+	}
+	middlewareContent := `package middleware
+
+import "github.com/google/wire"
+
+var ProviderSet = wire.NewSet()
+`
+	if err := os.WriteFile(path.Join(middlewarePath, "middleware.go"), []byte(middlewareContent), 0o644); err != nil {
+		return err
+	}
+
+	// 9 gen demo greeter
+	if err := genDemo(name, appPath, isSubMono); err != nil {
 		return err
 	}
 

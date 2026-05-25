@@ -12,6 +12,7 @@ import (
 
 type ServerTmpl struct {
 	AppPkgPath string
+	ApiPkgPath string
 	ServerPath string
 	GenGrpc    bool
 	GenHttp    bool
@@ -31,9 +32,10 @@ func NonGenHttp() ServerTmplOption {
 	}
 }
 
-func NewServerTmpl(appPkgPath, serverPath string, options ...ServerTmplOption) *ServerTmpl {
+func NewServerTmpl(appPkgPath, apiPkgPath, serverPath string, options ...ServerTmplOption) *ServerTmpl {
 	st := &ServerTmpl{
 		AppPkgPath: appPkgPath,
+		ApiPkgPath: apiPkgPath,
 		ServerPath: serverPath,
 		GenGrpc:    true,
 		GenHttp:    true,
@@ -103,8 +105,9 @@ var ProviderSet = wire.NewSet(%s)
 	}
 	// 4.3 gen grpc,http
 	appPkgPath := path.Join(util.ModName(), "app", name)
+	apiPkgPath := path.Join(util.ModName(), "api", name, "v1")
 
-	if err := NewServerTmpl(appPkgPath, serverPath, options...).Generate(); err != nil {
+	if err := NewServerTmpl(appPkgPath, apiPkgPath, serverPath, options...).Generate(); err != nil {
 		return err
 	}
 	return nil

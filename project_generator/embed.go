@@ -51,8 +51,23 @@ var httpServerTmpl string
 //go:embed resources/otel.otel.go.tmpl
 var otelTmpl string
 
+//go:embed resources/demo.greeter.proto.tmpl
+var demoGreeterProtoTmpl string
+
+//go:embed resources/demo.greeter.biz.go.example
+var demoGreeterBizGo string
+
+//go:embed resources/demo.greeter.service.go.tmpl
+var demoGreeterServiceTmpl string
+
+//go:embed resources/demo.greeter.data.go.tmpl
+var demoGreeterDataTmpl string
+
 //go:embed resources/conf.proto.example
 var confProto string
+
+//go:embed resources/Makefile.example
+var makefileContent string
 
 //go:embed resources/conf.bff.proto.example
 var confBffProto string

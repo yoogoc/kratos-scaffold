@@ -1,0 +1,21 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.DemoTmpl*/ -}}
+syntax = "proto3";
+package {{.ProtoPackage}};
+option go_package = "{{.GoPackage}}";
+import "google/api/annotations.proto";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {
+    option (google.api.http) = {
+      get: "/api/v1/greeter/{name}"
+    };
+  };
+}
+
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloReply {
+  string message = 1;
+}
