@@ -26,6 +26,7 @@ type UserRepo interface {
 	DestroyBy(ctx context.Context, param *UserParam) (int, error)
 	List(ctx context.Context, param *UserParam, opts *ListOptions) ([]*User, int, error)
 	FindBy(ctx context.Context, param *UserParam) (*User, error)
+	ExistBy(ctx context.Context, param *UserParam) (bool, error)
 }
 
 type UserUsecase struct {
@@ -59,4 +60,8 @@ func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, opts ...L
 
 func (uc *UserUsecase) FindUserBy(ctx context.Context, param *UserParam) (*User, error) {
 	return uc.repo.FindBy(ctx, param)
+}
+
+func (uc *UserUsecase) ExistUserBy(ctx context.Context, param *UserParam) (bool, error) {
+	return uc.repo.ExistBy(ctx, param)
 }

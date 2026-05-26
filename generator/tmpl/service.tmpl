@@ -86,6 +86,16 @@ func (s *{{.Name}}Service) FindBy(ctx context.Context, req *v1.Find{{.Name}}ByRe
 		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
+
+func (s *{{.Name}}Service) ExistBy(ctx context.Context, req *v1.Exist{{.Name}}ByRequest) (*v1.Exist{{.Name}}ByReply, error) {
+	exist, err := s.uc.Exist{{.Name}}By(ctx, param{{.Name}}Proto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Exist{{.Name}}ByReply{
+		Exist: exist,
+	}, nil
+}
 {{- end }}
 
 func (s *{{.Name}}Service) List(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {

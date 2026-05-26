@@ -34,6 +34,7 @@ type {{.Name}}Repo interface {
 	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
 	List(ctx context.Context, param *{{.Name}}Param, opts *ListOptions) ([]*{{.Name}}, int, error)
 	FindBy(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error)
+	ExistBy(ctx context.Context, param *{{.Name}}Param) (bool, error)
 }
 
 type {{.Name}}Usecase struct {
@@ -67,4 +68,8 @@ func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}P
 
 func (uc *{{.Name}}Usecase) Find{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error) {
 	return uc.repo.FindBy(ctx, param)
+}
+
+func (uc *{{.Name}}Usecase) Exist{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (bool, error) {
+	return uc.repo.ExistBy(ctx, param)
 }

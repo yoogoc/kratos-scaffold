@@ -81,3 +81,13 @@ func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToC
 	}
 	return {{$modelName}}Proto2Biz(reply.Datum), nil
 }
+
+func (r {{$modelName}}Repo) ExistBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (bool, error) {
+	reply, err := r.{{$modelName}}.ExistBy(ctx, &{{$modelName}}V1.Exist{{.Name | ToCamel}}ByRequest{
+		Param: {{.Name | ToLowerCamel}}ParamBiz2Proto(param),
+	})
+	if err != nil {
+		return false, err
+	}
+	return reply.Exist, nil
+}
