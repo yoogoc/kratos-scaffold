@@ -20,5 +20,8 @@ var ProviderSet = wire.NewSet(NewGreeterUsecase)
 	if err := os.WriteFile(path.Join(bizPath, "biz.go"), []byte(bizContent), 0o644); err != nil {
 		return err
 	}
+	if err := os.WriteFile(path.Join(bizPath, "pagination.go"), []byte(bizPaginationGo), 0o644); err != nil {
+		return err
+	}
 	return nil
 }

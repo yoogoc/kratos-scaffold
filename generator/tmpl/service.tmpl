@@ -89,7 +89,11 @@ func (s *{{.Name}}Service) FindBy(ctx context.Context, req *v1.Find{{.Name}}ByRe
 {{- end }}
 
 func (s *{{.Name}}Service) List(ctx context.Context, req *v1.List{{.Name}}Request) (*v1.List{{.Name}}Reply, error) {
-	list, count, err := s.uc.List{{.Name}}(ctx, param{{.Name}}Proto2Biz(req.Param), int(req.Page), int(req.PageSize))
+	list, count, err := s.uc.List{{.Name}}(ctx, param{{.Name}}Proto2Biz(req.Param),
+		biz.WithPage(int(req.Page)),
+		biz.WithPageSize(int(req.PageSize)),
+		biz.WithOrderBy(biz.ParseOrderBy(req.OrderBy)),
+	)
 	if err != nil {
 		return nil, err
 	}

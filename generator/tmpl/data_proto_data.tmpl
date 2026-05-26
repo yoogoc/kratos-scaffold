@@ -59,11 +59,12 @@ func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | 
 	return 0, err
 }
 
-func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, size int) ([]*biz.{{.Name | ToCamel}}, int, error) {
+func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, opts *biz.ListOptions) ([]*biz.{{.Name | ToCamel}}, int, error) {
 	reply, err := r.{{$modelName}}.List(ctx, &{{$modelName}}V1.List{{.Name | ToCamel}}Request{
-		Param: {{.Name | ToLowerCamel}}ParamBiz2Proto(param),
-		Page:     uint32(page),
-		PageSize: uint32(size),
+		Param:    {{.Name | ToLowerCamel}}ParamBiz2Proto(param),
+		Page:     uint32(opts.Page),
+		PageSize: uint32(opts.PageSize),
+		OrderBy:  biz.FormatOrderBy(opts.OrderBy),
 	})
 	if err != nil {
 		return nil, 0, err

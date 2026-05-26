@@ -30,6 +30,9 @@ var cmdMigrationTmpl string
 //go:embed resources/biz.tx.go.example
 var bizTxGo string
 
+//go:embed resources/biz.pagination.go.example
+var bizPaginationGo string
+
 //go:embed resources/log.log.go.tmpl
 var logTmpl string
 

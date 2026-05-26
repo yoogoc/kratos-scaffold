@@ -78,7 +78,7 @@ func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | 
 	{{- end }}
 }
 
-func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, page, size int) ([]*biz.{{.Name | ToCamel}}, int, error) {
+func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCamel}}Param, opts *biz.ListOptions) ([]*biz.{{.Name | ToCamel}}, int, error) {
 	client := r.data.EntClient(ctx)
 	query := client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...)
 	{{- if .SoftDelete }}
@@ -88,9 +88,7 @@ func (r {{$modelName}}Repo) List(ctx context.Context, param *biz.{{.Name | ToCam
 	if err != nil {
 		return nil, 0, err
 	}
-	if size > 0 {
-		query = query.Limit(size).Offset((page - 1) * size)
-	}
+	query.Modify(applyListOptions(opts))
 	rows, err := query.All(ctx)
 	if err != nil {
 		return nil, 0, err

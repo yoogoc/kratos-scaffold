@@ -24,7 +24,7 @@ type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
 	DestroyBy(ctx context.Context, param *UserParam) (int, error)
-	List(ctx context.Context, param *UserParam, page, size int) ([]*User, int, error)
+	List(ctx context.Context, param *UserParam, opts *ListOptions) ([]*User, int, error)
 	FindBy(ctx context.Context, param *UserParam) (*User, error)
 }
 
@@ -52,8 +52,9 @@ func (uc *UserUsecase) DestroyUserBy(ctx context.Context, param *UserParam) (int
 	return uc.repo.DestroyBy(ctx, param)
 }
 
-func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, page, size int) ([]*User, int, error) {
-	return uc.repo.List(ctx, param, page, size)
+func (uc *UserUsecase) ListUser(ctx context.Context, param *UserParam, opts ...ListOption) ([]*User, int, error) {
+	o := ApplyListOptions(opts...)
+	return uc.repo.List(ctx, param, o)
 }
 
 func (uc *UserUsecase) FindUserBy(ctx context.Context, param *UserParam) (*User, error) {

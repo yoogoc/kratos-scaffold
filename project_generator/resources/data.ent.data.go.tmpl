@@ -96,3 +96,19 @@ func NewData(conf *conf.Data, logger log.Logger, db *ent.Client) (*Data, error) 
 		db:  db,
 	}, nil
 }
+
+func applyListOptions(opts *biz.ListOptions) func(*sql.Selector) {
+	return func(s *sql.Selector) {
+		if opts.PageSize > 0 {
+			s.Limit(opts.PageSize)
+			s.Offset((opts.Page - 1) * opts.PageSize)
+		}
+		for _, ob := range opts.OrderBy {
+			if ob.Desc {
+				s.OrderBy(sql.Desc(ob.Field))
+			} else {
+				s.OrderBy(sql.Asc(ob.Field))
+			}
+		}
+	}
+}
