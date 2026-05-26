@@ -18,7 +18,7 @@ type ListOptions struct {
 }
 
 func DefaultListOptions() *ListOptions {
-	return &ListOptions{Page: 1, PageSize: 20}
+	return &ListOptions{Page: 0, PageSize: 0}
 }
 
 func ApplyListOptions(opts ...ListOption) *ListOptions {

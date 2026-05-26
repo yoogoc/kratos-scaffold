@@ -19,7 +19,7 @@ type DemoTmpl struct {
 	GoPackage    string
 }
 
-func genDemo(name, appPath string, isSubMono bool) error {
+func genDemo(name, appPath string, isSubMono, isBff bool) error {
 	wd, _ := os.Getwd()
 
 	var apiProtoDir string
@@ -114,7 +114,11 @@ func genDemo(name, appPath string, isSubMono bool) error {
 	// 6. render data/greeter.go
 	fmt.Println("generating demo data/greeter.go ...")
 	dataBuf := new(bytes.Buffer)
-	dataTmpl, err := template.New("demoDataTmpl").Parse(demoGreeterDataTmpl)
+	dataTemplate := demoGreeterDataTmpl
+	if isBff {
+		dataTemplate = demoGreeterBffDataTmpl
+	}
+	dataTmpl, err := template.New("demoDataTmpl").Parse(dataTemplate)
 	if err != nil {
 		return err
 	}

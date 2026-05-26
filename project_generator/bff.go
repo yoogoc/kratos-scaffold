@@ -75,7 +75,7 @@ var ProviderSet = wire.NewSet()
 	}
 
 	// 9 gen demo greeter
-	if err := genDemo(name, appPath, isSubMono); err != nil {
+	if err := genDemo(name, appPath, isSubMono, true); err != nil {
 		return err
 	}
 
