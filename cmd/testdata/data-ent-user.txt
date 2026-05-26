@@ -75,3 +75,8 @@ func (r userRepo) FindBy(ctx context.Context, param *biz.UserParam) (*biz.User, 
 	}
 	return userEnt2Biz(rows), nil
 }
+
+func (r userRepo) ExistBy(ctx context.Context, param *biz.UserParam) (bool, error) {
+	client := r.data.EntClient(ctx)
+	return client.User.Query().Where(userParam2Predicates(param)...).Exist(ctx)
+}

@@ -60,6 +60,16 @@ func (s *UserService) FindBy(ctx context.Context, req *v1.FindUserByRequest) (*v
 	}, nil
 }
 
+func (s *UserService) ExistBy(ctx context.Context, req *v1.ExistUserByRequest) (*v1.ExistUserByReply, error) {
+	exist, err := s.uc.ExistUserBy(ctx, paramUserProto2Biz(req.Param))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.ExistUserByReply{
+		Exist: exist,
+	}, nil
+}
+
 func (s *UserService) List(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
 	list, count, err := s.uc.ListUser(ctx, paramUserProto2Biz(req.Param),
 		biz.WithPage(int(req.Page)),

@@ -8,6 +8,7 @@ service UserService {
 	rpc Update (UpdateUserRequest) returns (UpdateUserReply);
 	rpc DestroyBy (DestroyUserByRequest) returns (DestroyUserByReply);
 	rpc FindBy (FindUserByRequest) returns (FindUserByReply);
+	rpc ExistBy (ExistUserByRequest) returns (ExistUserByReply);
 	rpc List (ListUserRequest) returns (ListUserReply);
 }
 
@@ -43,6 +44,12 @@ message FindUserByRequest {
 }
 message FindUserByReply {
 	User datum = 1;
+}
+message ExistUserByRequest {
+	UserParam param = 1;
+}
+message ExistUserByReply {
+	bool exist = 1;
 }
 message UserParam {
 	optional int64 idEq = 1;

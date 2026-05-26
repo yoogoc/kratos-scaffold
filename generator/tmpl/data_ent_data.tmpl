@@ -110,3 +110,14 @@ func (r {{$modelName}}Repo) FindBy(ctx context.Context, param *biz.{{.Name | ToC
 	}
 	return {{$modelName}}Ent2Biz(rows), nil
 }
+
+func (r {{$modelName}}Repo) ExistBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (bool, error) {
+	client := r.data.EntClient(ctx)
+	{{- if .SoftDelete }}
+	return client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).
+		Where({{$modelName}}.DeletedAtIsNil()).
+		Exist(ctx)
+	{{- else }}
+	return client.{{.Name | ToCamel}}.Query().Where({{$modelName}}Param2Predicates(param)...).Exist(ctx)
+	{{- end }}
+}

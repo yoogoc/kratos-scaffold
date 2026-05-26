@@ -42,6 +42,7 @@ service {{.Name}}Service {
 	{{- else }}
 	rpc DestroyBy (Destroy{{.Name}}ByRequest) returns (Destroy{{.Name}}ByReply);
 	rpc FindBy (Find{{.Name}}ByRequest) returns (Find{{.Name}}ByReply);
+	rpc ExistBy (Exist{{.Name}}ByRequest) returns (Exist{{.Name}}ByReply);
 	{{- end }}
 	rpc List (List{{.Name}}Request) returns (List{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
@@ -120,6 +121,12 @@ message Find{{.Name}}ByRequest {
 }
 message Find{{.Name}}ByReply {
 	{{.Name}} datum = 1;
+}
+message Exist{{.Name}}ByRequest {
+	{{.Name}}Param param = 1;
+}
+message Exist{{.Name}}ByReply {
+	bool exist = 1;
 }
 {{- end }}
 message {{.Name}}Param {
