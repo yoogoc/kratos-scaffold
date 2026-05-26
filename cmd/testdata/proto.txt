@@ -3,7 +3,6 @@ package api.user.v1;
 option go_package = "test/api/user/v1;v1";
 option java_multiple_files = true;
 option java_package = "api.user.v1";
-
 service UserService {
 	rpc Create (CreateUserRequest) returns (CreateUserReply);
 	rpc Update (UpdateUserRequest) returns (UpdateUserReply);

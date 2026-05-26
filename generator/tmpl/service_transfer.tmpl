@@ -10,18 +10,34 @@ import (
 	v1 "{{.ApiPath}}"
 )
 
+{{- $genHttp := .GenHttp }}
 func create{{.Name}}Req2Biz(req *v1.Create{{.Name}}Request) *biz.{{.Name}} {
 	{{- range $i, $f := .CreateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.IsTime }}
-			{{- if $f.IsNillable }}
+			{{- if $genHttp }}
+				{{- if $f.IsNillable }}
 			var {{ $f.Name | ToLowCamel }} *time.Time
 			if {{ $reqf }} != nil {
-				tmp, _ := time.Parse(time.DateTime, *{{ $reqf }})
+				tmp := time.Unix(*{{ $reqf }}, 0)
 				{{ $f.Name | ToLowCamel }} = &tmp
 			}
+				{{- else }}
+			{{ $f.Name | ToLowCamel }} := time.Unix({{ $reqf }}, 0)
+				{{- end }}
 			{{- else }}
-			{{ $f.Name | ToLowCamel }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+				{{- if $f.IsNillable }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp := {{ $reqf }}.AsTime()
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+				{{- else }}
+			var {{ $f.Name | ToLowCamel }} time.Time
+			if {{ $reqf }} != nil {
+				{{ $f.Name | ToLowCamel }} = {{ $reqf }}.AsTime()
+			}
+				{{- end }}
 			{{- end }}
 		{{- end }}
 	{{- end }}
@@ -40,14 +56,29 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 	{{- range $i, $f := .CreateFields }}
 		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
 		{{- if $f.FieldType.IsTime }}
-			{{- if $f.IsNillable }}
+			{{- if $genHttp }}
+				{{- if $f.IsNillable }}
 			var {{ $f.Name | ToLowCamel }} *time.Time
 			if {{ $reqf }} != nil {
-				tmp, _ := time.Parse(time.DateTime, *{{ $reqf }})
+				tmp := time.Unix(*{{ $reqf }}, 0)
 				{{ $f.Name | ToLowCamel }} = &tmp
 			}
+				{{- else }}
+			{{ $f.Name | ToLowCamel }} := time.Unix({{ $reqf }}, 0)
+				{{- end }}
 			{{- else }}
-			{{ $f.Name | ToLowCamel }}, _ := time.Parse(time.DateTime, {{ $reqf }})
+				{{- if $f.IsNillable }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp := {{ $reqf }}.AsTime()
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+				{{- else }}
+			var {{ $f.Name | ToLowCamel }} time.Time
+			if {{ $reqf }} != nil {
+				{{ $f.Name | ToLowCamel }} = {{ $reqf }}.AsTime()
+			}
+				{{- end }}
 			{{- end }}
 		{{- end }}
 	{{- end }}
@@ -68,13 +99,15 @@ func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
 	{{- range $i, $f := .TransferFields }}
 		{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
 		{{- if and $f.FieldType.IsTime $f.IsNillable }}
-			{{ $f.Name | ToLowCamel }} := func() *string {
-				if {{ $reqf }} == nil {
-					return nil
-				}
-				tmp := {{ $reqf }}.Format(time.DateTime)
-				return &tmp
-			}()
+			{{- if $genHttp }}
+			{{ $f.Name | ToLowCamel }} := lo.IfF({{ $reqf }} != nil, func() *int64 {
+				return lo.ToPtr({{ $reqf }}.Unix())
+			}).Else(nil)
+			{{- else }}
+			{{ $f.Name | ToLowCamel }} := lo.IfF({{ $reqf }} != nil, func() *timestamppb.Timestamp {
+				return timestamppb.New(*{{ $reqf }})
+			}).Else(nil)
+			{{- end }}
 		{{- end }}
 	{{- end }}
 	return &v1.{{.Name}}{
@@ -84,7 +117,7 @@ func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
 				{{- if $f.IsNillable }}
 				{{- $reqf = $f.Name | ToLowCamel }}
 				{{- else }}
-				{{- $reqf = printf $f.FieldType.Biz2Proto $reqf }}
+				{{- $reqf = printf ($f.FieldType.Biz2ProtoByHttp $genHttp) $reqf }}
 				{{- end }}
 			{{- end }}
 			{{ $f.Name | ToCamel }}: {{$reqf}},
@@ -107,27 +140,36 @@ func param{{.Name}}Proto2Biz(req *v1.{{.Name}}Param) *biz.{{.Name}}Param {
 	{{- range $i, $f := .Fields.ParamFields }}
 		{{- if and $f.FieldType.IsTime (not $f.Type.IsIn) }}
 			{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
+			{{- if $genHttp }}
 			var {{ $f.Name | ToLowCamel }} *time.Time
 			if {{ $reqf }} != nil {
-				item, err := time.Parse(time.DateTime, *{{$reqf}})
-				if err == nil {
-					{{ $f.Name | ToLowCamel }} = &item
-				} else {
-					// TODO return error
-				}
+				item := time.Unix(*{{$reqf}}, 0)
+				{{ $f.Name | ToLowCamel }} = &item
 			}
+			{{- else }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				item := {{$reqf}}.AsTime()
+				{{ $f.Name | ToLowCamel }} = &item
+			}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 
 	{{- range $i, $f := .Fields.ParamFields }}
 		{{- $reqf := printf "req.%s%s" ($f.SourceName | ToCamel) $f.Type.StringProto }}
 		{{- if and $f.FieldType.IsTime $f.Type.IsIn }}
+			{{- if $genHttp }}
 			{{ $f.Name | ToLowCamel }} := make([]time.Time, 0, len({{$reqf}}))
-			for _, timestamp := range {{$reqf}} {
-				item, _ := time.Parse(time.DateTime, timestamp)
-				// TODO return error
-				{{ $f.Name | ToLowCamel }} = append({{ $f.Name | ToLowCamel }}, item)
+			for _, ts := range {{$reqf}} {
+				{{ $f.Name | ToLowCamel }} = append({{ $f.Name | ToLowCamel }}, time.Unix(ts, 0))
 			}
+			{{- else }}
+			{{ $f.Name | ToLowCamel }} := make([]time.Time, 0, len({{$reqf}}))
+			for _, ts := range {{$reqf}} {
+				{{ $f.Name | ToLowCamel }} = append({{ $f.Name | ToLowCamel }}, ts.AsTime())
+			}
+			{{- end }}
 		{{- end }}
 	{{- end }}
 

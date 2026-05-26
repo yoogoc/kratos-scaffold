@@ -31,12 +31,23 @@ type Field struct {
 }
 
 func (fs Fields) ProtoImports() []string {
+	var imports []string
 	for _, f := range fs {
 		if f.IsArray || f.FieldType.IsJson() {
-			return []string{"google/protobuf/struct.proto"}
+			imports = append(imports, "google/protobuf/struct.proto")
+			break
 		}
 	}
-	return nil
+	return imports
+}
+
+func (fs Fields) HasTimeField() bool {
+	for _, f := range fs {
+		if f.FieldType == TypeTime || f.FieldType == TypeDate {
+			return true
+		}
+	}
+	return false
 }
 
 func (fs Fields) CreateFields(primaryKey string) []*Field {

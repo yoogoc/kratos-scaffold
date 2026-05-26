@@ -27,7 +27,7 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 	reply, err := r.{{$modelName}}.Create(ctx, &{{$modelName}}V1.Create{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .CreateFields }}
 			{{- if $f.FieldType.IsTime }}
-				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }}.Format(time.DateTime),
+				{{ $f.Name | ToCamel }}: timestamppb.New({{$modelName}}.{{ $f.Name | ToCamel }}),
 			{{- else }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
 			{{- end }}
