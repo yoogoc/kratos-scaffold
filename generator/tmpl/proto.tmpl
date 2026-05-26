@@ -102,7 +102,7 @@ message Get{{.Name}}Request {
 	{{ $primaryField.FieldType.StringProto }} {{ $primaryField.Name | fieldStyle }} = 1;
 }
 message Get{{.Name}}Reply {
-	{{.Name}} {{.Name | fieldStyle }} = 1;
+	{{.Name}} datum = 1;
 }
 {{- else }}
 message Destroy{{.Name}}ByRequest {

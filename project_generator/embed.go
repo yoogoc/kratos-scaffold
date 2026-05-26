@@ -1,7 +1,8 @@
 package project_generator
 
 import (
-	_ "embed"
+	"embed"
+	"io/fs"
 	"os"
 	"path"
 )
@@ -78,84 +79,29 @@ var makefileContent string
 //go:embed resources/conf.bff.proto.example
 var confBffProto string
 
-//go:embed resources/annotations.proto
-var annotationsProto string
-
-//go:embed resources/descriptor.proto
-var descriptorProto string
-
-//go:embed resources/duration.proto
-var durationProto string
-
-//go:embed resources/errors.proto
-var errorsProto string
-
-//go:embed resources/http.proto
-var httpProto string
-
-//go:embed resources/httpbody.proto
-var httpbodyProto string
-
-//go:embed resources/struct.proto
-var structProto string
-
-//go:embed resources/timestamp.proto
-var timestampProto string
-
-//go:embed resources/wrappers.proto
-var wrappersProto string
-
-//go:embed resources/validate.proto
-var validateProto string
+//go:embed resources/third_party
+var thirdPartyFS embed.FS
 
 func cpProto(projectPath string) error {
-	if err := os.MkdirAll(path.Join(projectPath, "third_party"), 0o700); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path.Join(projectPath, "third_party/errors"), 0o700); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/errors/errors.proto"), []byte(errorsProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path.Join(projectPath, "third_party/google"), 0o700); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path.Join(projectPath, "third_party/google/api"), 0o700); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/api/annotations.proto"), []byte(annotationsProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/api/http.proto"), []byte(httpProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/api/httpbody.proto"), []byte(httpbodyProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path.Join(projectPath, "third_party/google/protobuf"), 0o700); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/protobuf/descriptor.proto"), []byte(descriptorProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/protobuf/duration.proto"), []byte(durationProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/protobuf/struct.proto"), []byte(structProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/protobuf/timestamp.proto"), []byte(timestampProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/google/protobuf/wrappers.proto"), []byte(wrappersProto), 0o644); err != nil {
-		return err
-	}
-	if err := os.MkdirAll(path.Join(projectPath, "third_party/validate"), 0o700); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(projectPath, "third_party/validate/validate.proto"), []byte(validateProto), 0o644); err != nil {
-		return err
-	}
-	return nil
+	return fs.WalkDir(thirdPartyFS, "resources/third_party", func(p string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		rel, _ := path.Split(p)
+		_ = rel
+		// strip "resources/third_party" prefix to get relative path
+		relPath := p[len("resources/third_party"):]
+		if relPath == "" {
+			return nil
+		}
+		destPath := path.Join(projectPath, "third_party", relPath)
+		if d.IsDir() {
+			return os.MkdirAll(destPath, 0o700)
+		}
+		content, err := thirdPartyFS.ReadFile(p)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(destPath, content, 0o644)
+	})
 }
