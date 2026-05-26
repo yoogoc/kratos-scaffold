@@ -1,0 +1,28 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.DemoTmpl*/ -}}
+package data
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"{{.AppPkgPath}}/internal/biz"
+	"{{.AppPkgPath}}/internal/conf"
+)
+
+type greeterRepo struct {
+	conf *conf.Data
+	log  *log.Helper
+}
+
+func NewGreeterRepo(c *conf.Data, logger log.Logger) biz.GreeterRepo {
+	return &greeterRepo{
+		conf: c,
+		log:  log.NewHelper(log.With(logger, "module", "data/greeter")),
+	}
+}
+
+func (r *greeterRepo) SayHello(ctx context.Context, name string) (string, error) {
+	r.log.WithContext(ctx).Infof("SayHello: %s", name)
+	return fmt.Sprintf("Hello %s", name), nil
+}

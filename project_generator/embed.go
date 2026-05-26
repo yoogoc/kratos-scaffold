@@ -66,6 +66,9 @@ var demoGreeterServiceTmpl string
 //go:embed resources/demo.greeter.data.go.tmpl
 var demoGreeterDataTmpl string
 
+//go:embed resources/demo.greeter.bff.data.go.tmpl
+var demoGreeterBffDataTmpl string
+
 //go:embed resources/conf.proto.example
 var confProto string
 
