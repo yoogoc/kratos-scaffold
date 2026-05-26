@@ -108,6 +108,7 @@ func GenMono(name string) error {
 		"entgo.io/ent",
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
+		"github.com/samber/lo",
 	)
 	if err != nil {
 		return err
@@ -213,6 +214,7 @@ func GenSingle(name string) error {
 		"entgo.io/ent",
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
+		"github.com/samber/lo",
 	); err != nil {
 		return err
 	}

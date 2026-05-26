@@ -107,8 +107,8 @@ var (
 		TypeBool:   "bool",
 		TypeString: "string",
 		TypeText:   "string",
-		TypeTime:   "string",
-		TypeDate:   "string",
+		TypeTime:   "google.protobuf.Timestamp",
+		TypeDate:   "google.protobuf.Timestamp",
 		TypeJson:   "google.protobuf.Struct",
 	}
 
@@ -122,13 +122,13 @@ var (
 		TypeBool:   "optional bool",
 		TypeString: "optional string",
 		TypeText:   "optional string",
-		TypeTime:   "optional string",
-		TypeDate:   "optional string",
+		TypeTime:   "google.protobuf.Timestamp",
+		TypeDate:   "google.protobuf.Timestamp",
 	}
 
 	typeBiz2Proto = [...]string{
-		TypeTime: "%s.Format(time.DateTime)",
-		TypeDate: "%s.Format(time.DateOnly)",
+		TypeTime: "timestamppb.New(%s)",
+		TypeDate: "timestamppb.New(%s)",
 	}
 )
 
@@ -137,9 +137,6 @@ func (t TypeField) String() string {
 }
 
 func (t TypeField) StringByType(http bool) string {
-	if http && (t == TypeTime || t == TypeDate) {
-		return "string"
-	}
 	return typeNames[t]
 }
 
@@ -156,9 +153,6 @@ func (t TypeField) StringParam() string {
 }
 
 func (t TypeField) StringParamByType(http bool) string {
-	if http && (t == TypeTime || t == TypeDate) {
-		return "*string"
-	}
 	return typePramNames[t]
 }
 
@@ -174,10 +168,31 @@ func (t TypeField) StringProto() string {
 	return typeProtoNames[t]
 }
 
+func (t TypeField) StringProtoByHttp(http bool) string {
+	if http && (t == TypeTime || t == TypeDate) {
+		return "int64"
+	}
+	return typeProtoNames[t]
+}
+
 func (t TypeField) StringProtoParam() string {
 	return typeParamProtoNames[t]
 }
 
+func (t TypeField) StringProtoParamByHttp(http bool) string {
+	if http && (t == TypeTime || t == TypeDate) {
+		return "optional int64"
+	}
+	return typeParamProtoNames[t]
+}
+
 func (t TypeField) Biz2Proto() string {
+	return typeBiz2Proto[t]
+}
+
+func (t TypeField) Biz2ProtoByHttp(http bool) string {
+	if http && (t == TypeTime || t == TypeDate) {
+		return "%s.Unix()"
+	}
 	return typeBiz2Proto[t]
 }
