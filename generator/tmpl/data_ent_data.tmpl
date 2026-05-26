@@ -69,6 +69,19 @@ func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.N
 	return {{$modelName}}Ent2Biz(row), nil
 }
 
+func (r {{$modelName}}Repo) Patch(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}Patch) (*biz.{{.Name | ToCamel}}, error) {
+	client := r.data.EntClient(ctx)
+	row, err := client.{{.Name | ToCamel}}.UpdateOneID({{$modelName}}.Id).
+		{{- range $i, $f := .UpdateFields }}
+		SetNillable{{ $f.Name | ToEntName }}({{$modelName}}.{{ $f.Name | ToCamel }}{{- if $f.FieldType.IsJson }}.AsMap(){{- end }}).
+		{{- end }}
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return {{$modelName}}Ent2Biz(row), nil
+}
+
 func (r {{$modelName}}Repo) DestroyBy(ctx context.Context, param *biz.{{.Name | ToCamel}}Param) (int, error) {
 	client := r.data.EntClient(ctx)
 	{{- if .SoftDelete }}

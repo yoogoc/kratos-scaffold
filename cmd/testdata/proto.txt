@@ -6,6 +6,7 @@ option java_package = "api.user.v1";
 service UserService {
 	rpc Create (CreateUserRequest) returns (CreateUserReply);
 	rpc Update (UpdateUserRequest) returns (UpdateUserReply);
+	rpc Patch (PatchUserRequest) returns (PatchUserReply);
 	rpc DestroyBy (DestroyUserByRequest) returns (DestroyUserByReply);
 	rpc FindBy (FindUserByRequest) returns (FindUserByReply);
 	rpc ExistBy (ExistUserByRequest) returns (ExistUserByReply);
@@ -30,6 +31,14 @@ message UpdateUserRequest {
 	int32 age = 3;
 }
 message UpdateUserReply {
+	User datum = 1;
+}
+message PatchUserRequest {
+	int64 id = 1;
+	optional string name = 2;
+	optional int32 age = 3;
+}
+message PatchUserReply {
 	User datum = 1;
 }
 

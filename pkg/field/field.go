@@ -81,6 +81,18 @@ func (fs Fields) UpdateFields(primaryField *Field) []*Field {
 	})
 }
 
+func (fs Fields) PatchFields(primaryField *Field) []*Field {
+	return util.FilterSlice(fs, func(f *Field) bool {
+		fn := strings.ToLower(strcase.ToSnake(f.Name))
+		return fn != strings.ToLower(strcase.ToSnake(primaryField.Name)) &&
+			fn != "created_at" &&
+			fn != "updated_at" &&
+			fn != "created_by" &&
+			fn != "updated_by" &&
+			fn != "deleted_at"
+	})
+}
+
 func (fs Fields) UpdateProtoFields() []*Field {
 	return util.FilterSlice(fs, func(f *Field) bool {
 		fn := strings.ToLower(strcase.ToSnake(f.Name))
