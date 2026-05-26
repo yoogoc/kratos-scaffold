@@ -141,7 +141,7 @@ func (t TypeField) StringByType(http bool) string {
 }
 
 func (t TypeField) IsTime() bool {
-	return t == TypeTime
+	return t == TypeTime || t == TypeDate
 }
 
 func (t TypeField) IsJson() bool {
