@@ -12,6 +12,12 @@ type User struct {
 	Age  int32
 }
 
+type UserPatch struct {
+	Id   int64
+	Name *string
+	Age  *int32
+}
+
 type UserParam struct {
 	IdEq     *int64
 	IdIn     []int64
@@ -23,6 +29,7 @@ type UserParam struct {
 type UserRepo interface {
 	Create(ctx context.Context, user *User) (*User, error)
 	Update(ctx context.Context, user *User) (*User, error)
+	Patch(ctx context.Context, user *UserPatch) (*User, error)
 	DestroyBy(ctx context.Context, param *UserParam) (int, error)
 	List(ctx context.Context, param *UserParam, opts *ListOptions) ([]*User, int, error)
 	FindBy(ctx context.Context, param *UserParam) (*User, error)
@@ -47,6 +54,10 @@ func (uc *UserUsecase) CreateUser(ctx context.Context, user *User) (*User, error
 
 func (uc *UserUsecase) UpdateUser(ctx context.Context, user *User) (*User, error) {
 	return uc.repo.Update(ctx, user)
+}
+
+func (uc *UserUsecase) PatchUser(ctx context.Context, user *UserPatch) (*User, error) {
+	return uc.repo.Patch(ctx, user)
 }
 
 func (uc *UserUsecase) DestroyUserBy(ctx context.Context, param *UserParam) (int, error) {

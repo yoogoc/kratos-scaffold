@@ -27,7 +27,13 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 	reply, err := r.{{$modelName}}.Create(ctx, &{{$modelName}}V1.Create{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .CreateFields }}
 			{{- if $f.FieldType.IsTime }}
+				{{- if $f.IsNillable }}
+				{{ $f.Name | ToCamel }}: lo.IfF({{$modelName}}.{{ $f.Name | ToCamel }} != nil, func() *timestamppb.Timestamp {
+					return timestamppb.New(*{{$modelName}}.{{ $f.Name | ToCamel }})
+				}).Else(nil),
+				{{- else }}
 				{{ $f.Name | ToCamel }}: timestamppb.New({{$modelName}}.{{ $f.Name | ToCamel }}),
+				{{- end }}
 			{{- else }}
 				{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
 			{{- end }}
@@ -43,7 +49,35 @@ func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.N
 func (r {{$modelName}}Repo) Update(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Update(ctx, &{{$modelName}}V1.Update{{.Name | ToCamel}}Request{
 		{{- range $i, $f := .UpdateProtoFields }}
+			{{- if $f.FieldType.IsTime }}
+				{{- if $f.IsNillable }}
+			{{ $f.Name | ToCamel }}: lo.IfF({{$modelName}}.{{ $f.Name | ToCamel }} != nil, func() *timestamppb.Timestamp {
+				return timestamppb.New(*{{$modelName}}.{{ $f.Name | ToCamel }})
+			}).Else(nil),
+				{{- else }}
+			{{ $f.Name | ToCamel }}: timestamppb.New({{$modelName}}.{{ $f.Name | ToCamel }}),
+				{{- end }}
+			{{- else }}
 			{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
+			{{- end }}
+		{{- end }}
+	})
+	if err != nil {
+		return nil, err
+	}
+	return {{$modelName}}Proto2Biz(reply.Datum), nil
+}
+
+func (r {{$modelName}}Repo) Patch(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}Patch) (*biz.{{.Name | ToCamel}}, error) {
+	reply, err := r.{{$modelName}}.Patch(ctx, &{{$modelName}}V1.Patch{{.Name | ToCamel}}Request{
+		{{- range $i, $f := .UpdateProtoFields }}
+			{{- if $f.FieldType.IsTime }}
+			{{ $f.Name | ToCamel }}: lo.IfF({{$modelName}}.{{ $f.Name | ToCamel }} != nil, func() *timestamppb.Timestamp {
+				return timestamppb.New(*{{$modelName}}.{{ $f.Name | ToCamel }})
+			}).Else(nil),
+			{{- else }}
+			{{ $f.Name | ToCamel }}: {{$modelName}}.{{ $f.Name | ToCamel }},
+			{{- end }}
 		{{- end }}
 	})
 	if err != nil {

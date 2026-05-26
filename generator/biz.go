@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
+	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
@@ -25,6 +26,14 @@ func NewBiz(setting *cli.EnvSettings) *Biz {
 	return &Biz{
 		Base: NewBase(setting, true),
 	}
+}
+
+func (b *Biz) PrimaryField() *field.Field {
+	return b.Fields.PrimaryField(b.PrimaryKey)
+}
+
+func (b *Biz) PatchFields() []*field.Field {
+	return b.Fields.PatchFields(b.Fields.PrimaryField(b.PrimaryKey))
 }
 
 //go:embed tmpl/biz.tmpl

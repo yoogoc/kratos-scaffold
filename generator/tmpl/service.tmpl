@@ -43,6 +43,16 @@ func (s *{{.Name}}Service) Update(ctx context.Context, req *v1.Update{{.Name}}Re
 		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
 	}, nil
 }
+func (s *{{.Name}}Service) Patch(ctx context.Context, req *v1.Patch{{.Name}}Request) (*v1.Patch{{.Name}}Reply, error) {
+	item, err := s.uc.Patch{{.Name}}(ctx, patch{{.Name}}Req2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.Patch{{.Name}}Reply{
+		Datum: {{.Name | ToLowCamel }}Biz2Proto(item),
+	}, nil
+}
+
 {{- if .GenHttp }}
 func (s *{{.Name}}Service) Destroy(ctx context.Context, req *v1.Destroy{{.Name}}Request) (*v1.Destroy{{.Name}}Reply, error) {
 	_, err := s.uc.Destroy{{.Name}}By(ctx, &biz.{{.Name}}Param{

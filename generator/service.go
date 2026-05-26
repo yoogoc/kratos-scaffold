@@ -52,6 +52,10 @@ func (b *Service) TransferFields() []*field.Field {
 	return b.Fields.TransferFields()
 }
 
+func (b *Service) PatchFields() []*field.Field {
+	return b.Fields.PatchFields(b.Fields.PrimaryField(b.PrimaryKey))
+}
+
 func (b *Service) PrimaryField() *field.Field {
 	return b.Fields.PrimaryField(b.PrimaryKey)
 }

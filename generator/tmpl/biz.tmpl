@@ -21,6 +21,17 @@ type {{.Name}} struct {
 	{{- end }}
 }
 
+type {{.Name}}Patch struct {
+	{{ .PrimaryField.Name | ToCamel }}{{" "}}{{ $http | .PrimaryField.FieldType.StringByType }}
+	{{- range $i, $f := .PatchFields }}
+	{{- if $f.IsArray }}
+	{{ $f.Name | ToCamel }} []{{ $http | $f.FieldType.StringByType }}
+	{{- else }}
+	{{ $f.Name | ToCamel }} *{{ $http | $f.FieldType.StringByType }}
+	{{- end }}
+	{{- end }}
+}
+
 type {{.Name}}Param struct {
 	{{- $strToPreMap := .StrToPreMap}}
 	{{- range $i, $f := .Fields.ParamFields }}
@@ -31,6 +42,7 @@ type {{.Name}}Param struct {
 type {{.Name}}Repo interface {
 	Create(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
 	Update(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
+	Patch(ctx context.Context, {{.Name | ToLower}} *{{.Name}}Patch) (*{{.Name}}, error)
 	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
 	List(ctx context.Context, param *{{.Name}}Param, opts *ListOptions) ([]*{{.Name}}, int, error)
 	FindBy(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error)
@@ -55,6 +67,10 @@ func (uc *{{.Name}}Usecase) Create{{.Name}}(ctx context.Context, {{.Name | ToLow
 
 func (uc *{{.Name}}Usecase) Update{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {
 	return uc.repo.Update(ctx, {{.Name | ToLower}})
+}
+
+func (uc *{{.Name}}Usecase) Patch{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}Patch) (*{{.Name}}, error) {
+	return uc.repo.Patch(ctx, {{.Name | ToLower}})
 }
 
 func (uc *{{.Name}}Usecase) Destroy{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (int, error) {

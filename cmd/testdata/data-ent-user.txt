@@ -47,6 +47,18 @@ func (r userRepo) Update(ctx context.Context, user *biz.User) (*biz.User, error)
 	return userEnt2Biz(row), nil
 }
 
+func (r userRepo) Patch(ctx context.Context, user *biz.UserPatch) (*biz.User, error) {
+	client := r.data.EntClient(ctx)
+	row, err := client.User.UpdateOneID(user.Id).
+		SetNillableName(user.Name).
+		SetNillableAge(user.Age).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return userEnt2Biz(row), nil
+}
+
 func (r userRepo) DestroyBy(ctx context.Context, param *biz.UserParam) (int, error) {
 	client := r.data.EntClient(ctx)
 	return client.User.Delete().Where(userParam2Predicates(param)...).Exec(ctx)

@@ -20,6 +20,14 @@ func updateUserReq2Biz(req *v1.UpdateUserRequest) *biz.User {
 	}
 }
 
+func patchUserReq2Biz(req *v1.PatchUserRequest) *biz.UserPatch {
+	return &biz.UserPatch{
+		Id:   req.Id,
+		Name: req.Name,
+		Age:  req.Age,
+	}
+}
+
 func userBiz2Proto(item *biz.User) *v1.User {
 	return &v1.User{
 		Id:   item.Id,

@@ -40,6 +40,15 @@ func (s *UserService) Update(ctx context.Context, req *v1.UpdateUserRequest) (*v
 		Datum: userBiz2Proto(item),
 	}, nil
 }
+func (s *UserService) Patch(ctx context.Context, req *v1.PatchUserRequest) (*v1.PatchUserReply, error) {
+	item, err := s.uc.PatchUser(ctx, patchUserReq2Biz(req))
+	if err != nil {
+		return nil, err
+	}
+	return &v1.PatchUserReply{
+		Datum: userBiz2Proto(item),
+	}, nil
+}
 func (s *UserService) DestroyBy(ctx context.Context, req *v1.DestroyUserByRequest) (*v1.DestroyUserByReply, error) {
 	count, err := s.uc.DestroyUserBy(ctx, paramUserProto2Biz(req.Param))
 	if err != nil {

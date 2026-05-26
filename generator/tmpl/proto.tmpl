@@ -28,6 +28,12 @@ service {{.Name}}Service {
 			body: "*"
 		};
 	}{{- end }};
+	rpc Patch (Patch{{.Name}}Request) returns (Patch{{.Name}}Reply){{- if .GenHttp }} {
+		option (google.api.http) = {
+			patch: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			body: "*"
+		};
+	}{{- end }};
 	{{- if .GenHttp }}
 	rpc Destroy (Destroy{{.Name}}Request) returns (Destroy{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
@@ -95,6 +101,15 @@ message Update{{.Name}}Request {
 	{{- end }}
 }
 message Update{{.Name}}Reply {
+	{{.Name}} datum = 1;
+}
+message Patch{{.Name}}Request {
+	{{ .PrimaryField.FieldType.StringProtoByHttp $genHttp }} {{ .PrimaryFieldName | fieldStyle }} = 1;
+	{{- range $i, $f := .PatchFields }}
+	optional {{ $f.FieldType.StringProtoByHttp $genHttp }} {{ $f.Name | fieldStyle }} = {{ add $i 2 }};
+	{{- end }}
+}
+message Patch{{.Name}}Reply {
 	{{.Name}} datum = 1;
 }
 {{$primaryField := .PrimaryField }}

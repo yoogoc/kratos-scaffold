@@ -95,6 +95,38 @@ func update{{.Name}}Req2Biz(req *v1.Update{{.Name}}Request) *biz.{{.Name}} {
 	}
 }
 
+func patch{{.Name}}Req2Biz(req *v1.Patch{{.Name}}Request) *biz.{{.Name}}Patch {
+	{{- range $i, $f := .PatchFields }}
+		{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
+		{{- if $f.FieldType.IsTime }}
+			{{- if $genHttp }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp := time.Unix(*{{ $reqf }}, 0)
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+			{{- else }}
+			var {{ $f.Name | ToLowCamel }} *time.Time
+			if {{ $reqf }} != nil {
+				tmp := {{ $reqf }}.AsTime()
+				{{ $f.Name | ToLowCamel }} = &tmp
+			}
+			{{- end }}
+		{{- end }}
+	{{- end }}
+	return &biz.{{.Name}}Patch{
+		{{- $reqf := printf "req.%s" (.PrimaryField.Name | ToCamel) }}
+		{{ .PrimaryField.Name | ToCamel }}: {{$reqf}},
+		{{- range $i, $f := .PatchFields }}
+			{{- $reqf := printf "req.%s" ($f.Name | ToCamel) }}
+			{{- if $f.FieldType.IsTime }}
+				{{- $reqf = $f.Name | ToLowCamel }}
+			{{- end }}
+			{{ $f.Name | ToCamel }}: {{$reqf}},
+		{{- end }}
+	}
+}
+
 func {{.Name | ToLowCamel}}Biz2Proto(item *biz.{{.Name}}) *v1.{{.Name}} {
 	{{- range $i, $f := .TransferFields }}
 		{{- $reqf := printf "item.%s" ($f.Name | ToCamel) }}
