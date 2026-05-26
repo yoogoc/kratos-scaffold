@@ -62,6 +62,10 @@ func (p *Proto) PageSizeParamName() string {
 	return field.StyleFieldMap[p.FieldStyle]("pageSize")
 }
 
+func (p *Proto) OrderByParamName() string {
+	return field.StyleFieldMap[p.FieldStyle]("orderBy")
+}
+
 //go:embed tmpl/proto.tmpl
 var protoTmpl string
 

@@ -61,7 +61,11 @@ func (s *UserService) FindBy(ctx context.Context, req *v1.FindUserByRequest) (*v
 }
 
 func (s *UserService) List(ctx context.Context, req *v1.ListUserRequest) (*v1.ListUserReply, error) {
-	list, count, err := s.uc.ListUser(ctx, paramUserProto2Biz(req.Param), int(req.Page), int(req.PageSize))
+	list, count, err := s.uc.ListUser(ctx, paramUserProto2Biz(req.Param),
+		biz.WithPage(int(req.Page)),
+		biz.WithPageSize(int(req.PageSize)),
+		biz.WithOrderBy(biz.ParseOrderBy(req.OrderBy)),
+	)
 	if err != nil {
 		return nil, err
 	}

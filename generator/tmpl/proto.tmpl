@@ -128,6 +128,7 @@ message List{{.Name}}Request {
 	uint32 {{.PageParamName}} = 1;
 	uint32 {{.PageSizeParamName}} = 2;
 	{{.Name}}Param param = 3;
+	string {{.OrderByParamName}} = 4;
 }
 message List{{.Name}}Reply {
 	repeated {{.Name}} list = 1;

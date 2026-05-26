@@ -29,6 +29,9 @@ var ProviderSet = wire.NewSet(NewTxUsecase, NewGreeterUsecase)
 	if err := os.WriteFile(path.Join(bizPath, "tx.go"), []byte(bizTxGo), 0o644); err != nil {
 		return err
 	}
+	if err := os.WriteFile(path.Join(bizPath, "pagination.go"), []byte(bizPaginationGo), 0o644); err != nil {
+		return err
+	}
 	// 2. mkdir service. gen service/service.go
 	servicePath := path.Join(appPath, "service")
 	if err := os.MkdirAll(servicePath, 0o700); err != nil {

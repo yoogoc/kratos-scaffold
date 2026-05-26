@@ -1,0 +1,75 @@
+package biz
+
+import (
+	"strings"
+)
+
+type OrderBy struct {
+	Field string
+	Desc  bool
+}
+
+type ListOption func(*ListOptions)
+
+type ListOptions struct {
+	Page     int
+	PageSize int
+	OrderBy  []OrderBy
+}
+
+func DefaultListOptions() *ListOptions {
+	return &ListOptions{Page: 1, PageSize: 20}
+}
+
+func ApplyListOptions(opts ...ListOption) *ListOptions {
+	o := DefaultListOptions()
+	for _, opt := range opts {
+		opt(o)
+	}
+	return o
+}
+
+func WithPage(page int) ListOption {
+	return func(o *ListOptions) { o.Page = page }
+}
+
+func WithPageSize(size int) ListOption {
+	return func(o *ListOptions) { o.PageSize = size }
+}
+
+func WithOrderBy(orderBy []OrderBy) ListOption {
+	return func(o *ListOptions) { o.OrderBy = orderBy }
+}
+
+func FormatOrderBy(orderBy []OrderBy) string {
+	parts := make([]string, 0, len(orderBy))
+	for _, ob := range orderBy {
+		if ob.Desc {
+			parts = append(parts, ob.Field+" desc")
+		} else {
+			parts = append(parts, ob.Field+" asc")
+		}
+	}
+	return strings.Join(parts, ", ")
+}
+
+func ParseOrderBy(s string) []OrderBy {
+	if s == "" {
+		return nil
+	}
+	var result []OrderBy
+	parts := strings.Split(s, ",")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part == "" {
+			continue
+		}
+		fields := strings.Fields(part)
+		ob := OrderBy{Field: fields[0]}
+		if len(fields) > 1 && strings.EqualFold(fields[1], "desc") {
+			ob.Desc = true
+		}
+		result = append(result, ob)
+	}
+	return result
+}

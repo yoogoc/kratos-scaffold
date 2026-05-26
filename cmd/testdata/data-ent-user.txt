@@ -52,16 +52,14 @@ func (r userRepo) DestroyBy(ctx context.Context, param *biz.UserParam) (int, err
 	return client.User.Delete().Where(userParam2Predicates(param)...).Exec(ctx)
 }
 
-func (r userRepo) List(ctx context.Context, param *biz.UserParam, page, size int) ([]*biz.User, int, error) {
+func (r userRepo) List(ctx context.Context, param *biz.UserParam, opts *biz.ListOptions) ([]*biz.User, int, error) {
 	client := r.data.EntClient(ctx)
 	query := client.User.Query().Where(userParam2Predicates(param)...)
 	count, err := query.Clone().Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
-	if size > 0 {
-		query = query.Limit(size).Offset((page - 1) * size)
-	}
+	query.Modify(applyListOptions(opts))
 	rows, err := query.All(ctx)
 	if err != nil {
 		return nil, 0, err

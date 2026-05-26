@@ -32,7 +32,7 @@ type {{.Name}}Repo interface {
 	Create(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
 	Update(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error)
 	DestroyBy(ctx context.Context, param *{{.Name}}Param) (int, error)
-	List(ctx context.Context, param *{{.Name}}Param, page, size int) ([]*{{.Name}}, int, error)
+	List(ctx context.Context, param *{{.Name}}Param, opts *ListOptions) ([]*{{.Name}}, int, error)
 	FindBy(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error)
 }
 
@@ -60,8 +60,9 @@ func (uc *{{.Name}}Usecase) Destroy{{.Name}}By(ctx context.Context, param *{{.Na
 	return uc.repo.DestroyBy(ctx, param)
 }
 
-func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}Param, page, size int) ([]*{{.Name}}, int, error) {
-	return uc.repo.List(ctx, param, page, size)
+func (uc *{{.Name}}Usecase) List{{.Name}}(ctx context.Context, param *{{.Name}}Param, opts ...ListOption) ([]*{{.Name}}, int, error) {
+	o := ApplyListOptions(opts...)
+	return uc.repo.List(ctx, param, o)
 }
 
 func (uc *{{.Name}}Usecase) Find{{.Name}}By(ctx context.Context, param *{{.Name}}Param) (*{{.Name}}, error) {
