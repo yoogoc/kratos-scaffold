@@ -2,12 +2,15 @@
 package main
 
 import (
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
+	"log/slog"
+
+	ilog "{{.AppPkgPath}}/internal/log"
+
+	"github.com/go-kratos/kratos/v3"
 {{- if not .IsBff }}
-	"github.com/go-kratos/kratos/v2/transport/grpc"
+	"github.com/go-kratos/kratos/v3/transport/grpc"
 {{- end }}
-	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/google/wire"
 	"github.com/spf13/cobra"
 )
@@ -21,9 +24,9 @@ var ProviderSet = wire.NewSet(NewServerCmd, NewMigrateCmd)
 {{- end }}
 
 {{- if .IsBff }}
-func NewServerCmd(logger log.Logger, hs *http.Server) *ServerCommand {
+func NewServerCmd(versionString ilog.VersionString, logger *slog.Logger, hs *http.Server) *ServerCommand {
 {{- else }}
-func NewServerCmd(logger log.Logger, gs *grpc.Server, hs *http.Server) *ServerCommand {
+func NewServerCmd(versionString ilog.VersionString, logger *slog.Logger, gs *grpc.Server, hs *http.Server) *ServerCommand {
 {{- end }}
 	return &ServerCommand{
 		Use:                "server",
@@ -33,7 +36,7 @@ func NewServerCmd(logger log.Logger, gs *grpc.Server, hs *http.Server) *ServerCo
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := kratos.New(
 				kratos.Name(Name),
-				kratos.Version(Version),
+				kratos.Version(string(versionString)),
 				kratos.Metadata(map[string]string{}),
 				kratos.Logger(logger),
 				kratos.Server(

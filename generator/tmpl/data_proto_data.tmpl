@@ -4,8 +4,9 @@ package data
 
 import (
 	"context"
+	"log/slog"
 	"{{.CurrentPkgPath}}/biz"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 	{{$modelName}}V1 "{{ .ProtoPkgPath }}"
 )
 
@@ -13,13 +14,13 @@ var _ biz.{{.Name | ToCamel}}Repo = (*{{$modelName}}Repo)(nil)
 
 type {{$modelName}}Repo struct {
 	{{$modelName}} {{$modelName}}V1.{{.Name | ToCamel}}ServiceClient
-	log   *log.Helper
+	log   *slog.Logger
 }
 
-func New{{.Name | ToCamel}}Repo(logger log.Logger, {{$modelName}} {{$modelName}}V1.{{.Name | ToCamel}}ServiceClient) biz.{{.Name | ToCamel}}Repo {
+func New{{.Name | ToCamel}}Repo(logger *slog.Logger, {{$modelName}} {{$modelName}}V1.{{.Name | ToCamel}}ServiceClient) biz.{{.Name | ToCamel}}Repo {
 	return &{{$modelName}}Repo{
 		{{$modelName}}: {{$modelName}},
-		log:  log.NewHelper(log.With(logger, "module", "data/{{$modelName}}")),
+		log:  log.With(logger, "module", "data/{{$modelName}}"),
 	}
 }
 

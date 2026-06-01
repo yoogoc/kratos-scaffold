@@ -3,7 +3,8 @@ package biz
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
+	"log/slog"
+	"github.com/go-kratos/kratos/v3/log"
 	{{- range $i, $s := .MaybeGoPackages }}
 	"{{ $s }}"
 	{{- end }}
@@ -51,13 +52,13 @@ type {{.Name}}Repo interface {
 
 type {{.Name}}Usecase struct {
 	repo {{.Name}}Repo
-	log  *log.Helper
+	log  *slog.Logger
 }
 
-func New{{.Name}}Usecase(repo {{.Name}}Repo, logger log.Logger) *{{.Name}}Usecase {
+func New{{.Name}}Usecase(repo {{.Name}}Repo, logger *slog.Logger) *{{.Name}}Usecase {
 	return &{{.Name}}Usecase{
 		repo: repo,
-		log:  log.NewHelper(log.With(logger, "module", "usecase/{{.Name | ToLower}}")),
+		log:  log.With(logger, "module", "usecase/{{.Name | ToLower}}"),
 	}
 }
 

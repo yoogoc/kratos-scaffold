@@ -2,8 +2,9 @@ package biz
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 type GreeterRepo interface {
@@ -12,17 +13,17 @@ type GreeterRepo interface {
 
 type GreeterUsecase struct {
 	repo GreeterRepo
-	log  *log.Helper
+	log  *slog.Logger
 }
 
-func NewGreeterUsecase(repo GreeterRepo, logger log.Logger) *GreeterUsecase {
+func NewGreeterUsecase(repo GreeterRepo, logger *slog.Logger) *GreeterUsecase {
 	return &GreeterUsecase{
 		repo: repo,
-		log:  log.NewHelper(log.With(logger, "module", "biz/greeter")),
+		log:  log.With(logger, "module", "biz/greeter"),
 	}
 }
 
 func (uc *GreeterUsecase) SayHello(ctx context.Context, name string) (string, error) {
-	uc.log.WithContext(ctx).Infof("SayHello: %s", name)
+	uc.log.InfoContext(ctx, "SayHello", "name", name)
 	return uc.repo.SayHello(ctx, name)
 }

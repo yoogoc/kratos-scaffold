@@ -94,7 +94,9 @@ func GenMono(name string) error {
 
 	err = util.Go(
 		"get",
-		"github.com/go-kratos/kratos/v2",
+		"github.com/go-kratos/kratos/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3PseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
 		"github.com/google/wire",
@@ -103,12 +105,12 @@ func GenMono(name string) error {
 		"go.opentelemetry.io/otel",
 		"go.opentelemetry.io/otel/sdk",
 		"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
-		"go.uber.org/zap",
 		"github.com/spf13/cobra",
 		"entgo.io/ent",
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
 		"github.com/samber/lo",
+		"github.com/pressly/goose/v3",
 	)
 	if err != nil {
 		return err
@@ -126,8 +128,7 @@ func GenMono(name string) error {
 		return err
 	}
 	fmt.Println("generating pkg/ ...")
-	servicePath := path.Join(projectPath, "pkg/contrib")
-	if err := os.MkdirAll(servicePath, 0o700); err != nil {
+	if err := util.GenNullPath(path.Join(projectPath, "pkg")); err != nil {
 		return err
 	}
 	// 6. cp common proto
@@ -136,10 +137,6 @@ func GenMono(name string) error {
 	}
 	// 7. cp create-migration.sh
 	if err = os.WriteFile(path.Join(projectPath, "create-migration.sh"), []byte(createMigrationSh), 0o644); err != nil {
-		return err
-	}
-	// 7. cp log
-	if err = os.WriteFile(path.Join(projectPath, "pkg/contrib/zap.go"), []byte(zapGoExample), 0o644); err != nil {
 		return err
 	}
 	// 8. cp Makefile
@@ -200,7 +197,9 @@ func GenSingle(name string) error {
 	// 3.1 go get dependencies
 	if err := util.Go(
 		"get",
-		"github.com/go-kratos/kratos/v2",
+		"github.com/go-kratos/kratos/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3PseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
 		"github.com/google/wire",
@@ -209,12 +208,12 @@ func GenSingle(name string) error {
 		"go.opentelemetry.io/otel",
 		"go.opentelemetry.io/otel/sdk",
 		"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc",
-		"go.uber.org/zap",
 		"github.com/spf13/cobra",
 		"entgo.io/ent",
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
 		"github.com/samber/lo",
+		"github.com/pressly/goose/v3",
 	); err != nil {
 		return err
 	}
@@ -228,14 +227,6 @@ func GenSingle(name string) error {
 	}
 	// 6. init configs/conf.yaml
 	if err := genConfigs(name, appPath); err != nil {
-		return err
-	}
-	// 7. cp pkg/contrib/zap.go
-	contribPath := path.Join(appPath, "pkg/contrib")
-	if err := os.MkdirAll(contribPath, 0o700); err != nil {
-		return err
-	}
-	if err := os.WriteFile(path.Join(contribPath, "zap.go"), []byte(zapGoExample), 0o644); err != nil {
 		return err
 	}
 	return nil

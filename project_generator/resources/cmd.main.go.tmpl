@@ -7,9 +7,9 @@ import (
 	ilog "{{.AppPkgPath}}/internal/log"
 	"os"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/env"
-	"github.com/go-kratos/kratos/v2/config/file"
+	"github.com/go-kratos/kratos/v3/config"
+	"github.com/go-kratos/kratos/v3/config/env"
+	"github.com/go-kratos/kratos/v3/config/file"
 
 	"github.com/spf13/cobra"
 )
@@ -58,10 +58,6 @@ func newConf(rootCmd *RootCommand) *conf.Bootstrap {
 
 func newDataConf(bc *conf.Bootstrap) *conf.Data {
 	return bc.Data
-}
-
-func newLogConf(bc *conf.Bootstrap) *conf.Log {
-	return bc.Log
 }
 
 func newServerConf(bc *conf.Bootstrap) *conf.Server {

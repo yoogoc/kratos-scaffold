@@ -3,8 +3,9 @@ package service
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 	v1 "{{.ApiPkgPath}}"
 	"{{.AppPkgPath}}/internal/biz"
 )
@@ -12,13 +13,13 @@ import (
 type GreeterService struct {
 	v1.UnimplementedGreeterServer
 	uc  *biz.GreeterUsecase
-	log *log.Helper
+	log *slog.Logger
 }
 
-func NewGreeterService(uc *biz.GreeterUsecase, logger log.Logger) *GreeterService {
+func NewGreeterService(uc *biz.GreeterUsecase, logger *slog.Logger) *GreeterService {
 	return &GreeterService{
 		uc:  uc,
-		log: log.NewHelper(log.With(logger, "module", "service/greeter")),
+		log: log.With(logger, "module", "service/greeter"),
 	}
 }
 

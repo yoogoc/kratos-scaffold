@@ -10,9 +10,6 @@ import (
 //go:embed resources/config.yaml.example
 var configContent string
 
-//go:embed resources/zap.go.example
-var zapGoExample string
-
 //go:embed resources/create-migration.sh.example
 var createMigrationSh string
 

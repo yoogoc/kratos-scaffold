@@ -2,22 +2,23 @@ package data
 
 import (
 	"context"
+	"log/slog"
 	"test/internal/biz"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 var _ biz.UserRepo = (*userRepo)(nil)
 
 type userRepo struct {
 	data *Data
-	log  *log.Helper
+	log  *slog.Logger
 }
 
-func NewUserRepo(data *Data, logger log.Logger) biz.UserRepo {
+func NewUserRepo(data *Data, logger *slog.Logger) biz.UserRepo {
 	return &userRepo{
 		data: data,
-		log:  log.NewHelper(log.With(logger, "module", "data/user")),
+		log:  log.With(logger, "module", "data/user"),
 	}
 }
 

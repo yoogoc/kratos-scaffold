@@ -3,13 +3,15 @@ package data
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
 	stdsql "database/sql"
 	"{{.AppPkgPath}}/internal/biz"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/data/ent"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 	"github.com/google/wire"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -21,12 +23,11 @@ import (
 var ProviderSet = wire.NewSet(NewEntClient, NewData, NewTxRepo, NewGreeterRepo)
 
 type Data struct {
-	log *log.Helper
+	log *slog.Logger
 	db  *ent.Client
 }
 
 func (d *Data) WithEntTx(ctx context.Context, fn func(ctx context.Context) error) error {
-	// 如果事务内嵌套事务,则交由上层处理
 	if tx := ent.TxFromContext(ctx); tx != nil {
 		return fn(ctx)
 	}
@@ -65,14 +66,10 @@ func NewTxRepo(d *Data) biz.TxRepo {
 	return d
 }
 
-func NewEntClient(conf *conf.Data, logger log.Logger) *ent.Client {
-	l := log.NewHelper(log.With(logger, "module", "{{.LoggerName}}/ent"))
-
+func NewEntClient(conf *conf.Data, logger *slog.Logger) *ent.Client {
 	var ops []ent.Option
 	if conf.Database.EntDebug {
 		ops = append(ops, ent.Debug())
-	} else {
-		//ops = append(ops, ent.Log(log.Info))
 	}
 
 	driverName := conf.Database.Driver
@@ -83,14 +80,14 @@ func NewEntClient(conf *conf.Data, logger log.Logger) *ent.Client {
 
 	db, err := stdsql.Open(driverName, conf.Database.Source)
 	if err != nil {
-		l.Fatalf("failed opening connection to db: %v", err)
+		panic(fmt.Sprintf("failed opening connection to db: %v", err))
 	}
 
 	return ent.NewClient(append(ops, ent.Driver(sql.NewDriver(conf.Database.Driver, sql.Conn{ExecQuerier: db})))...)
 }
 
-func NewData(conf *conf.Data, logger log.Logger, db *ent.Client) (*Data, error) {
-	l := log.NewHelper(log.With(logger, "module", "{{.LoggerName}}"))
+func NewData(conf *conf.Data, logger *slog.Logger, db *ent.Client) (*Data, error) {
+	l := log.With(logger, "module", "{{.LoggerName}}")
 	return &Data{
 		log: l,
 		db:  db,

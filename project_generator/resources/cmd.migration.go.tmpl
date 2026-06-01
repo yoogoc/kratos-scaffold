@@ -3,15 +3,15 @@ package main
 
 import (
 	"{{.AppPkgPath}}/internal/conf"
+	"log/slog"
 
-	"github.com/go-kratos/kratos/v2/log"
-	"github.com/spf13/cobra"
 	"github.com/pressly/goose/v3"
+	"github.com/spf13/cobra"
 )
 
 type MigrateCommand cobra.Command
 
-func NewMigrateCmd(logger log.Logger, conf *conf.Data) *MigrateCommand {
+func NewMigrateCmd(logger *slog.Logger, conf *conf.Data) *MigrateCommand {
 
 	var table string
 	var dir string
@@ -42,12 +42,12 @@ func NewMigrateCmd(logger log.Logger, conf *conf.Data) *MigrateCommand {
 
 			db, err := goose.OpenDBWithDriver(conf.Database.Driver, conf.Database.Source)
 			if err != nil {
-				log.Fatalf("db driver=%s, db string=%s: %s\n", "mysql", conf.Database.Source, err.Error())
+				slog.Error("failed to open db", "driver", conf.Database.Driver, "source", conf.Database.Source, "error", err)
 				return err
 			}
 			defer func() {
 				if err := db.Close(); err != nil {
-					log.Fatalf("goose: failed to close DB: %v\n", err)
+					slog.Error("goose: failed to close DB", "error", err)
 				}
 			}()
 

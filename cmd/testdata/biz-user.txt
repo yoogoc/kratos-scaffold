@@ -2,8 +2,9 @@ package biz
 
 import (
 	"context"
+	"log/slog"
 
-	"github.com/go-kratos/kratos/v2/log"
+	"github.com/go-kratos/kratos/v3/log"
 )
 
 type User struct {
@@ -38,13 +39,13 @@ type UserRepo interface {
 
 type UserUsecase struct {
 	repo UserRepo
-	log  *log.Helper
+	log  *slog.Logger
 }
 
-func NewUserUsecase(repo UserRepo, logger log.Logger) *UserUsecase {
+func NewUserUsecase(repo UserRepo, logger *slog.Logger) *UserUsecase {
 	return &UserUsecase{
 		repo: repo,
-		log:  log.NewHelper(log.With(logger, "module", "usecase/user")),
+		log:  log.With(logger, "module", "usecase/user"),
 	}
 }
 

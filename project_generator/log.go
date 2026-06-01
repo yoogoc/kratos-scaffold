@@ -6,14 +6,11 @@ import (
 	"os"
 	"path"
 	"text/template"
-
-	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
 type LogTmpl struct {
 	AppPkgPath string
 	LogPath    string
-	ModName    string
 }
 
 type LogTmplOption func(*LogTmpl)
@@ -22,7 +19,6 @@ func NewLogTmpl(appPkgPath, logPath string, options ...LogTmplOption) *LogTmpl {
 	st := &LogTmpl{
 		AppPkgPath: appPkgPath,
 		LogPath:    logPath,
-		ModName:    util.ModName(),
 	}
 	for _, option := range options {
 		option(st)

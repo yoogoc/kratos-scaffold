@@ -3,7 +3,8 @@ package service
 
 import (
 	"context"
-	"github.com/go-kratos/kratos/v2/log"
+	"log/slog"
+	"github.com/go-kratos/kratos/v3/log"
 	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
 	{{- range $i, $s := .MaybeGoPackages }}
@@ -14,12 +15,12 @@ import (
 type {{.Name}}Service struct {
 	v1.Unimplemented{{.Name}}ServiceServer
 	uc  *biz.{{.Name}}Usecase
-	log *log.Helper
+	log *slog.Logger
 }
 
-func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger log.Logger) *{{.Name}}Service {
+func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger *slog.Logger) *{{.Name}}Service {
 	return &{{.Name}}Service{
-		log: log.NewHelper(log.With(logger, "module", "service/{{.Name | ToSnake}}")),
+		log: log.With(logger, "module", "service/{{.Name | ToSnake}}"),
 		uc:  uc,
 	}
 }
