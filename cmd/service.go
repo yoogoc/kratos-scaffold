@@ -59,7 +59,7 @@ func runService(service *generator.Service, args []string) error {
 			}
 		}
 
-		service.ApiPath = path.Join(util.ModName(), apiModelName, "v1")
+		service.ApiPath = path.Join(util.ModName(), apiModelName, settings.GetApiVersion())
 	}
 
 	err := service.Generate()

@@ -16,6 +16,7 @@ type Base struct {
 	StrToPreMap     map[string]field.PredicateType
 	MaybeGoPackages []string
 	PrimaryKey      string
+	ApiVersion      string
 }
 
 func NewBase(setting *cli.EnvSettings, resetNs bool) Base {
@@ -31,6 +32,7 @@ func NewBase(setting *cli.EnvSettings, resetNs bool) Base {
 		AppDirName:      setting.AppDirName,
 		ApiDirName:      setting.ApiDirName,
 		PrimaryKey:      setting.PrimaryKey,
+		ApiVersion:      setting.GetApiVersion(),
 		StrToPreMap:     field.StrToPreMap,
 		MaybeGoPackages: field.MaybeGoPackages,
 	}

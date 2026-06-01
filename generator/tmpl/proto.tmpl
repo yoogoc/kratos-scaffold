@@ -18,31 +18,31 @@ import "{{$f}}";
 service {{.Name}}Service {
 	rpc Create (Create{{.Name}}Request) returns (Create{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			post: "/api/v1/{{.Name | ToPlural | fieldStyle }}"
+			post: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}"
 			body: "*"
 		};
 	}{{- end }};
 	rpc Update (Update{{.Name}}Request) returns (Update{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			put: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			put: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
 			body: "*"
 		};
 	}{{- end }};
 	rpc Patch (Patch{{.Name}}Request) returns (Patch{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			patch: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			patch: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
 			body: "*"
 		};
 	}{{- end }};
 	{{- if .GenHttp }}
 	rpc Destroy (Destroy{{.Name}}Request) returns (Destroy{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			delete: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			delete: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
 		};
 	}{{- end }};
 	rpc Get (Get{{.Name}}Request) returns (Get{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			get: "/api/v1/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
+			get: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}/{{ .PrimaryFieldURLName }}"
 		};
 	}{{- end }};
 	{{- else }}
@@ -52,7 +52,7 @@ service {{.Name}}Service {
 	{{- end }}
 	rpc List (List{{.Name}}Request) returns (List{{.Name}}Reply){{- if .GenHttp }} {
 		option (google.api.http) = {
-			get: "/api/v1/{{.Name | ToPlural | fieldStyle }}"
+			get: "/api/{{.ApiVersion}}/{{.Name | ToPlural | fieldStyle }}"
 		};
 	}{{- end }};
 }

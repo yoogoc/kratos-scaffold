@@ -21,14 +21,20 @@ const (
 	ExitIfExistsTarget
 )
 
+type NamespaceConfig struct {
+	ApiVersion string `yaml:"api_version"`
+}
+
 type EnvSettings struct {
-	AppDirName           string               `yaml:"app_dir_name"`
-	ApiDirName           string               `yaml:"api_dir_name"`
-	Namespace            string               `yaml:"namespace"`     // only gen api or gen mono repo scaffold is active
-	TemplatePath         string               `yaml:"template_path"` // TODO
-	PolicyIfExistsTarget PolicyIfExistsTarget `yaml:"policy_if_exists_target"`
-	FieldStyle           string               `yaml:"field_style"`
-	PrimaryKey           string               `yaml:"primary_key"`
+	AppDirName           string                       `yaml:"app_dir_name"`
+	ApiDirName           string                       `yaml:"api_dir_name"`
+	Namespace            string                       `yaml:"namespace"`     // only gen api or gen mono repo scaffold is active
+	TemplatePath         string                       `yaml:"template_path"` // TODO
+	PolicyIfExistsTarget PolicyIfExistsTarget          `yaml:"policy_if_exists_target"`
+	FieldStyle           string                       `yaml:"field_style"`
+	PrimaryKey           string                       `yaml:"primary_key"`
+	ApiVersion           string                       `yaml:"api_version"`
+	Namespaces           map[string]*NamespaceConfig  `yaml:"namespaces"`
 }
 
 func New() *EnvSettings {
@@ -66,6 +72,7 @@ func New() *EnvSettings {
 		ApiDirName: "api",
 		PrimaryKey: "id",
 		FieldStyle: field.DefaultStyleField,
+		ApiVersion: "v1",
 	}
 
 	if err := yaml.Unmarshal(buffer.Bytes(), env); err != nil {
@@ -77,9 +84,22 @@ func New() *EnvSettings {
 	env.Namespace = util.EnvOr("KRATOS_NAMESPACE", env.Namespace)
 	env.FieldStyle = util.EnvOr("KRATOS_FIELD_STYLE", env.FieldStyle)
 	env.PrimaryKey = util.EnvOr("KRATOS_PRIMARY_KEY", env.PrimaryKey)
+	env.ApiVersion = util.EnvOr("KRATOS_API_VERSION", env.ApiVersion)
 	env.PolicyIfExistsTarget = PolicyIfExistsTarget(util.EnvIntOr("KRATOS_IF_EXISTS", int(env.PolicyIfExistsTarget)))
 
 	return env
+}
+
+func (s *EnvSettings) GetApiVersion() string {
+	if s.Namespace != "" && s.Namespaces != nil {
+		if nsCfg, ok := s.Namespaces[s.Namespace]; ok && nsCfg.ApiVersion != "" {
+			return nsCfg.ApiVersion
+		}
+	}
+	if s.ApiVersion != "" {
+		return s.ApiVersion
+	}
+	return "v1"
 }
 
 func (s *EnvSettings) AddFlags(fs *pflag.FlagSet) {

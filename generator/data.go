@@ -67,7 +67,7 @@ func (d *Data) CurrentPkgPath() string {
 }
 
 func (d *Data) ProtoPkgPath() string {
-	return path.Join(util.ModName(), d.ApiDirName, d.TargetModel, "v1")
+	return path.Join(util.ModName(), d.ApiDirName, d.TargetModel, d.ApiVersion)
 }
 
 func (d *Data) ConfPkgPath() string {

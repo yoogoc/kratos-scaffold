@@ -145,7 +145,7 @@ func (p *Proto) OutPath() string {
 }
 
 func (p *Proto) Path() string {
-	return path.Join(p.ApiDirName, p.Namespace, util.DefaultApiVersion)
+	return path.Join(p.ApiDirName, p.Namespace, p.ApiVersion)
 }
 
 func (p *Proto) GoPackage() string {
