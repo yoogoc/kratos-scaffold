@@ -14,6 +14,7 @@ type Data struct {
 	NeedAuditField bool
 	OrmType        string
 	TargetModel    string
+	IsSingle       bool
 }
 
 func NewData(setting *cli.EnvSettings) *Data {
@@ -67,4 +68,16 @@ func (d *Data) CurrentPkgPath() string {
 
 func (d *Data) ProtoPkgPath() string {
 	return path.Join(util.ModName(), d.ApiDirName, d.TargetModel, "v1")
+}
+
+func (d *Data) ConfPkgPath() string {
+	return path.Join(util.ModName(), d.InternalPath(), "internal/conf")
+}
+
+func (d *Data) ConfPath() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return path.Join(wd, d.InternalPath(), "internal/conf")
 }

@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
+	"github.com/yoogoc/kratos-scaffold/pkg/util"
+	"github.com/yoogoc/kratos-scaffold/project_generator"
 )
 
 func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
@@ -23,6 +27,20 @@ func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
 			}
 			if err := service.RunE(service, args); err != nil {
 				return err
+			}
+			fmt.Println("running wire...")
+			if project_generator.IsProjectTypeSingle() {
+				if err := util.Exec("wire", "./cmd"); err != nil {
+					fmt.Printf("wire failed, please run manually: wire ./cmd\n")
+				}
+			} else {
+				ns := settings.Namespace
+				if ns == "" {
+					ns = args[0]
+				}
+				if err := util.Exec("make", "wire-"+ns); err != nil {
+					fmt.Printf("wire failed, please run manually: make wire-%s\n", ns)
+				}
 			}
 			return nil
 		},

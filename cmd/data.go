@@ -5,6 +5,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/generator"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
+	"github.com/yoogoc/kratos-scaffold/project_generator"
 
 	"github.com/spf13/cobra"
 )
@@ -65,6 +66,7 @@ func runDataProto(dataEnt *generator.Data, args []string) error {
 	modelName := args[0]
 
 	dataEnt.Name = util.Singular(strcase.ToCamel(modelName))
+	dataEnt.IsSingle = project_generator.IsProjectTypeSingle()
 	if fs, err := field.ParseFields(args[1:]); err != nil {
 		return err
 	} else {
