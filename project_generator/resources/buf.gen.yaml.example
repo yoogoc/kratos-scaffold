@@ -1,0 +1,28 @@
+# Go code for api/**: messages, gRPC stubs and Kratos HTTP stubs.
+# Plugins are resolved through `go tool`, so versions are pinned in go.mod and
+# nothing has to be installed by hand on mac/linux/windows.
+version: v2
+managed:
+  enabled: false
+# A bare `buf generate` covers every service under api/ — no hardcoded list.
+# The exclusions are directories that live in the workspace only so imports
+# resolve; they are not ours to generate.
+inputs:
+  - directory: .
+    exclude_paths:
+      # Vendored .proto. Listed one level down because buf refuses to
+      # --exclude-path a whole module directory.
+      - third_party/google
+      - third_party/buf
+      - third_party/errors
+      - third_party/validate
+plugins:
+  - local: [go, tool, protoc-gen-go]
+    out: .
+    opt: paths=source_relative
+  - local: [go, tool, protoc-gen-go-grpc]
+    out: .
+    opt: paths=source_relative
+  - local: [go, tool, protoc-gen-go-http]
+    out: .
+    opt: paths=source_relative

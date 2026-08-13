@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"text/template"
@@ -102,21 +101,18 @@ func (ct CmdTmpl) Generate() error {
 		return err
 	}
 
-	if _, err := exec.LookPath("wire"); err != nil {
-		fmt.Println("wire not found, installing...")
-		if err := util.Go("install", "github.com/google/wire/cmd/wire@latest"); err != nil {
-			fmt.Println("wire install failed, please install manually: go install github.com/google/wire/cmd/wire@latest")
-			return nil
-		}
+	// wire builds the package it generates for, so go.mod has to be complete first
+	if err := util.Go("mod", "tidy"); err != nil {
+		fmt.Println("go mod tidy failed, please run manually: go mod tidy")
 	}
 	fmt.Println("running wire generate ...")
 	if ct.IsSubMono {
-		if err := util.Exec("make", "wire-"+ct.Name); err != nil {
-			fmt.Printf("wire generate failed, please run manually: make wire-%s\n", ct.Name)
+		if err := util.Exec("just", "wire", ct.Name); err != nil {
+			fmt.Printf("wire generate failed, please run manually: just wire %s\n", ct.Name)
 		}
 	} else {
-		if err := util.Exec("wire", path.Join(".", ct.OutPath)); err != nil {
-			fmt.Printf("wire generate failed, please run manually: wire ./%s\n", ct.OutPath)
+		if err := util.Exec("just", "wire"); err != nil {
+			fmt.Printf("wire generate failed, please run manually: just wire\n")
 		}
 	}
 

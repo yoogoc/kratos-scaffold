@@ -9,12 +9,22 @@ kratos-layout脚手架，可以生成项目，proto，biz，service，data。mon
 - 支持排序（`order_by`），采用 Go Option 可变参数模式
 - 时间类型：gRPC 使用 `google.protobuf.Timestamp`，HTTP 使用 `int64`（unix timestamp）
 - CRUD 方法：Create、Update、Patch（部分更新）、DestroyBy、List、FindBy、ExistBy
-- SubMono 项目的 wire/proto 编译使用 Makefile target（`make wire-xx`、`make proto-xx`）
+- proto 编译使用 [buf](https://buf.build)，生成的项目自带 `buf.yaml` / `buf.gen.yaml` / `buf.gen.openapi.yaml` / `buf.gen.validate.yaml`
+- 生成的项目使用 [just](https://just.systems) 而不是 make，SubMono 项目的 wire/proto 编译使用 justfile recipe（`just wire xx`、`just proto xx`）
+- protoc 插件与 wire 通过 go.mod 的 `tool` 块用 `go tool` 调用，无需手动安装（生成项目时自动 `go get -tool`）
 
 # Install
 
 ```shell
 go install github.com/yoogoc/kratos-scaffold@latest
+```
+
+脚手架会调用 `buf` 和 `just`，请先安装：
+
+```shell
+brew install bufbuild/buf/buf just
+# 或
+go install github.com/bufbuild/buf/cmd/buf@latest
 ```
 
 # Command
@@ -173,12 +183,13 @@ service user id:int64:eq,in name:string:cont age:int32:gte,lte birthday:time:eq,
 
 生成的项目包含以下核心依赖：
 
-- `github.com/go-kratos/kratos/v2` — Kratos 框架
+- Go 1.26+
+- `github.com/go-kratos/kratos/v3 v3.0.0` — Kratos 框架（contrib 模块尚未打 tag，使用 pseudo-version）
 - `entgo.io/ent` — ORM
 - `github.com/google/wire` — 依赖注入
 - `github.com/samber/lo` — Go 工具库（用于类型转换）
 - `go.opentelemetry.io/otel` — OpenTelemetry 链路追踪
-- `go.uber.org/zap` — 日志
+- `github.com/pressly/goose/v3` — 数据库迁移
 - `github.com/spf13/cobra` — CLI
 
 # Roadmap

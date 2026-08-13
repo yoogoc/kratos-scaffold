@@ -70,14 +70,60 @@ var demoGreeterBffDataTmpl string
 //go:embed resources/conf.proto.example
 var confProto string
 
-//go:embed resources/Makefile.example
-var makefileContent string
+//go:embed resources/justfile.mono.example
+var justfileMonoContent string
+
+//go:embed resources/justfile.single.example
+var justfileSingleContent string
+
+//go:embed resources/buf.yaml.mono.example
+var bufYamlMono string
+
+//go:embed resources/buf.yaml.single.example
+var bufYamlSingle string
+
+//go:embed resources/buf.gen.yaml.example
+var bufGenYaml string
+
+//go:embed resources/buf.gen.openapi.yaml.example
+var bufGenOpenapiYaml string
+
+//go:embed resources/buf.gen.validate.yaml.example
+var bufGenValidateYaml string
+
+//go:embed resources/buf.conf.yaml.example
+var bufConfYaml string
 
 //go:embed resources/conf.bff.proto.example
 var confBffProto string
 
 //go:embed resources/third_party
 var thirdPartyFS embed.FS
+
+// cpBuildFiles writes the justfile and the buf configs into the project root.
+// The buf workspace layout differs between mono and single, everything else is
+// shared.
+func cpBuildFiles(projectPath string, isMono bool) error {
+	justfile := justfileSingleContent
+	bufYaml := bufYamlSingle
+	if isMono {
+		justfile = justfileMonoContent
+		bufYaml = bufYamlMono
+	}
+	files := map[string]string{
+		"justfile":              justfile,
+		"buf.yaml":              bufYaml,
+		"buf.gen.yaml":          bufGenYaml,
+		"buf.gen.openapi.yaml":  bufGenOpenapiYaml,
+		"buf.gen.validate.yaml": bufGenValidateYaml,
+	}
+	for name, content := range files {
+		if err := os.WriteFile(path.Join(projectPath, name), []byte(content), 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func cpProto(projectPath string) error {
 	return fs.WalkDir(thirdPartyFS, "resources/third_party", func(p string, d fs.DirEntry, err error) error {

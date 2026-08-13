@@ -1,0 +1,53 @@
+# bash on Windows too (ships with Git for Windows), so recipes can be plain
+# POSIX shell everywhere.
+set windows-shell := ["bash", "-uc"]
+
+default:
+    @just --list
+
+# The protoc plugins and wire are deliberately not installed: they come from
+# go.mod's `tool` block via `go tool`.
+#
+# Install everything the repo needs on top of Go and just
+init:
+    @command -v buf >/dev/null 2>&1 || go install github.com/bufbuild/buf/cmd/buf@latest
+    @command -v buf >/dev/null 2>&1 || echo "buf installed to $(go env GOPATH)/bin - add it to PATH"
+    @go mod download
+
+# Apply all pending migrations
+migrate service:
+    go run ./app/{{service}}/cmd migrate up -c ./configs/{{service}} --dir ./app/{{service}}/db/migration
+
+# Roll back the most recent migration
+rollup service:
+    go run ./app/{{service}}/cmd migrate down -c ./configs/{{service}} --dir ./app/{{service}}/db/migration
+
+# Create a new migration: `just migration user add_foo_table`
+migration service name:
+    go run ./app/{{service}}/cmd migrate create -c ./configs/{{service}} --dir ./app/{{service}}/db/migration {{name}} sql
+
+# protobuf + gRPC + Kratos HTTP stubs, plus OpenAPI / validate when the protos use them
+proto service:
+    @buf generate --path api/{{service}}
+    @if grep -rq "google.api.http" api/{{service}} --include='*.proto'; then just openapi {{service}}; fi
+    @if grep -rq "buf/validate" api/{{service}} --include='*.proto'; then just validate {{service}}; fi
+
+# OpenAPI v2 spec -> openapi/<service>/openapi.swagger.json
+openapi service:
+    buf generate --template buf.gen.openapi.yaml --path api/{{service}} -o openapi/{{service}}
+
+# protoc-gen-validate stubs
+validate service:
+    buf generate --template buf.gen.validate.yaml --path api/{{service}}
+
+# conf.proto -> conf.pb.go
+config service:
+    buf generate app/{{service}}/internal/conf -o app/{{service}}/internal/conf
+
+# Ent ORM code
+ent service:
+    go generate ./app/{{service}}/internal/data/ent
+
+# Wire dependency injection
+wire service:
+    go tool wire ./app/{{service}}/cmd

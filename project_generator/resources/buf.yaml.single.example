@@ -1,0 +1,30 @@
+version: v2
+modules:
+  # API definitions plus internal/conf. Imports are rooted at the project root
+  # (e.g. "api/user/v1/user.proto"), so the module root is "." and only the
+  # vendored protos are excluded — they are their own module below.
+  - path: .
+    excludes:
+      - third_party
+  # Vendored protos: google/api, google/gateway (protoc-gen-openapiv2 options),
+  # buf/validate, validate, errors. google/protobuf is omitted on purpose —
+  # buf ships the well-known types itself.
+  - path: third_party
+    excludes:
+      - third_party/google/protobuf
+lint:
+  use:
+    - BASIC
+  except:
+    - FIELD_LOWER_SNAKE_CASE
+    - ENUM_VALUE_UPPER_SNAKE_CASE
+    - ENUM_ZERO_VALUE_SUFFIX
+    - PACKAGE_DIRECTORY_MATCH
+    - SERVICE_SUFFIX
+  ignore:
+    - third_party
+breaking:
+  use:
+    - FILE
+  ignore:
+    - third_party

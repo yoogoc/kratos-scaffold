@@ -30,16 +30,16 @@ func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
 			}
 			fmt.Println("running wire...")
 			if project_generator.IsProjectTypeSingle() {
-				if err := util.Exec("wire", "./cmd"); err != nil {
-					fmt.Printf("wire failed, please run manually: wire ./cmd\n")
+				if err := util.Exec("just", "wire"); err != nil {
+					fmt.Printf("wire failed, please run manually: just wire\n")
 				}
 			} else {
 				ns := settings.Namespace
 				if ns == "" {
 					ns = args[0]
 				}
-				if err := util.Exec("make", "wire-"+ns); err != nil {
-					fmt.Printf("wire failed, please run manually: make wire-%s\n", ns)
+				if err := util.Exec("just", "wire", ns); err != nil {
+					fmt.Printf("wire failed, please run manually: just wire %s\n", ns)
 				}
 			}
 			return nil

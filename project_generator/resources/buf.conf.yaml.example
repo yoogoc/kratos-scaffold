@@ -1,0 +1,3 @@
+# Standalone module: every service declares the same `kratos.api` package, so
+# conf.proto cannot live in the root workspace alongside the others.
+version: v2

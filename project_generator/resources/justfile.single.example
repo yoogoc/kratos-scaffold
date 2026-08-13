@@ -1,0 +1,53 @@
+# bash on Windows too (ships with Git for Windows), so recipes can be plain
+# POSIX shell everywhere.
+set windows-shell := ["bash", "-uc"]
+
+default:
+    @just --list
+
+# The protoc plugins and wire are deliberately not installed: they come from
+# go.mod's `tool` block via `go tool`.
+#
+# Install everything the project needs on top of Go and just
+init:
+    @command -v buf >/dev/null 2>&1 || go install github.com/bufbuild/buf/cmd/buf@latest
+    @command -v buf >/dev/null 2>&1 || echo "buf installed to $(go env GOPATH)/bin - add it to PATH"
+    @go mod download
+
+# Apply all pending migrations
+migrate:
+    go run ./cmd migrate up -c ./configs --dir ./db/migration
+
+# Roll back the most recent migration
+rollup:
+    go run ./cmd migrate down -c ./configs --dir ./db/migration
+
+# Create a new migration: `just migration add_foo_table`
+migration name:
+    go run ./cmd migrate create -c ./configs --dir ./db/migration {{name}} sql
+
+# protobuf + gRPC + Kratos HTTP stubs, plus OpenAPI / validate when the protos use them
+proto service:
+    @buf generate --path api/{{service}}
+    @if grep -rq "google.api.http" api/{{service}} --include='*.proto'; then just openapi {{service}}; fi
+    @if grep -rq "buf/validate" api/{{service}} --include='*.proto'; then just validate {{service}}; fi
+
+# OpenAPI v2 spec -> openapi/<service>/openapi.swagger.json
+openapi service:
+    buf generate --template buf.gen.openapi.yaml --path api/{{service}} -o openapi/{{service}}
+
+# protoc-gen-validate stubs
+validate service:
+    buf generate --template buf.gen.validate.yaml --path api/{{service}}
+
+# conf.proto -> conf.pb.go
+config:
+    buf generate --path internal/conf
+
+# Ent ORM code
+ent:
+    go generate ./internal/data/ent
+
+# Wire dependency injection
+wire:
+    go tool wire ./cmd

@@ -3,7 +3,6 @@ package conf
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"regexp"
 	"strconv"
@@ -156,19 +155,11 @@ func findMatchingBrace(s string) int {
 
 func runProtoc(confDir, namespace string, isSingle bool) error {
 	if isSingle {
-		cmd := exec.Command("protoc",
-			"--proto_path=./internal/conf",
-			"--proto_path=./third_party",
-			"--go_out=paths=source_relative:./internal/conf",
-			"conf.proto",
-		)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		return cmd.Run()
+		return util.Exec("just", "config")
 	}
 	ns := namespace
 	if ns == "" {
 		return fmt.Errorf("namespace is required for mono-repo")
 	}
-	return util.Exec("make", "config-"+ns)
+	return util.Exec("just", "config", ns)
 }

@@ -94,9 +94,9 @@ func GenMono(name string) error {
 
 	err = util.Go(
 		"get",
-		"github.com/go-kratos/kratos/v3@"+kratosV3PseudoVersion,
-		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3PseudoVersion,
-		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/v3@"+kratosV3Version,
+		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3ContribPseudoVersion,
+		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3ContribPseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
 		"github.com/google/wire",
@@ -113,6 +113,9 @@ func GenMono(name string) error {
 		"github.com/pressly/goose/v3",
 	)
 	if err != nil {
+		return err
+	}
+	if err = genTools(); err != nil {
 		return err
 	}
 	if err = os.WriteFile(path.Join(projectPath, "README.md"), []byte(name), 0o644); err != nil {
@@ -139,8 +142,8 @@ func GenMono(name string) error {
 	if err = os.WriteFile(path.Join(projectPath, "create-migration.sh"), []byte(createMigrationSh), 0o644); err != nil {
 		return err
 	}
-	// 8. cp Makefile
-	if err = os.WriteFile(path.Join(projectPath, "Makefile"), []byte(makefileContent), 0o644); err != nil {
+	// 8. cp justfile + buf configs
+	if err = cpBuildFiles(projectPath, true); err != nil {
 		return err
 	}
 	return nil
@@ -197,9 +200,9 @@ func GenSingle(name string) error {
 	// 3.1 go get dependencies
 	if err := util.Go(
 		"get",
-		"github.com/go-kratos/kratos/v3@"+kratosV3PseudoVersion,
-		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3PseudoVersion,
-		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3PseudoVersion,
+		"github.com/go-kratos/kratos/v3@"+kratosV3Version,
+		"github.com/go-kratos/kratos/contrib/otel/v3@"+kratosV3ContribPseudoVersion,
+		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3ContribPseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
 		"github.com/google/wire",
@@ -215,6 +218,13 @@ func GenSingle(name string) error {
 		"github.com/samber/lo",
 		"github.com/pressly/goose/v3",
 	); err != nil {
+		return err
+	}
+	if err := genTools(); err != nil {
+		return err
+	}
+	// 3.2 justfile + buf configs, needed by the conf/proto generation below
+	if err := cpBuildFiles(appPath, false); err != nil {
 		return err
 	}
 	// 4. gen internal: biz,data,service,server,conf

@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -110,34 +109,34 @@ func (p *Proto) Generate() error {
 	if err := os.WriteFile(out, buf.Bytes(), 0o644); err != nil {
 		return err
 	}
-	fmt.Println("exec protoc...")
+	fmt.Println("exec buf generate...")
 	if err := p.genClient(p.OutPath(), p.GenHttp); err != nil {
 		return errors.Wrap(err, "gen proto client error")
 	}
 	return nil
 }
 
-// genClient OPTIMIZE
+// genClient runs buf against the single proto just written. It mirrors the
+// `proto` recipe of the generated justfile, which cannot be reused here because
+// the proto may not sit under api/<namespace>.
 func (p *Proto) genClient(source string, genHttp bool) error {
-	args := []string{
-		"--proto_path=.",
-		"--proto_path=./third_party",
-		"--go_out=paths=source_relative:.",
-		"--go-grpc_out=paths=source_relative:.",
-		// "--validate_out=paths=source_relative,lang=go:.",
+	if err := util.Exec("buf", "generate", "--path", source); err != nil {
+		return err
 	}
 	if genHttp {
-		args = append(args, "--go-http_out=paths=source_relative:.",
-			"--openapiv2_out=.",
-			"--openapiv2_opt=logtostderr=true",
-			"--openapiv2_opt=json_names_for_fields=false",
-		)
+		out := path.Join("openapi", p.Namespace)
+		if err := os.MkdirAll(out, 0o700); err != nil {
+			return err
+		}
+		if err := util.Exec("buf", "generate",
+			"--template", "buf.gen.openapi.yaml",
+			"--path", source,
+			"-o", out,
+		); err != nil {
+			return err
+		}
 	}
-	cmd := exec.Command("protoc", append(args, source)...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Dir = "."
-	return cmd.Run()
+	return nil
 }
 
 func (p *Proto) OutPath() string {

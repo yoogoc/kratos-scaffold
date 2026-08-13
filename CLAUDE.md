@@ -78,6 +78,15 @@ Uses Go templates for code generation:
 - Proto templates create protobuf definitions with proper field mappings
 - Migration SQL templates in `generator/tmpl/migration.sql.tmpl`
 
+### Build Tooling of Generated Projects (`project_generator/resources/`)
+Generated projects use **buf** (not protoc) and a **justfile** (not a Makefile):
+- `justfile.mono.example` / `justfile.single.example` — recipes: `init`, `migrate`, `rollup`, `migration`, `proto`, `openapi`, `validate`, `config`, `ent`, `wire`
+- `buf.yaml.mono.example` / `buf.yaml.single.example` — buf v2 workspace. Mono excludes `app` from the root module, because every service's `internal/conf/conf.proto` declares the same `kratos.api` package; each conf dir gets its own module (`buf.conf.yaml.example`). Single keeps `internal/conf` in the root module.
+- `buf.gen.yaml.example` (go/go-grpc/go-http), `buf.gen.openapi.yaml.example`, `buf.gen.validate.yaml.example`
+- Plugins and wire are resolved via `go tool`, pinned in the generated `go.mod` `tool` block (`genTools` in `project_generator/gomod.go`)
+- The scaffold shells out to `just <recipe> [service]` for conf/proto/wire generation; `generator/proto.go` calls `buf generate` directly because the proto may not live under `api/<namespace>`.
+- `buf` and `just` must be on PATH for the scaffold to work.
+
 ### Wire Integration (`pkg/ast/wire.go`)
 The tool automatically injects constructors into `biz.go` using AST manipulation when generating biz layer code.
 
@@ -93,7 +102,7 @@ The tool maintains consistent type mappings across layers:
 
 Commands follow a consistent pattern:
 1. **new**: Creates new project (mono, sub-mono, or single)
-2. **proto**: Generates proto files and compiles them with protoc
+2. **proto**: Generates proto files and compiles them with buf
 3. **biz**: Generates business logic layer
 4. **data**: Generates data access layer (supports `--orm-type=ent` or `--orm-type=proto`)
 5. **service**: Generates service layer

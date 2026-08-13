@@ -1,0 +1,12 @@
+# protoc-gen-validate stubs. Only used by services whose protos carry validate
+# rules (see `just validate`); running it repo-wide would litter every package
+# with empty *.pb.validate.go files.
+version: v2
+managed:
+  enabled: false
+plugins:
+  - local: [go, tool, protoc-gen-validate]
+    out: .
+    opt:
+      - paths=source_relative
+      - lang=go

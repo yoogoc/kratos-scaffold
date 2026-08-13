@@ -93,7 +93,7 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 		return err
 	}
 
-	// 5 gen conf + protoc
+	// 5 gen conf + buf generate
 	if isSubMono {
 		if err := genConf(name, appPath, confProto); err != nil {
 			return err

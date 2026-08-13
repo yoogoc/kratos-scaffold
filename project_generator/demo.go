@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"strings"
 	"text/template"
@@ -71,23 +70,15 @@ func genDemo(name, appPath string, isSubMono, isBff bool) error {
 	// 3. compile proto
 	fmt.Println("compiling demo greeter.proto ...")
 	if isSubMono {
-		if err := util.Exec("make", "proto-"+name); err != nil {
-			fmt.Printf("proto compile failed, please run manually: make proto-%s\n", name)
+		if err := util.Exec("just", "proto", name); err != nil {
+			fmt.Printf("proto compile failed, please run manually: just proto %s\n", name)
 		}
 	} else {
-		protoFile := path.Join("api", "v1", "greeter.proto")
-		cmd := exec.Command("protoc",
-			"--proto_path=.",
-			"--proto_path=./third_party",
-			"--go_out=paths=source_relative:.",
-			"--go-grpc_out=paths=source_relative:.",
-			"--go-http_out=paths=source_relative:.",
-			protoFile,
-		)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			fmt.Printf("proto compile failed, please run manually: protoc ... %s\n", protoFile)
+		// the demo proto lives at api/v1, not under a service dir, so `just
+		// proto <service>` does not apply here
+		protoPath := path.Join("api", "v1")
+		if err := util.Exec("buf", "generate", "--path", protoPath); err != nil {
+			fmt.Printf("proto compile failed, please run manually: buf generate --path %s\n", protoPath)
 		}
 	}
 

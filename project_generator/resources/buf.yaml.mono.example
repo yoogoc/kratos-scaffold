@@ -1,0 +1,34 @@
+version: v2
+modules:
+  # API definitions. Imports are rooted at the repo root (e.g. "api/user/v1/user.proto"),
+  # so the module root is "." with everything else excluded.
+  - path: .
+    excludes:
+      - app
+      - third_party
+  # Vendored protos: google/api, google/gateway (protoc-gen-openapiv2 options),
+  # buf/validate, validate, errors. google/protobuf is omitted on purpose —
+  # buf ships the well-known types itself.
+  - path: third_party
+    excludes:
+      - third_party/google/protobuf
+  # NOTE: app/<svc>/internal/conf/conf.proto is deliberately NOT a workspace module.
+  # Every service declares the same `kratos.api` package with the same symbols, so
+  # they cannot share one image. Each has its own buf.yaml and is generated
+  # individually (see `just config`).
+lint:
+  use:
+    - BASIC
+  except:
+    - FIELD_LOWER_SNAKE_CASE
+    - ENUM_VALUE_UPPER_SNAKE_CASE
+    - ENUM_ZERO_VALUE_SUFFIX
+    - PACKAGE_DIRECTORY_MATCH
+    - SERVICE_SUFFIX
+  ignore:
+    - third_party
+breaking:
+  use:
+    - FILE
+  ignore:
+    - third_party
