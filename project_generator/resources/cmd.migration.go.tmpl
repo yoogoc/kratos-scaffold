@@ -41,7 +41,7 @@ func NewMigrateCmd(logger *slog.Logger, bootstrap *conf.Bootstrap) *MigrateComma
 				}
 			}()
 
-			return goose.Run(args[0], db, dir)
+			return goose.RunContext(cmd.Context(), args[0], db, dir)
 		},
 	}
 

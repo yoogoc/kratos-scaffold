@@ -9,6 +9,7 @@ func TestMigrationCommandOnlyAllowsUpAndDown(t *testing.T) {
 	for _, want := range []string{
 		`ValidArgs:           []string{"up", "down"}`,
 		"cobra.OnlyValidArgs",
+		"goose.RunContext(cmd.Context(), args[0], db, dir)",
 	} {
 		if !strings.Contains(cmdMigrationTmpl, want) {
 			t.Fatalf("migration command template does not contain %q", want)
