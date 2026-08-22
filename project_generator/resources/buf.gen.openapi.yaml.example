@@ -1,12 +1,8 @@
-# OpenAPI v2 (swagger) spec, merged into a single openapi.swagger.json per service.
+# OpenAPI v3 spec, merged into a single openapi.yaml per service.
 # Run with `-o openapi/<service>` and `--path api/<service>` (see `just openapi`).
 version: v2
 managed:
   enabled: false
 plugins:
-  - local: [go, tool, protoc-gen-openapiv2]
+  - local: [go, tool, protoc-gen-openapi]
     out: .
-    opt:
-      - allow_merge=true
-      - include_package_in_tags=false
-      - merge_file_name=openapi

@@ -6,7 +6,7 @@ modules:
     excludes:
       - app
       - third_party
-  # Vendored protos: google/api, google/gateway (protoc-gen-openapiv2 options),
+  # Vendored protos: google/api, legacy google/gateway options,
   # buf/validate, validate, errors. google/protobuf is omitted on purpose —
   # buf ships the well-known types itself.
   - path: third_party

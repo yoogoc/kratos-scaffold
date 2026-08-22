@@ -32,7 +32,7 @@ proto service:
     @if grep -rq "google.api.http" api/{{service}} --include='*.proto'; then just openapi {{service}}; fi
     @if grep -rq "buf/validate" api/{{service}} --include='*.proto'; then just validate {{service}}; fi
 
-# OpenAPI v2 spec -> openapi/<service>/openapi.swagger.json
+# OpenAPI v3 spec -> openapi/<service>/openapi.yaml
 openapi service:
     buf generate --template buf.gen.openapi.yaml --path api/{{service}} -o openapi/{{service}}
 

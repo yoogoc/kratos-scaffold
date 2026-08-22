@@ -24,7 +24,7 @@ func genTools(di string) error {
 		"google.golang.org/protobuf/cmd/protoc-gen-go",
 		"google.golang.org/grpc/cmd/protoc-gen-go-grpc",
 		"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v3",
-		"github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2",
+		"github.com/google/gnostic/cmd/protoc-gen-openapi",
 		"github.com/envoyproxy/protoc-gen-validate",
 	}
 	if di == "wire" {

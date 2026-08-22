@@ -20,7 +20,7 @@ local, explicit `--config`, then `KRATOS_` environment variables.
 - 支持排序（`order_by`），采用 Go Option 可变参数模式
 - 时间类型：gRPC 使用 `google.protobuf.Timestamp`，HTTP 使用 `int64`（unix timestamp）
 - CRUD 方法：Create、Update、Patch（部分更新）、DestroyBy、List、FindBy、ExistBy
-- proto 编译使用 [buf](https://buf.build)，生成的项目自带 `buf.yaml` / `buf.gen.yaml` / `buf.gen.openapi.yaml` / `buf.gen.validate.yaml`
+- proto 编译使用 [buf](https://buf.build)，生成的项目自带 `buf.yaml` / `buf.gen.yaml` / `buf.gen.openapi.yaml` / `buf.gen.validate.yaml`，HTTP API 生成 OpenAPI v3 文档
 - 生成的项目使用 [just](https://just.systems) 而不是 make，SubMono 项目的 wire/proto 编译使用 justfile recipe（`just wire xx`、`just proto xx`）
 - protoc 插件与 wire 通过 go.mod 的 `tool` 块用 `go tool` 调用，无需手动安装（生成项目时自动 `go get -tool`）
 
