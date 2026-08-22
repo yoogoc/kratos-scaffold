@@ -199,7 +199,7 @@ service user id:int64:eq,in name:string:cont age:int32:gte,lte birthday:time:eq,
 - `entgo.io/ent` — ORM
 - `github.com/google/wire` — 依赖注入
 - `github.com/samber/lo` — Go 工具库（用于类型转换）
-- `github.com/pressly/goose/v3` — 数据库迁移
+- `github.com/yoogoc/kratos-kit/migration` — 数据库迁移执行（Goose CLI 作为 Go tool 创建迁移文件）
 - `github.com/spf13/cobra` — CLI
 
 # Roadmap

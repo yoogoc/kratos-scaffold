@@ -9,7 +9,7 @@ func TestMigrationCommandOnlyAllowsUpAndDown(t *testing.T) {
 	for _, want := range []string{
 		`ValidArgs:           []string{"up", "down"}`,
 		"cobra.OnlyValidArgs",
-		"goose.RunContext(cmd.Context(), args[0], db, dir)",
+		"kitmigration.Run(cmd.Context()",
 	} {
 		if !strings.Contains(cmdMigrationTmpl, want) {
 			t.Fatalf("migration command template does not contain %q", want)
@@ -19,6 +19,9 @@ func TestMigrationCommandOnlyAllowsUpAndDown(t *testing.T) {
 		if strings.Contains(cmdMigrationTmpl, unwanted) {
 			t.Fatalf("migration command template still contains %q", unwanted)
 		}
+	}
+	if strings.Contains(cmdMigrationTmpl, `"github.com/pressly/goose/v3"`) {
+		t.Fatal("migration command template still imports goose directly")
 	}
 }
 

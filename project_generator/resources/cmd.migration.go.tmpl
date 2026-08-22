@@ -5,8 +5,8 @@ import (
 	"{{.AppPkgPath}}/internal/conf"
 	"log/slog"
 
-	"github.com/pressly/goose/v3"
 	"github.com/spf13/cobra"
+	kitmigration "github.com/yoogoc/kratos-kit/migration"
 )
 
 type MigrateCommand cobra.Command
@@ -26,22 +26,13 @@ func NewMigrateCmd(logger *slog.Logger, bootstrap *conf.Bootstrap) *MigrateComma
 		ValidArgs:           []string{"up", "down"},
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if verbose {
-				goose.SetVerbose(true)
-			}
-			goose.SetTableName(table)
-			db, err := goose.OpenDBWithDriver(conf.Database.Driver, conf.Database.Source)
-			if err != nil {
-				logger.Error("failed to open db", "driver", conf.Database.Driver, "source", conf.Database.Source, "error", err)
-				return err
-			}
-			defer func() {
-				if err := db.Close(); err != nil {
-					logger.Error("goose: failed to close DB", "error", err)
-				}
-			}()
-
-			return goose.RunContext(cmd.Context(), args[0], db, dir)
+			return kitmigration.Run(cmd.Context(), kitmigration.Direction(args[0]), kitmigration.Options{
+				Driver:    conf.Database.Driver,
+				Source:    conf.Database.Source,
+				Directory: dir,
+				Table:     table,
+				Verbose:   verbose,
+			}, logger)
 		},
 	}
 

@@ -124,7 +124,6 @@ func GenMono(name, di string) error {
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
 		"github.com/samber/lo",
-		"github.com/pressly/goose/v3",
 	)
 	if err != nil {
 		return err
@@ -247,7 +246,6 @@ func GenSingle(name, di string) error {
 		"github.com/go-sql-driver/mysql",
 		"github.com/jackc/pgx/v5",
 		"github.com/samber/lo",
-		"github.com/pressly/goose/v3",
 	); err != nil {
 		return err
 	}
