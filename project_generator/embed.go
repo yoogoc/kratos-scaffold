@@ -11,9 +11,6 @@ import (
 //go:embed resources/config.yaml.example
 var configContent string
 
-//go:embed resources/create-migration.sh.example
-var createMigrationSh string
-
 //go:embed resources/cmd.main.go.tmpl
 var cmdMainTmpl string
 

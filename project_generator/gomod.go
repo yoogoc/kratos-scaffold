@@ -26,6 +26,7 @@ func genTools(di string) error {
 		"github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v3",
 		"github.com/google/gnostic/cmd/protoc-gen-openapi",
 		"github.com/envoyproxy/protoc-gen-validate",
+		"github.com/pressly/goose/v3/cmd/goose",
 	}
 	if di == "wire" {
 		args = append(args, "github.com/google/wire/cmd/wire")

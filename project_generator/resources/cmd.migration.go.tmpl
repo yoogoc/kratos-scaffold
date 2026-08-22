@@ -22,42 +22,26 @@ func NewMigrateCmd(logger *slog.Logger, bootstrap *conf.Bootstrap) *MigrateComma
 		Use:                "migrate",
 		Short:              "migrate database",
 		Long:               "migrate power by goose, show more in https://github.com/pressly/goose#usage",
+		Args:                cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
+		ValidArgs:           []string{"up", "down"},
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if verbose {
 				goose.SetVerbose(true)
 			}
 			goose.SetTableName(table)
-			if len(args) == 0 {
-				return cmd.Usage()
-			}
-
-			switch args[0] {
-			case "create":
-				return goose.Run("create", nil, dir, args[1:]...)
-			case "fix":
-				return goose.Run("fix", nil, dir)
-			}
-
-			command := args[0]
-
 			db, err := goose.OpenDBWithDriver(conf.Database.Driver, conf.Database.Source)
 			if err != nil {
-				slog.Error("failed to open db", "driver", conf.Database.Driver, "source", conf.Database.Source, "error", err)
+				logger.Error("failed to open db", "driver", conf.Database.Driver, "source", conf.Database.Source, "error", err)
 				return err
 			}
 			defer func() {
 				if err := db.Close(); err != nil {
-					slog.Error("goose: failed to close DB", "error", err)
+					logger.Error("goose: failed to close DB", "error", err)
 				}
 			}()
 
-			var arguments []string
-			if len(args) > 3 {
-				arguments = append(arguments, args[3:]...)
-			}
-
-			return goose.Run(command, db, dir, arguments...)
+			return goose.Run(args[0], db, dir)
 		},
 	}
 

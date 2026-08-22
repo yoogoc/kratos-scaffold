@@ -24,7 +24,7 @@ rollup:
 
 # Create a new migration: `just migration add_foo_table`
 migration name:
-    go run ./cmd migrate create -c ./configs --dir ./db/migration {{name}} sql
+    go tool goose -dir ./db/migration create {{name}} sql
 
 # protobuf + gRPC + Kratos HTTP stubs, plus OpenAPI / validate when the protos use them
 proto service:

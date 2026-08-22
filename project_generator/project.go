@@ -161,11 +161,7 @@ func GenMono(name, di string) error {
 	if err := cpProto(projectPath); err != nil {
 		return err
 	}
-	// 7. cp create-migration.sh
-	if err = os.WriteFile(path.Join(projectPath, "create-migration.sh"), []byte(createMigrationSh), 0o644); err != nil {
-		return err
-	}
-	// 8. cp justfile + buf configs
+	// 7. cp justfile + buf configs
 	if err = cpBuildFiles(projectPath, true); err != nil {
 		return err
 	}
