@@ -6,7 +6,6 @@ import (
 	"context"
 	"log/slog"
 	"{{.CurrentPkgPath}}/biz"
-	"github.com/go-kratos/kratos/v3/log"
 	{{$modelName}}V1 "{{ .ProtoPkgPath }}"
 	{{- if eq .DI "do" }}
 	"github.com/samber/do/v2"
@@ -26,14 +25,14 @@ func New{{.Name | ToCamel}}Repo(i do.Injector) (biz.{{.Name | ToCamel}}Repo, err
 	{{$modelName}} := do.MustInvoke[{{$modelName}}V1.{{.Name | ToCamel}}ServiceClient](i)
 	return &{{$modelName}}Repo{
 		{{$modelName}}: {{$modelName}},
-		log: log.With(logger, "module", "data/{{$modelName}}"),
+		log: logger.With("module", "data/{{$modelName}}"),
 	}, nil
 }
 {{- else }}
 func New{{.Name | ToCamel}}Repo(logger *slog.Logger, {{$modelName}} {{$modelName}}V1.{{.Name | ToCamel}}ServiceClient) biz.{{.Name | ToCamel}}Repo {
 	return &{{$modelName}}Repo{
 		{{$modelName}}: {{$modelName}},
-		log:  log.With(logger, "module", "data/{{$modelName}}"),
+		log:  logger.With("module", "data/{{$modelName}}"),
 	}
 }
 {{- end }}

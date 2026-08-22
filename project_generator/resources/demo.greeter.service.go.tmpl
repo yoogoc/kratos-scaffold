@@ -5,7 +5,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/go-kratos/kratos/v3/log"
 	v1 "{{.ApiPkgPath}}"
 	"{{.AppPkgPath}}/internal/biz"
 )
@@ -19,7 +18,7 @@ type GreeterService struct {
 func NewGreeterService(uc *biz.GreeterUsecase, logger *slog.Logger) *GreeterService {
 	return &GreeterService{
 		uc:  uc,
-		log: log.With(logger, "module", "service/greeter"),
+		log: logger.With("module", "service/greeter"),
 	}
 }
 

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/go-kratos/kratos/v3/log"
 	"{{.AppPkgPath}}/internal/biz"
 )
 
@@ -18,7 +17,7 @@ type greeterRepo struct {
 func NewGreeterRepo(data *Data, logger *slog.Logger) biz.GreeterRepo {
 	return &greeterRepo{
 		data: data,
-		log:  log.With(logger, "module", "data/greeter"),
+		log:  logger.With("module", "data/greeter"),
 	}
 }
 

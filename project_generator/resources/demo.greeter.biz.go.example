@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/go-kratos/kratos/v3/log"
 )
 
 type GreeterRepo interface {
@@ -19,7 +18,7 @@ type GreeterUsecase struct {
 func NewGreeterUsecase(repo GreeterRepo, logger *slog.Logger) *GreeterUsecase {
 	return &GreeterUsecase{
 		repo: repo,
-		log:  log.With(logger, "module", "biz/greeter"),
+		log:  logger.With("module", "biz/greeter"),
 	}
 }
 

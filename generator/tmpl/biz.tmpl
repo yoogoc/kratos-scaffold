@@ -4,7 +4,6 @@ package biz
 import (
 	"context"
 	"log/slog"
-	"github.com/go-kratos/kratos/v3/log"
 	{{- if eq .DI "do" }}
 	"github.com/samber/do/v2"
 	{{- end }}
@@ -64,14 +63,14 @@ func New{{.Name}}Usecase(i do.Injector) (*{{.Name}}Usecase, error) {
 	logger := do.MustInvoke[*slog.Logger](i)
 	return &{{.Name}}Usecase{
 		repo: repo,
-		log:  log.With(logger, "module", "usecase/{{.Name | ToLower}}"),
+		log:  logger.With("module", "usecase/{{.Name | ToLower}}"),
 	}, nil
 }
 {{- else }}
 func New{{.Name}}Usecase(repo {{.Name}}Repo, logger *slog.Logger) *{{.Name}}Usecase {
 	return &{{.Name}}Usecase{
 		repo: repo,
-		log:  log.With(logger, "module", "usecase/{{.Name | ToLower}}"),
+		log:  logger.With("module", "usecase/{{.Name | ToLower}}"),
 	}
 }
 {{- end }}

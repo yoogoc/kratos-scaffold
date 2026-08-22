@@ -6,7 +6,6 @@ import (
 	"context"
 	"log/slog"
 	"time"
-	"github.com/go-kratos/kratos/v3/log"
 	"{{.CurrentPkgPath}}/biz"
 	"{{.CurrentPkgPath}}/data/ent"
 	{{- if eq .DI "do" }}
@@ -27,14 +26,14 @@ func New{{.Name | ToCamel}}Repo(i do.Injector) (biz.{{.Name | ToCamel}}Repo, err
 	logger := do.MustInvoke[*slog.Logger](i)
 	return &{{$modelName}}Repo{
 		data: data,
-		log: log.With(logger, "module", "data/{{$modelName}}"),
+		log: logger.With("module", "data/{{$modelName}}"),
 	}, nil
 }
 {{- else }}
 func New{{.Name | ToCamel}}Repo(data *Data, logger *slog.Logger) biz.{{.Name | ToCamel}}Repo {
 	return &{{$modelName}}Repo{
 		data: data,
-		log:  log.With(logger, "module", "data/{{$modelName}}"),
+		log:  logger.With("module", "data/{{$modelName}}"),
 	}
 }
 {{- end }}

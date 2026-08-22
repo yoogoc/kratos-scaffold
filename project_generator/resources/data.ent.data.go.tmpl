@@ -11,7 +11,6 @@ import (
 	"{{.AppPkgPath}}/internal/data/ent"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/go-kratos/kratos/v3/log"
 	"github.com/google/wire"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -87,7 +86,7 @@ func NewEntClient(conf *conf.Data, logger *slog.Logger) *ent.Client {
 }
 
 func NewData(conf *conf.Data, logger *slog.Logger, db *ent.Client) (*Data, error) {
-	l := log.With(logger, "module", "{{.LoggerName}}")
+	l := logger.With("module", "{{.LoggerName}}")
 	return &Data{
 		log: l,
 		db:  db,

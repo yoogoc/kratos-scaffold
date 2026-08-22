@@ -4,7 +4,6 @@ package service
 import (
 	"context"
 	"log/slog"
-	"github.com/go-kratos/kratos/v3/log"
 	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
 	{{- if eq .DI "do" }}
@@ -26,14 +25,14 @@ func New{{.Name}}Service(i do.Injector) (*{{.Name}}Service, error) {
 	uc := do.MustInvoke[*biz.{{.Name}}Usecase](i)
 	logger := do.MustInvoke[*slog.Logger](i)
 	return &{{.Name}}Service{
-		log: log.With(logger, "module", "service/{{.Name | ToSnake}}"),
+		log: logger.With("module", "service/{{.Name | ToSnake}}"),
 		uc: uc,
 	}, nil
 }
 {{- else }}
 func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger *slog.Logger) *{{.Name}}Service {
 	return &{{.Name}}Service{
-		log: log.With(logger, "module", "service/{{.Name | ToSnake}}"),
+		log: logger.With("module", "service/{{.Name | ToSnake}}"),
 		uc:  uc,
 	}
 }
