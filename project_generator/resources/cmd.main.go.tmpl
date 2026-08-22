@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"{{.AppPkgPath}}/internal/conf"
 	defaultconfigs "{{.ProjectPkgPath}}/configs"
-	ilog "{{.AppPkgPath}}/internal/log"
+	"log/slog"
 	"os"
 
 	"github.com/spf13/cobra"
 	kitconfig "github.com/yoogoc/kratos-kit/config/loader"
+	kitlog "github.com/yoogoc/kratos-kit/log"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -26,7 +27,11 @@ var (
 type RootCommand cobra.Command
 
 func main() {
-	cmd, cleanup, err := initApp(ilog.NameString(Name), ilog.VersionString(Version))
+{{- if eq .DI "do" }}
+	cmd, cleanup, err := initApp(Name, Version)
+{{- else }}
+	cmd, cleanup, err := initApp(kitlog.Options{Name: Name, Version: Version})
+{{- end }}
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -69,16 +74,13 @@ func newConf(rootCmd *RootCommand) *conf.Bootstrap {
 	return &bc
 }
 
-func newDataConf(bc *conf.Bootstrap) *conf.Data {
-	return bc.Data
-}
-
-func newServerConf(bc *conf.Bootstrap) *conf.Server {
-	return bc.Server
-}
-
-func newTraceConf(bc *conf.Bootstrap) *conf.Trace {
-	return bc.Trace
+func newLogger(bc *conf.Bootstrap, app kitlog.Options) *slog.Logger {
+	if bc.Log != nil {
+		app.Type = bc.Log.Type
+		app.Level = bc.Log.Level
+	}
+	app.FilterKeys = []string{"password"}
+	return kitlog.New(app)
 }
 
 func newRootCmd() *RootCommand {

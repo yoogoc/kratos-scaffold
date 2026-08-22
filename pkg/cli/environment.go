@@ -26,15 +26,15 @@ type NamespaceConfig struct {
 }
 
 type EnvSettings struct {
-	AppDirName           string                       `yaml:"app_dir_name"`
-	ApiDirName           string                       `yaml:"api_dir_name"`
-	Namespace            string                       `yaml:"namespace"`     // only gen api or gen mono repo scaffold is active
-	TemplatePath         string                       `yaml:"template_path"` // TODO
-	PolicyIfExistsTarget PolicyIfExistsTarget          `yaml:"policy_if_exists_target"`
-	FieldStyle           string                       `yaml:"field_style"`
-	PrimaryKey           string                       `yaml:"primary_key"`
-	ApiVersion           string                       `yaml:"api_version"`
-	Namespaces           map[string]*NamespaceConfig  `yaml:"namespaces"`
+	AppDirName           string                      `yaml:"app_dir_name"`
+	ApiDirName           string                      `yaml:"api_dir_name"`
+	Namespace            string                      `yaml:"namespace"`     // only gen api or gen mono repo scaffold is active
+	TemplatePath         string                      `yaml:"template_path"` // TODO
+	PolicyIfExistsTarget PolicyIfExistsTarget        `yaml:"policy_if_exists_target"`
+	FieldStyle           string                      `yaml:"field_style"`
+	PrimaryKey           string                      `yaml:"primary_key"`
+	ApiVersion           string                      `yaml:"api_version"`
+	Namespaces           map[string]*NamespaceConfig `yaml:"namespaces"`
 }
 
 func New() *EnvSettings {

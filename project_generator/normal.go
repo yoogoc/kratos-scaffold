@@ -3,7 +3,6 @@ package project_generator
 import (
 	"os"
 	"path"
-	"strings"
 
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
@@ -86,26 +85,7 @@ func genInternal(name string, appPath string, isSubMono bool) error {
 		}
 	}
 
-	// 6 gen log
-	logPath := path.Join(appPath, "log")
-	if err := os.MkdirAll(logPath, 0o700); err != nil {
-		return err
-	}
-	if err := NewLogTmpl(appPkgPath, logPath).Generate(); err != nil {
-		return err
-	}
-
-	// 7 gen otel
-	otelPath := path.Join(appPath, "otel")
-	if err := os.MkdirAll(otelPath, 0o700); err != nil {
-		return err
-	}
-	serviceName := strings.ReplaceAll(appPkgPath, "/", ".")
-	if err := NewOtelTmpl(appPkgPath, serviceName, otelPath).Generate(); err != nil {
-		return err
-	}
-
-	// 8 gen middleware
+	// 6 gen middleware
 	middlewarePath := path.Join(appPath, "middleware")
 	if err := os.MkdirAll(middlewarePath, 0o700); err != nil {
 		return err
@@ -115,7 +95,7 @@ func genInternal(name string, appPath string, isSubMono bool) error {
 		return err
 	}
 
-	// 9 gen demo greeter
+	// 7 gen demo greeter
 	if err := genDemo(name, appPath, isSubMono, false); err != nil {
 		return err
 	}

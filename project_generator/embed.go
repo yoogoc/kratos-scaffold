@@ -35,9 +35,6 @@ var bizTxGo string
 //go:embed resources/biz.pagination.go.example
 var bizPaginationGo string
 
-//go:embed resources/log.log.go.tmpl
-var logTmpl string
-
 //go:embed resources/data.ent.schema.needremove.go.example
 var entSchemaNeedRemove string
 
@@ -52,9 +49,6 @@ var grpcServerTmpl string
 
 //go:embed resources/server.http.go.tmpl
 var httpServerTmpl string
-
-//go:embed resources/otel.otel.go.tmpl
-var otelTmpl string
 
 //go:embed resources/demo.greeter.proto.tmpl
 var demoGreeterProtoTmpl string

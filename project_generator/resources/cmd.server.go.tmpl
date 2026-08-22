@@ -4,7 +4,7 @@ package main
 import (
 	"log/slog"
 
-	ilog "{{.AppPkgPath}}/internal/log"
+	kitlog "github.com/yoogoc/kratos-kit/log"
 
 	"github.com/go-kratos/kratos/v3"
 {{- if not .IsBff }}
@@ -28,9 +28,9 @@ var ProviderSet = wire.NewSet(NewServerCmd, NewMigrateCmd)
 {{- end }}
 
 {{- if .IsBff }}
-func NewServerCmd(versionString ilog.VersionString, logger *slog.Logger, hs *http.Server) *ServerCommand {
+func NewServerCmd(app kitlog.Options, logger *slog.Logger, hs *http.Server) *ServerCommand {
 {{- else }}
-func NewServerCmd(versionString ilog.VersionString, logger *slog.Logger, gs *grpc.Server, hs *http.Server) *ServerCommand {
+func NewServerCmd(app kitlog.Options, logger *slog.Logger, gs *grpc.Server, hs *http.Server) *ServerCommand {
 {{- end }}
 	return &ServerCommand{
 		Use:                "server",
@@ -40,7 +40,7 @@ func NewServerCmd(versionString ilog.VersionString, logger *slog.Logger, gs *grp
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app := kratos.New(
 				kratos.Name(Name),
-				kratos.Version(string(versionString)),
+				kratos.Version(app.Version),
 				kratos.Metadata(map[string]string{}),
 				kratos.Logger(logger),
 				kratos.Server(

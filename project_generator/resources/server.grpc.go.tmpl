@@ -6,16 +6,16 @@ import (
 
 	"github.com/go-kratos/kratos/v3/transport/grpc"
 	kitmiddleware "github.com/yoogoc/kratos-kit/middleware"
-	"go.opentelemetry.io/otel/trace"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/service"
 	v1 "{{.ApiPkgPath}}"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, logger *slog.Logger, tp trace.TracerProvider, greeter *service.GreeterService) *grpc.Server {
+func NewGRPCServer(bootstrap *conf.Bootstrap, logger *slog.Logger, greeter *service.GreeterService) *grpc.Server {
+	c := bootstrap.Server
 	var opts = []grpc.ServerOption{
-		grpc.Middleware(kitmiddleware.GRPC(logger, tp)...),
+		grpc.Middleware(kitmiddleware.GRPC(logger)...),
 	}
 	if c.Grpc.Network != "" {
 		opts = append(opts, grpc.Network(c.Grpc.Network))

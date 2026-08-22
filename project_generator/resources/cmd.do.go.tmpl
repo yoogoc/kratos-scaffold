@@ -7,13 +7,12 @@ import (
 	"{{.AppPkgPath}}/internal/biz"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/data"
-	ilog "{{.AppPkgPath}}/internal/log"
-	iotel "{{.AppPkgPath}}/internal/otel"
 	"{{.AppPkgPath}}/internal/server"
 	"{{.AppPkgPath}}/internal/service"
 
 	"github.com/samber/do/v2"
 	"github.com/spf13/cobra"
+	kitlog "github.com/yoogoc/kratos-kit/log"
 {{- if not .IsBff }}
 	"github.com/go-kratos/kratos/v3/transport/grpc"
 {{- end }}
@@ -23,19 +22,25 @@ import (
 var CommandPackage = do.Package(
 	do.Lazy(func(i do.Injector) (*RootCommand, error) { return newRootCmd(), nil }),
 	do.Lazy(func(i do.Injector) (*conf.Bootstrap, error) { return newConf(do.MustInvoke[*RootCommand](i)), nil }),
-	do.Lazy(func(i do.Injector) (*conf.Data, error) { return newDataConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
-	do.Lazy(func(i do.Injector) (*conf.Server, error) { return newServerConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
-	do.Lazy(func(i do.Injector) (*conf.Trace, error) { return newTraceConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
+	do.Lazy(func(i do.Injector) (kitlog.Options, error) {
+		return kitlog.Options{
+			Name: do.MustInvokeNamed[string](i, "app.name"),
+			Version: do.MustInvokeNamed[string](i, "app.version"),
+		}, nil
+	}),
+	do.Lazy(func(i do.Injector) (*slog.Logger, error) {
+		return newLogger(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[kitlog.Options](i)), nil
+	}),
 {{- if .IsBff }}
 	do.Lazy(func(i do.Injector) (*ServerCommand, error) {
-		return NewServerCmd(do.MustInvoke[ilog.VersionString](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*http.Server](i)), nil
+		return NewServerCmd(do.MustInvoke[kitlog.Options](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*http.Server](i)), nil
 	}),
 {{- else }}
 	do.Lazy(func(i do.Injector) (*ServerCommand, error) {
-		return NewServerCmd(do.MustInvoke[ilog.VersionString](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*grpc.Server](i), do.MustInvoke[*http.Server](i)), nil
+		return NewServerCmd(do.MustInvoke[kitlog.Options](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*grpc.Server](i), do.MustInvoke[*http.Server](i)), nil
 	}),
 	do.Lazy(func(i do.Injector) (*MigrateCommand, error) {
-		return NewMigrateCmd(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*conf.Data](i)), nil
+		return NewMigrateCmd(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*conf.Bootstrap](i)), nil
 	}),
 {{- end }}
 	do.Lazy(func(i do.Injector) (*cobra.Command, error) {
@@ -47,10 +52,10 @@ var CommandPackage = do.Package(
 	}),
 )
 
-func initApp(name ilog.NameString, version ilog.VersionString) (*cobra.Command, func(), error) {
-	injector := do.New(ilog.Package, iotel.Package, biz.Package, data.Package, service.Package, server.Package, CommandPackage)
-	do.ProvideValue(injector, name)
-	do.ProvideValue(injector, version)
+func initApp(name, version string) (*cobra.Command, func(), error) {
+	injector := do.New(biz.Package, data.Package, service.Package, server.Package, CommandPackage)
+	do.ProvideNamedValue(injector, "app.name", name)
+	do.ProvideNamedValue(injector, "app.version", version)
 	cmd, err := do.Invoke[*cobra.Command](injector)
 	return cmd, func() { _ = injector.Shutdown() }, err
 }

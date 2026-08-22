@@ -199,7 +199,6 @@ service user id:int64:eq,in name:string:cont age:int32:gte,lte birthday:time:eq,
 - `entgo.io/ent` — ORM
 - `github.com/google/wire` — 依赖注入
 - `github.com/samber/lo` — Go 工具库（用于类型转换）
-- `go.opentelemetry.io/otel` — OpenTelemetry 链路追踪
 - `github.com/pressly/goose/v3` — 数据库迁移
 - `github.com/spf13/cobra` — CLI
 

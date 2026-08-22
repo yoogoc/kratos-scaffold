@@ -65,7 +65,8 @@ func NewTxRepo(d *Data) biz.TxRepo {
 	return d
 }
 
-func NewEntClient(conf *conf.Data, logger *slog.Logger) *ent.Client {
+func NewEntClient(bootstrap *conf.Bootstrap, logger *slog.Logger) *ent.Client {
+	conf := bootstrap.Data
 	var ops []ent.Option
 	if conf.Database.EntDebug {
 		ops = append(ops, ent.Debug())
@@ -85,7 +86,7 @@ func NewEntClient(conf *conf.Data, logger *slog.Logger) *ent.Client {
 	return ent.NewClient(append(ops, ent.Driver(sql.NewDriver(conf.Database.Driver, sql.Conn{ExecQuerier: db})))...)
 }
 
-func NewData(conf *conf.Data, logger *slog.Logger, db *ent.Client) (*Data, error) {
+func NewData(logger *slog.Logger, db *ent.Client) (*Data, error) {
 	l := logger.With("module", "{{.LoggerName}}")
 	return &Data{
 		log: l,

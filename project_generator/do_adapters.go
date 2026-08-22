@@ -38,26 +38,6 @@ var Package = do.Package(do.Lazy(func(i do.Injector) (*GreeterService, error) {
 	return NewGreeterService(do.MustInvoke[*biz.GreeterUsecase](i), do.MustInvoke[*slog.Logger](i)), nil
 }))
 `, appPkgPath),
-		"log/do.go": `package log
-import (
-	"log/slog"
-	"github.com/samber/do/v2"
-)
-var Package = do.Package(do.Lazy(func(i do.Injector) (*slog.Logger, error) {
-	return NewKratosLogger(do.MustInvoke[NameString](i), do.MustInvoke[VersionString](i)), nil
-}))
-`,
-		"otel/do.go": fmt.Sprintf(`package otel
-import (
-	"%s/internal/conf"
-	"github.com/samber/do/v2"
-	"go.opentelemetry.io/otel/trace"
-)
-var Package = do.Package(do.Lazy(func(i do.Injector) (trace.TracerProvider, error) {
-	provider, _, err := NewTracerProvider(do.MustInvoke[*conf.Trace](i))
-	return provider, err
-}))
-`, appPkgPath),
 	}
 	if isBff {
 		files["data/do.go"] = fmt.Sprintf(`package data
@@ -68,7 +48,7 @@ import (
 	"github.com/samber/do/v2"
 )
 var Package = do.Package(do.Lazy(func(i do.Injector) (biz.GreeterRepo, error) {
-	return NewGreeterRepo(do.MustInvoke[*conf.Data](i), do.MustInvoke[*slog.Logger](i)), nil
+	return NewGreeterRepo(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[*slog.Logger](i)), nil
 }))
 `, appPkgPath, appPkgPath)
 		files["server/do.go"] = fmt.Sprintf(`package server
@@ -78,10 +58,9 @@ import (
 	"%s/internal/service"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/samber/do/v2"
-	"go.opentelemetry.io/otel/trace"
 )
 var Package = do.Package(do.Lazy(func(i do.Injector) (*http.Server, error) {
-	return NewHTTPServer(do.MustInvoke[*conf.Server](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[trace.TracerProvider](i), do.MustInvoke[*service.GreeterService](i)), nil
+	return NewHTTPServer(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*service.GreeterService](i)), nil
 }))
 `, appPkgPath, appPkgPath)
 	} else {
@@ -94,8 +73,8 @@ import (
 	"github.com/samber/do/v2"
 )
 var Package = do.Package(
-	do.Lazy(func(i do.Injector) (*ent.Client, error) { return NewEntClient(do.MustInvoke[*conf.Data](i), do.MustInvoke[*slog.Logger](i)), nil }),
-	do.Lazy(func(i do.Injector) (*Data, error) { return NewData(do.MustInvoke[*conf.Data](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*ent.Client](i)) }),
+	do.Lazy(func(i do.Injector) (*ent.Client, error) { return NewEntClient(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[*slog.Logger](i)), nil }),
+	do.Lazy(func(i do.Injector) (*Data, error) { return NewData(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*ent.Client](i)) }),
 	do.Lazy(func(i do.Injector) (biz.TxRepo, error) { return NewTxRepo(do.MustInvoke[*Data](i)), nil }),
 	do.Lazy(func(i do.Injector) (biz.GreeterRepo, error) { return NewGreeterRepo(do.MustInvoke[*Data](i), do.MustInvoke[*slog.Logger](i)), nil }),
 )
@@ -108,11 +87,10 @@ import (
 	"github.com/go-kratos/kratos/v3/transport/grpc"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/samber/do/v2"
-	"go.opentelemetry.io/otel/trace"
 )
 var Package = do.Package(
-	do.Lazy(func(i do.Injector) (*grpc.Server, error) { return NewGRPCServer(do.MustInvoke[*conf.Server](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[trace.TracerProvider](i), do.MustInvoke[*service.GreeterService](i)), nil }),
-	do.Lazy(func(i do.Injector) (*http.Server, error) { return NewHTTPServer(do.MustInvoke[*conf.Server](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[trace.TracerProvider](i), do.MustInvoke[*service.GreeterService](i)), nil }),
+	do.Lazy(func(i do.Injector) (*grpc.Server, error) { return NewGRPCServer(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*service.GreeterService](i)), nil }),
+	do.Lazy(func(i do.Injector) (*http.Server, error) { return NewHTTPServer(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*service.GreeterService](i)), nil }),
 )
 `, appPkgPath, appPkgPath)
 	}

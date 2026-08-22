@@ -92,7 +92,8 @@ func (d *Data) genClientProto() error {
 	alias := lowerCamelName + "V1"
 
 	funcCode := fmt.Sprintf(`
-func New%sServiceClient(confData *conf.Data, logger *slog.Logger) (%s.%sServiceClient, error) {
+func New%sServiceClient(bootstrap *conf.Bootstrap, logger *slog.Logger) (%s.%sServiceClient, error) {
+	confData := bootstrap.Data
 	conn, err := grpc.NewClient(
 		context.Background(),
 		grpc.WithTimeout(confData.%s.Timeout.AsDuration()),
@@ -113,7 +114,7 @@ func New%sServiceClient(confData *conf.Data, logger *slog.Logger) (%s.%sServiceC
 	if d.DI == "do" {
 		funcCode = fmt.Sprintf(`
 func New%sServiceClient(i do.Injector) (%s.%sServiceClient, error) {
-	confData := do.MustInvoke[*conf.Data](i)
+	confData := do.MustInvoke[*conf.Bootstrap](i).Data
 	logger := do.MustInvoke[*slog.Logger](i)
 	conn, err := grpc.NewClient(
 		context.Background(),

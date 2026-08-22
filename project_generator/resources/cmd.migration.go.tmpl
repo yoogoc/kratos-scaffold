@@ -11,7 +11,8 @@ import (
 
 type MigrateCommand cobra.Command
 
-func NewMigrateCmd(logger *slog.Logger, conf *conf.Data) *MigrateCommand {
+func NewMigrateCmd(logger *slog.Logger, bootstrap *conf.Bootstrap) *MigrateCommand {
+	conf := bootstrap.Data
 
 	var table string
 	var dir string
