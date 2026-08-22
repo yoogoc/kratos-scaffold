@@ -31,4 +31,5 @@ func newNewCmd() *cobra.Command {
 func addNewFlags(newCmd *cobra.Command, project *pg.Project) {
 	newCmd.PersistentFlags().BoolVarP(&isMono, "mono", "", false, "is mono parent repo?")
 	newCmd.PersistentFlags().BoolVarP(&project.IsBff, "bff", "", false, "is bff repo?")
+	newCmd.PersistentFlags().StringVar(&project.DI, "di", "", "dependency injection mode: do or wire (default: do, or inherit mono parent)")
 }

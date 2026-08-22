@@ -1,0 +1,56 @@
+{{- /*gotype: github.com/yoogoc/kratos-scaffold/project_generator.CmdTmpl*/ -}}
+package main
+
+import (
+	"log/slog"
+
+	"{{.AppPkgPath}}/internal/biz"
+	"{{.AppPkgPath}}/internal/conf"
+	"{{.AppPkgPath}}/internal/data"
+	ilog "{{.AppPkgPath}}/internal/log"
+	iotel "{{.AppPkgPath}}/internal/otel"
+	"{{.AppPkgPath}}/internal/server"
+	"{{.AppPkgPath}}/internal/service"
+
+	"github.com/samber/do/v2"
+	"github.com/spf13/cobra"
+{{- if not .IsBff }}
+	"github.com/go-kratos/kratos/v3/transport/grpc"
+{{- end }}
+	"github.com/go-kratos/kratos/v3/transport/http"
+)
+
+var CommandPackage = do.Package(
+	do.Lazy(func(i do.Injector) (*RootCommand, error) { return newRootCmd(), nil }),
+	do.Lazy(func(i do.Injector) (*conf.Bootstrap, error) { return newConf(do.MustInvoke[*RootCommand](i)), nil }),
+	do.Lazy(func(i do.Injector) (*conf.Data, error) { return newDataConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
+	do.Lazy(func(i do.Injector) (*conf.Server, error) { return newServerConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
+	do.Lazy(func(i do.Injector) (*conf.Trace, error) { return newTraceConf(do.MustInvoke[*conf.Bootstrap](i)), nil }),
+{{- if .IsBff }}
+	do.Lazy(func(i do.Injector) (*ServerCommand, error) {
+		return NewServerCmd(do.MustInvoke[ilog.VersionString](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*http.Server](i)), nil
+	}),
+{{- else }}
+	do.Lazy(func(i do.Injector) (*ServerCommand, error) {
+		return NewServerCmd(do.MustInvoke[ilog.VersionString](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*grpc.Server](i), do.MustInvoke[*http.Server](i)), nil
+	}),
+	do.Lazy(func(i do.Injector) (*MigrateCommand, error) {
+		return NewMigrateCmd(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*conf.Data](i)), nil
+	}),
+{{- end }}
+	do.Lazy(func(i do.Injector) (*cobra.Command, error) {
+{{- if .IsBff }}
+		return newCmd(do.MustInvoke[*RootCommand](i), do.MustInvoke[*ServerCommand](i)), nil
+{{- else }}
+		return newCmd(do.MustInvoke[*RootCommand](i), do.MustInvoke[*ServerCommand](i), do.MustInvoke[*MigrateCommand](i)), nil
+{{- end }}
+	}),
+)
+
+func initApp(name ilog.NameString, version ilog.VersionString) (*cobra.Command, func(), error) {
+	injector := do.New(ilog.Package, iotel.Package, biz.Package, data.Package, service.Package, server.Package, CommandPackage)
+	do.ProvideValue(injector, name)
+	do.ProvideValue(injector, version)
+	cmd, err := do.Invoke[*cobra.Command](injector)
+	return cmd, func() { _ = injector.Shutdown() }, err
+}

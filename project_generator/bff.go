@@ -64,12 +64,7 @@ func genBffInternal(name string, appPath string, isSubMono bool) error {
 	if err := os.MkdirAll(middlewarePath, 0o700); err != nil {
 		return err
 	}
-	middlewareContent := `package middleware
-
-import "github.com/google/wire"
-
-var ProviderSet = wire.NewSet()
-`
+	middlewareContent := providerDeclaration("middleware")
 	if err := os.WriteFile(path.Join(middlewarePath, "middleware.go"), []byte(middlewareContent), 0o644); err != nil {
 		return err
 	}
@@ -78,6 +73,5 @@ var ProviderSet = wire.NewSet()
 	if err := genDemo(name, appPath, isSubMono, true); err != nil {
 		return err
 	}
-
-	return nil
+	return genDoAdapters(appPkgPath, appPath, true)
 }

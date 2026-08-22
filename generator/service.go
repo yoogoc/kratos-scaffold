@@ -13,6 +13,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 
 	"github.com/iancoleman/strcase"
@@ -133,13 +134,24 @@ func (b *Service) genService() error {
 	}
 
 	providerSetPath := path.Join(b.OutPath(), "service.go")
-	if err := wire.AddToProviderSet(providerSetPath, "New"+b.Name+"Service"); err != nil {
+	cfg, _, _ := scaffoldconfig.Find(b.OutPath())
+	add := wire.AddToProviderSet
+	if cfg.DI == "do" {
+		providerSetPath = path.Join(b.OutPath(), "do.go")
+		add = wire.AddToPackage
+	}
+	if err := add(providerSetPath, "New"+b.Name+"Service"); err != nil {
 		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
 	}
 
 	serverDir := b.ServerPath()
 	if err := server.RegisterService(serverDir, b.Name, b.GenHttp); err != nil {
 		fmt.Printf("failed to register service to server, please add manually: %v\n", err)
+	}
+	if b.DI == "do" {
+		if err := server.RegisterDoService(serverDir, b.Name, b.GenHttp); err != nil {
+			fmt.Printf("failed to register service to do server provider, please add manually: %v\n", err)
+		}
 	}
 	return nil
 }

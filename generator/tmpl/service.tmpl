@@ -7,6 +7,9 @@ import (
 	"github.com/go-kratos/kratos/v3/log"
 	v1 "{{.ApiPath}}"
 	"{{.CurrentPkgPath}}/biz"
+	{{- if eq .DI "do" }}
+	"github.com/samber/do/v2"
+	{{- end }}
 	{{- range $i, $s := .MaybeGoPackages }}
 	"{{ $s }}"
 	{{- end }}
@@ -18,12 +21,23 @@ type {{.Name}}Service struct {
 	log *slog.Logger
 }
 
+{{- if eq .DI "do" }}
+func New{{.Name}}Service(i do.Injector) (*{{.Name}}Service, error) {
+	uc := do.MustInvoke[*biz.{{.Name}}Usecase](i)
+	logger := do.MustInvoke[*slog.Logger](i)
+	return &{{.Name}}Service{
+		log: log.With(logger, "module", "service/{{.Name | ToSnake}}"),
+		uc: uc,
+	}, nil
+}
+{{- else }}
 func New{{.Name}}Service(uc *biz.{{.Name}}Usecase, logger *slog.Logger) *{{.Name}}Service {
 	return &{{.Name}}Service{
 		log: log.With(logger, "module", "service/{{.Name | ToSnake}}"),
 		uc:  uc,
 	}
 }
+{{- end }}
 
 func (s *{{.Name}}Service) Create(ctx context.Context, req *v1.Create{{.Name}}Request) (*v1.Create{{.Name}}Reply, error) {
 	item, err := s.uc.Create{{.Name}}(ctx, create{{.Name}}Req2Biz(req))

@@ -93,14 +93,8 @@ func genServer(name, appPath string, isBff bool) error {
 	}
 
 	// 4.2 gen server
-	serverContent := `package server
-
-import "github.com/google/wire"
-
-// ProviderSet is server providers.
-var ProviderSet = wire.NewSet(%s)
-`
-	if err := os.WriteFile(path.Join(serverPath, "server.go"), []byte(fmt.Sprintf(serverContent, serverStr)), 0o644); err != nil {
+	serverContent := providerDeclaration("server", serverStr)
+	if err := os.WriteFile(path.Join(serverPath, "server.go"), []byte(serverContent), 0o644); err != nil {
 		return err
 	}
 	// 4.3 gen grpc,http

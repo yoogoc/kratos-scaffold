@@ -18,18 +18,22 @@ func genCmd(name string, appPath string, isSubMono, isBff bool) error {
 		return err
 	}
 	appPkgPath := name
+	projectPkgPath := name
 	serviceName := strings.ReplaceAll(name, "/", ".")
 	if isSubMono {
 		appPkgPath = path.Join(util.ModName(), "app", name)
+		projectPkgPath = util.ModName()
 		serviceName = strings.ReplaceAll(path.Join(util.ModName(), name), "/", ".")
 	}
 	cmdTmpl := CmdTmpl{
-		AppPkgPath:  appPkgPath,
-		ServiceName: serviceName,
-		OutPath:     mainPath,
-		IsBff:       isBff,
-		IsSubMono:   isSubMono,
-		Name:        name,
+		AppPkgPath:     appPkgPath,
+		ServiceName:    serviceName,
+		OutPath:        mainPath,
+		IsBff:          isBff,
+		IsSubMono:      isSubMono,
+		Name:           name,
+		DI:             activeDI,
+		ProjectPkgPath: projectPkgPath,
 	}
 	if err := cmdTmpl.Generate(); err != nil {
 		return err
@@ -38,12 +42,14 @@ func genCmd(name string, appPath string, isSubMono, isBff bool) error {
 }
 
 type CmdTmpl struct {
-	AppPkgPath  string
-	ServiceName string
-	OutPath     string
-	IsBff       bool
-	IsSubMono   bool
-	Name        string
+	AppPkgPath     string
+	ServiceName    string
+	OutPath        string
+	IsBff          bool
+	IsSubMono      bool
+	Name           string
+	DI             string
+	ProjectPkgPath string
 }
 
 func (ct CmdTmpl) Generate() error {
@@ -86,6 +92,19 @@ func (ct CmdTmpl) Generate() error {
 		if err := util.WhiteGo(path.Join(ct.OutPath, "migration.go"), migrationBuf.Bytes()); err != nil {
 			return err
 		}
+	}
+
+	if isDo() {
+		fmt.Println("generate cmd/package.go ...")
+		wireBuf := new(bytes.Buffer)
+		wireTmpl, err := template.New("doTmpl").Parse(cmdDoTmpl)
+		if err != nil {
+			return err
+		}
+		if err := wireTmpl.Execute(wireBuf, ct); err != nil {
+			return err
+		}
+		return util.WhiteGo(path.Join(ct.OutPath, "package.go"), wireBuf.Bytes())
 	}
 
 	fmt.Println("generate cmd/server/wire.go ...")

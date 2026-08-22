@@ -5,6 +5,7 @@ import (
 
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 )
 
 type Base struct {
@@ -17,6 +18,7 @@ type Base struct {
 	MaybeGoPackages []string
 	PrimaryKey      string
 	ApiVersion      string
+	DI              string
 }
 
 func NewBase(setting *cli.EnvSettings, resetNs bool) Base {
@@ -27,6 +29,7 @@ func NewBase(setting *cli.EnvSettings, resetNs bool) Base {
 		}
 	}
 
+	cfg, _, _ := scaffoldconfig.Find(".")
 	return Base{
 		Namespace:       ns,
 		AppDirName:      setting.AppDirName,
@@ -35,5 +38,6 @@ func NewBase(setting *cli.EnvSettings, resetNs bool) Base {
 		ApiVersion:      setting.GetApiVersion(),
 		StrToPreMap:     field.StrToPreMap,
 		MaybeGoPackages: field.MaybeGoPackages,
+		DI:              cfg.DI,
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 )
 
@@ -32,6 +33,7 @@ type Project struct {
 	Type  ProjectType
 	Name  string
 	IsBff bool
+	DI    string
 }
 
 func NewProject() *Project {
@@ -60,19 +62,32 @@ func (p *Project) SetProjectType(isMono bool) {
 }
 
 func (p *Project) Gen() error {
+	if p.Type == ProjectTypeSubMono && p.DI == "" {
+		cfg, _, err := scaffoldconfig.Find(".")
+		if err != nil {
+			return err
+		}
+		p.DI = cfg.DI
+	}
+	di, err := scaffoldconfig.NormalizeDI(p.DI)
+	if err != nil {
+		return err
+	}
+	p.DI = di
+	activeDI = di
 	switch p.Type {
 	case ProjectTypeMono:
-		return GenMono(p.Name)
+		return GenMono(p.Name, p.DI)
 	case ProjectTypeSubMono:
-		return GenSubMono(p.Name, p.IsBff)
+		return GenSubMono(p.Name, p.IsBff, p.DI)
 	case ProjectTypeSingle:
-		return GenSingle(p.Name)
+		return GenSingle(p.Name, p.DI)
 	default:
 		return errors.New("unknown type")
 	}
 }
 
-func GenMono(name string) error {
+func GenMono(name, di string) error {
 	// 1. find project name
 	ss := strings.Split(name, "/")
 	projectName := ss[len(ss)-1]
@@ -91,6 +106,9 @@ func GenMono(name string) error {
 	if err = genGoMod(name, projectPath); err != nil {
 		return err
 	}
+	if err = scaffoldconfig.Write(projectPath, di); err != nil {
+		return err
+	}
 
 	err = util.Go(
 		"get",
@@ -99,7 +117,7 @@ func GenMono(name string) error {
 		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3ContribPseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
-		"github.com/google/wire",
+		"github.com/yoogoc/kratos-kit",
 		"github.com/pkg/errors",
 		"github.com/gorilla/handlers",
 		"go.opentelemetry.io/otel",
@@ -115,7 +133,16 @@ func GenMono(name string) error {
 	if err != nil {
 		return err
 	}
-	if err = genTools(); err != nil {
+	var diErr error
+	if di == "wire" {
+		diErr = util.Go("get", "github.com/google/wire")
+	} else {
+		diErr = util.Go("get", "github.com/samber/do/v2")
+	}
+	if diErr != nil {
+		return diErr
+	}
+	if err = genTools(di); err != nil {
 		return err
 	}
 	if err = os.WriteFile(path.Join(projectPath, "README.md"), []byte(name), 0o644); err != nil {
@@ -146,15 +173,28 @@ func GenMono(name string) error {
 	if err = cpBuildFiles(projectPath, true); err != nil {
 		return err
 	}
+	if err = genConfigRoot(projectPath); err != nil {
+		return err
+	}
 	return nil
 }
 
-func GenSubMono(name string, isBff bool) error {
+func GenSubMono(name string, isBff bool, di string) error {
 	appDirName := "app"
 	// 1. gen sub app path
 	wd, _ := os.Getwd()
 	subAppPath := path.Join(wd, appDirName, name)
 	if err := os.MkdirAll(subAppPath, 0o700); err != nil {
+		return err
+	}
+	parentConfig, _, err := scaffoldconfig.Find(wd)
+	if err != nil {
+		return err
+	}
+	if parentConfig.DI != di {
+		return fmt.Errorf("DI mode conflict: parent uses %s but service requested %s", parentConfig.DI, di)
+	}
+	if err := scaffoldconfig.Write(subAppPath, di); err != nil {
 		return err
 	}
 	// 2. gen internal: biz,data,service,server,conf
@@ -173,13 +213,13 @@ func GenSubMono(name string, isBff bool) error {
 		return err
 	}
 	// 4. init configs/conf.yaml
-	if err := genConfigs(name, subAppPath); err != nil {
+	if err := genServiceConfig(wd, name); err != nil {
 		return err
 	}
 	return nil
 }
 
-func GenSingle(name string) error {
+func GenSingle(name, di string) error {
 	// 1. mkdir app path
 	wd, _ := os.Getwd()
 	appPath := path.Join(wd, name)
@@ -197,6 +237,9 @@ func GenSingle(name string) error {
 	if err := genGoMod(name, appPath); err != nil {
 		return err
 	}
+	if err := scaffoldconfig.Write(appPath, di); err != nil {
+		return err
+	}
 	// 3.1 go get dependencies
 	if err := util.Go(
 		"get",
@@ -205,7 +248,7 @@ func GenSingle(name string) error {
 		"github.com/go-kratos/kratos/contrib/encoding/json/v3@"+kratosV3ContribPseudoVersion,
 		"google.golang.org/grpc",
 		"google.golang.org/protobuf",
-		"github.com/google/wire",
+		"github.com/yoogoc/kratos-kit",
 		"github.com/pkg/errors",
 		"github.com/gorilla/handlers",
 		"go.opentelemetry.io/otel",
@@ -220,7 +263,16 @@ func GenSingle(name string) error {
 	); err != nil {
 		return err
 	}
-	if err := genTools(); err != nil {
+	var diErr error
+	if di == "wire" {
+		diErr = util.Go("get", "github.com/google/wire")
+	} else {
+		diErr = util.Go("get", "github.com/samber/do/v2")
+	}
+	if diErr != nil {
+		return diErr
+	}
+	if err := genTools(di); err != nil {
 		return err
 	}
 	// 3.2 justfile + buf configs, needed by the conf/proto generation below
@@ -236,7 +288,7 @@ func GenSingle(name string) error {
 		return err
 	}
 	// 6. init configs/conf.yaml
-	if err := genConfigs(name, appPath); err != nil {
+	if err := genConfigRoot(appPath); err != nil {
 		return err
 	}
 	return nil

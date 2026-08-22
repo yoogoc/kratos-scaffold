@@ -3,31 +3,19 @@ package log
 
 import (
 	"log/slog"
-	"os"
 
-	"github.com/go-kratos/kratos/v3/log"
 	"github.com/google/wire"
+	"github.com/yoogoc/kratos-kit/appinfo"
+	kitlog "github.com/yoogoc/kratos-kit/log"
 )
 
 // log level: debug info warn error dpanic panic fatal
 
-type VersionString string
-type NameString string
+type VersionString = appinfo.Version
+type NameString = appinfo.Name
 
 var ProviderSet = wire.NewSet(NewKratosLogger)
 
 func NewKratosLogger(name NameString, version VersionString) *slog.Logger {
-	logger := log.NewLogger(
-		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
-		}),
-		log.WithFilter(log.FilterKey("password")),
-	).With(
-		slog.String("service.name", string(name)),
-		slog.String("service.version", string(version)),
-	)
-
-	slog.SetDefault(logger)
-
-	return logger
+	return kitlog.New(kitlog.Options{Name: string(name), Version: string(version), Level: "info", FilterKeys: []string{"password"}})
 }

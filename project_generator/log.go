@@ -36,7 +36,11 @@ func (st LogTmpl) Generate() error {
 	if err := tmpl.Execute(buf, st); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(st.LogPath, "log.go"), buf.Bytes(), 0o644); err != nil {
+	content := buf.Bytes()
+	if isDo() {
+		content = stripWire(content)
+	}
+	if err := os.WriteFile(path.Join(st.LogPath, "log.go"), content, 0o644); err != nil {
 		return err
 	}
 	return nil

@@ -8,6 +8,9 @@ import (
 	"{{.CurrentPkgPath}}/biz"
 	"github.com/go-kratos/kratos/v3/log"
 	{{$modelName}}V1 "{{ .ProtoPkgPath }}"
+	{{- if eq .DI "do" }}
+	"github.com/samber/do/v2"
+	{{- end }}
 )
 
 var _ biz.{{.Name | ToCamel}}Repo = (*{{$modelName}}Repo)(nil)
@@ -17,12 +20,23 @@ type {{$modelName}}Repo struct {
 	log   *slog.Logger
 }
 
+{{- if eq .DI "do" }}
+func New{{.Name | ToCamel}}Repo(i do.Injector) (biz.{{.Name | ToCamel}}Repo, error) {
+	logger := do.MustInvoke[*slog.Logger](i)
+	{{$modelName}} := do.MustInvoke[{{$modelName}}V1.{{.Name | ToCamel}}ServiceClient](i)
+	return &{{$modelName}}Repo{
+		{{$modelName}}: {{$modelName}},
+		log: log.With(logger, "module", "data/{{$modelName}}"),
+	}, nil
+}
+{{- else }}
 func New{{.Name | ToCamel}}Repo(logger *slog.Logger, {{$modelName}} {{$modelName}}V1.{{.Name | ToCamel}}ServiceClient) biz.{{.Name | ToCamel}}Repo {
 	return &{{$modelName}}Repo{
 		{{$modelName}}: {{$modelName}},
 		log:  log.With(logger, "module", "data/{{$modelName}}"),
 	}
 }
+{{- end }}
 
 func (r {{$modelName}}Repo) Create(ctx context.Context, {{$modelName}} *biz.{{.Name | ToCamel}}) (*biz.{{.Name | ToCamel}}, error) {
 	reply, err := r.{{$modelName}}.Create(ctx, &{{$modelName}}V1.Create{{.Name | ToCamel}}Request{
@@ -126,4 +140,3 @@ func (r {{$modelName}}Repo) ExistBy(ctx context.Context, param *biz.{{.Name | To
 	}
 	return reply.Exist, nil
 }
-

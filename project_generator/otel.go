@@ -32,7 +32,11 @@ func (ot OtelTmpl) Generate() error {
 	if err := tmpl.Execute(buf, ot); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(ot.OtelPath, "otel.go"), buf.Bytes(), 0o644); err != nil {
+	content := buf.Bytes()
+	if isDo() {
+		content = stripWire(content)
+	}
+	if err := os.WriteFile(path.Join(ot.OtelPath, "otel.go"), content, 0o644); err != nil {
 		return err
 	}
 	return nil

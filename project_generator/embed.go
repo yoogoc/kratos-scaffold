@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"os"
 	"path"
+	"strings"
 )
 
 //go:embed resources/config.yaml.example
@@ -18,6 +19,9 @@ var cmdMainTmpl string
 
 //go:embed resources/cmd.wire.go.tmpl
 var cmdWireTmpl string
+
+//go:embed resources/cmd.do.go.tmpl
+var cmdDoTmpl string
 
 //go:embed resources/cmd.server.go.tmpl
 var cmdServerTmpl string
@@ -109,6 +113,10 @@ func cpBuildFiles(projectPath string, isMono bool) error {
 	if isMono {
 		justfile = justfileMonoContent
 		bufYaml = bufYamlMono
+	}
+	if isDo() {
+		justfile = strings.ReplaceAll(justfile, "\n# Wire dependency injection\nwire:\n    go tool wire ./cmd\n", "")
+		justfile = strings.ReplaceAll(justfile, "\n# Wire dependency injection\nwire service:\n    go tool wire ./app/{{service}}/cmd\n", "")
 	}
 	files := map[string]string{
 		"justfile":              justfile,

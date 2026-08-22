@@ -11,16 +11,20 @@ import (
 	"github.com/go-kratos/kratos/v3/transport/grpc"
 {{- end }}
 	"github.com/go-kratos/kratos/v3/transport/http"
+{{- if eq .DI "wire" }}
 	"github.com/google/wire"
+{{- end }}
 	"github.com/spf13/cobra"
 )
 
 type ServerCommand cobra.Command
 
+{{- if eq .DI "wire" }}
 {{- if .IsBff }}
 var ProviderSet = wire.NewSet(NewServerCmd)
 {{- else }}
 var ProviderSet = wire.NewSet(NewServerCmd, NewMigrateCmd)
+{{- end }}
 {{- end }}
 
 {{- if .IsBff }}

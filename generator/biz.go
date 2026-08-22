@@ -13,6 +13,7 @@ import (
 	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/cli"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
@@ -66,7 +67,13 @@ func (b *Biz) Generate() error {
 	}
 
 	providerSetPath := path.Join(b.OutPath(), "biz.go")
-	if err := wire.AddToProviderSet(providerSetPath, "New"+b.Name+"Usecase"); err != nil {
+	cfg, _, _ := scaffoldconfig.Find(b.OutPath())
+	add := wire.AddToProviderSet
+	if cfg.DI == "do" {
+		providerSetPath = path.Join(b.OutPath(), "do.go")
+		add = wire.AddToPackage
+	}
+	if err := add(providerSetPath, "New"+b.Name+"Usecase"); err != nil {
 		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
 	}
 	return nil

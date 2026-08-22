@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"testing"
@@ -52,8 +53,19 @@ func makeTestSingleWorkspace(t *testing.T) string {
 
 	}
 	_ = os.Chdir(p)
-	cmd := "new " + ProjectName
+	cmd := "new " + ProjectName + " --di=wire"
 	runTestCmd(t, cmd)
+	kitPath := os.Getenv("KRATOS_KIT_PATH")
+	if kitPath == "" {
+		kitPath = "/Users/yoogo/Workspaces/kratos-kit"
+	}
+	if _, err := os.Stat(kitPath); err == nil {
+		command := exec.Command("go", "mod", "edit", "-replace", "github.com/yoogoc/kratos-kit="+kitPath)
+		command.Dir = path.Join(p, ProjectName)
+		if output, err := command.CombinedOutput(); err != nil {
+			t.Fatalf("add kratos-kit replace: %v: %s", err, output)
+		}
+	}
 	return path.Join(p, ProjectName)
 }
 

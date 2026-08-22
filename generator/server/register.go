@@ -27,6 +27,59 @@ func RegisterService(serverDir, serviceName string, genHttp bool) error {
 	return nil
 }
 
+func RegisterDoService(serverDir, serviceName string, genHTTP bool) error {
+	filePath := path.Join(serverDir, "do.go")
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	if err != nil {
+		return errors.Wrapf(err, "parse file %s", filePath)
+	}
+	constructor := "NewGRPCServer"
+	if genHTTP {
+		constructor = "NewHTTPServer"
+	}
+	added := false
+	ast.Inspect(f, func(node ast.Node) bool {
+		call, ok := node.(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+		ident, ok := call.Fun.(*ast.Ident)
+		if !ok || ident.Name != constructor {
+			return true
+		}
+		want := "do.MustInvoke[*service." + serviceName + "Service](i)"
+		for _, arg := range call.Args {
+			if exprText(fset, arg) == want {
+				return false
+			}
+		}
+		call.Args = append(call.Args, &ast.CallExpr{
+			Fun: &ast.IndexExpr{
+				X:     &ast.SelectorExpr{X: ast.NewIdent("do"), Sel: ast.NewIdent("MustInvoke")},
+				Index: &ast.StarExpr{X: &ast.SelectorExpr{X: ast.NewIdent("service"), Sel: ast.NewIdent(serviceName + "Service")}},
+			},
+			Args: []ast.Expr{ast.NewIdent("i")},
+		})
+		added = true
+		return false
+	})
+	if !added {
+		return nil
+	}
+	var buf bytes.Buffer
+	if err := format.Node(&buf, fset, f); err != nil {
+		return err
+	}
+	return os.WriteFile(filePath, buf.Bytes(), 0o644)
+}
+
+func exprText(fset *token.FileSet, expr ast.Expr) string {
+	var buf bytes.Buffer
+	_ = format.Node(&buf, fset, expr)
+	return buf.String()
+}
+
 func registerToGRPC(serverDir, serviceName string) error {
 	filePath := path.Join(serverDir, "grpc.go")
 	return registerToServer(filePath, "NewGRPCServer", serviceName, "ServiceServer")

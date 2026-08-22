@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"github.com/yoogoc/kratos-scaffold/project_generator"
 )
@@ -27,6 +28,13 @@ func newGenerateCmd(proto, biz, data, service *cobra.Command) *cobra.Command {
 			}
 			if err := service.RunE(service, args); err != nil {
 				return err
+			}
+			cfg, _, err := scaffoldconfig.Find(".")
+			if err != nil {
+				return err
+			}
+			if cfg.DI != "wire" {
+				return nil
 			}
 			fmt.Println("running wire...")
 			if project_generator.IsProjectTypeSingle() {

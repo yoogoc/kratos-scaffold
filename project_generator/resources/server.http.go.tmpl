@@ -5,11 +5,9 @@ import (
 	"log/slog"
 	stdhttp "net/http"
 
-	"github.com/go-kratos/kratos/contrib/otel/v3/tracing"
-	"github.com/go-kratos/kratos/v3/middleware/logging"
-	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	"github.com/gorilla/handlers"
+	kitmiddleware "github.com/yoogoc/kratos-kit/middleware"
 	"go.opentelemetry.io/otel/trace"
 	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/service"
@@ -21,11 +19,7 @@ import (
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, logger *slog.Logger, tp trace.TracerProvider, greeter *service.GreeterService) *http.Server {
 	var opts = []http.ServerOption{
-		http.Middleware(
-			recovery.Recovery(),
-			tracing.Server(tracing.WithTracerProvider(tp)),
-			logging.Server(logger),
-		),
+		http.Middleware(kitmiddleware.HTTP(logger, tp)...),
 		http.Filter(handlers.CORS(
 			handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"}),
 			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD", "OPTIONS", "DELETE", "CONNECT", "TRACE", "PATCH"}),

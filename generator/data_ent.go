@@ -12,6 +12,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
@@ -184,7 +185,13 @@ func (d *Data) genDataEnt() error {
 	}
 
 	providerSetPath := path.Join(d.OutPath(), "data.go")
-	if err := wire.AddToProviderSet(providerSetPath, "New"+d.Name+"Repo"); err != nil {
+	cfg, _, _ := scaffoldconfig.Find(d.OutPath())
+	add := wire.AddToProviderSet
+	if cfg.DI == "do" {
+		providerSetPath = path.Join(d.OutPath(), "do.go")
+		add = wire.AddToPackage
+	}
+	if err := add(providerSetPath, "New"+d.Name+"Repo"); err != nil {
 		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
 	}
 	return nil

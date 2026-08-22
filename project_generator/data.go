@@ -50,8 +50,12 @@ func (dt DataTmpl) Generate(text string) error {
 	if err := tmpl.Execute(dataBuf, dt); err != nil {
 		return err
 	}
+	raw := dataBuf.Bytes()
+	if isDo() {
+		raw = stripWire(raw)
+	}
 	dp := path.Join(dt.DataPath, "data.go")
-	content, err := imports.Process(dp, dataBuf.Bytes(), nil)
+	content, err := imports.Process(dp, raw, nil)
 	if err != nil {
 		return err
 	}

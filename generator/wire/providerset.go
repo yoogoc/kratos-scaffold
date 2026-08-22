@@ -13,6 +13,31 @@ import (
 	"github.com/pkg/errors"
 )
 
+// AddToPackage adds lazy samber/do providers to a package declaration.
+func AddToPackage(filePath string, constructorNames ...string) error {
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return err
+	}
+	text := string(content)
+	for _, name := range constructorNames {
+		if strings.Contains(text, "do.Lazy("+name+")") {
+			continue
+		}
+		idx := strings.LastIndex(text, ")")
+		if idx < 0 || !strings.Contains(text, "do.Package(") {
+			return errors.New("do.Package call not found in file")
+		}
+		before := strings.TrimRight(text[:idx], " \t\r\n")
+		if !strings.HasSuffix(before, ",") {
+			text = before + ",\n" + text[idx:]
+			idx = strings.LastIndex(text, ")")
+		}
+		text = text[:idx] + "\tdo.Lazy(" + name + "),\n" + text[idx:]
+	}
+	return os.WriteFile(filePath, []byte(text), 0o644)
+}
+
 func AddToProviderSet(filePath string, constructorNames ...string) error {
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)

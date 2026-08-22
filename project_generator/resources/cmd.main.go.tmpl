@@ -4,14 +4,12 @@ package main
 import (
 	"fmt"
 	"{{.AppPkgPath}}/internal/conf"
+	defaultconfigs "{{.ProjectPkgPath}}/configs"
 	ilog "{{.AppPkgPath}}/internal/log"
 	"os"
 
-	"github.com/go-kratos/kratos/v3/config"
-	"github.com/go-kratos/kratos/v3/config/env"
-	"github.com/go-kratos/kratos/v3/config/file"
-
 	"github.com/spf13/cobra"
+	kitconfig "github.com/yoogoc/kratos-kit/config/loader"
 )
 
 // go build -ldflags "-X main.Version=x.y.z"
@@ -22,14 +20,25 @@ var (
 	Version string
 
 	flagconf string
+	closeConf func() error
 )
 
 type RootCommand cobra.Command
 
 func main() {
-	cmd, _, _ := initApp(ilog.NameString(Name), ilog.VersionString(Version))
+	cmd, cleanup, err := initApp(ilog.NameString(Name), ilog.VersionString(Version))
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	defer func() {
+		cleanup()
+		if closeConf != nil {
+			_ = closeConf()
+		}
+	}()
 
-	if err := cmd.Execute(); err != nil {
+	if err = cmd.Execute(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -37,22 +46,26 @@ func main() {
 
 func newConf(rootCmd *RootCommand) *conf.Bootstrap {
 	flags := (*cobra.Command)(rootCmd).PersistentFlags()
-	flags.StringVarP(&flagconf, "config", "c", "./configs", "config path, eg: --config=config.yaml")
+	flags.StringVarP(&flagconf, "config", "c", "", "additional config file or directory")
 	var bc conf.Bootstrap
 	_ = flags.Parse(os.Args[1:])
-
-	c := config.New(
-		config.WithSource(
-			file.NewSource(flagconf),
-			env.NewSource("kratos_"),
-		),
-	)
-	if err := c.Load(); err != nil {
+	defaultRoots := []string{"default"}
+	localRoots := []string{"./configs/local"}
+{{- if .IsSubMono }}
+	defaultRoots = append(defaultRoots, "default/{{.Name}}")
+	localRoots = append(localRoots, "./configs/local/{{.Name}}")
+{{- end }}
+	closeConfig, err := kitconfig.Load(&bc, kitconfig.Options{
+		Defaults: defaultconfigs.DefaultFS,
+		DefaultRoots: defaultRoots,
+		LocalRoots: localRoots,
+		ExplicitPath: flagconf,
+		EnvPrefix: "KRATOS_",
+	})
+	if err != nil {
 		panic(err)
 	}
-	if err := c.Scan(&bc); err != nil {
-		panic(err)
-	}
+	closeConf = closeConfig
 	return &bc
 }
 

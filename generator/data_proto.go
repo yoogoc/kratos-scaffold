@@ -13,6 +13,7 @@ import (
 	confmod "github.com/yoogoc/kratos-scaffold/generator/conf"
 	"github.com/yoogoc/kratos-scaffold/generator/wire"
 	"github.com/yoogoc/kratos-scaffold/pkg/field"
+	"github.com/yoogoc/kratos-scaffold/pkg/scaffoldconfig"
 	"github.com/yoogoc/kratos-scaffold/pkg/util"
 	"golang.org/x/tools/imports"
 )
@@ -43,7 +44,13 @@ func (d *Data) GenerateProto() error {
 	}
 
 	providerSetPath := path.Join(d.OutPath(), "data.go")
-	if err := wire.AddToProviderSet(providerSetPath, "New"+d.Name+"ServiceClient", "New"+d.Name+"Repo"); err != nil {
+	cfg, _, _ := scaffoldconfig.Find(d.OutPath())
+	add := wire.AddToProviderSet
+	if cfg.DI == "do" {
+		providerSetPath = path.Join(d.OutPath(), "do.go")
+		add = wire.AddToPackage
+	}
+	if err := add(providerSetPath, "New"+d.Name+"ServiceClient", "New"+d.Name+"Repo"); err != nil {
 		fmt.Printf("failed to add to ProviderSet, please add manually: %v\n", err)
 	}
 	return nil
@@ -103,6 +110,23 @@ func New%sServiceClient(confData *conf.Data, logger *slog.Logger) (%s.%sServiceC
 }
 `, name, alias, name, targetModelCamel, targetModelCamel, alias, name)
 
+	if d.DI == "do" {
+		funcCode = fmt.Sprintf(`
+func New%sServiceClient(i do.Injector) (%s.%sServiceClient, error) {
+	confData := do.MustInvoke[*conf.Data](i)
+	logger := do.MustInvoke[*slog.Logger](i)
+	conn, err := grpc.NewClient(
+		context.Background(),
+		grpc.WithTimeout(confData.%s.Timeout.AsDuration()),
+		grpc.WithEndpoint(confData.%s.Address),
+		grpc.WithMiddleware(mmd.Client(), tracing.Client(), mklog.Client(logger)),
+	)
+	if err != nil { return nil, err }
+	return %s.New%sServiceClient(conn), nil
+}
+`, name, alias, name, targetModelCamel, targetModelCamel, alias, name)
+	}
+
 	dataGoPath := path.Join(d.OutPath(), "data.go")
 	existing, err := os.ReadFile(dataGoPath)
 	if err != nil {
@@ -136,6 +160,9 @@ func New%sServiceClient(confData *conf.Data, logger *slog.Logger) (%s.%sServiceC
 		}
 	}
 
+	if d.DI == "do" && !strings.Contains(src, "github.com/samber/do/v2") {
+		src = addImport(src, "", "github.com/samber/do/v2")
+	}
 	content, err := imports.Process(dataGoPath, []byte(src), nil)
 	if err != nil {
 		return err

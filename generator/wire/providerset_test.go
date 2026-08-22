@@ -79,3 +79,22 @@ var ProviderSet = wire.NewSet()
 		t.Fatalf("expected NewGreeterService on its own line, got:\n%s", s)
 	}
 }
+
+func TestAddToPackage(t *testing.T) {
+	dir := t.TempDir()
+	p := filepath.Join(dir, "do.go")
+	src := "package biz\n\nimport \"github.com/samber/do/v2\"\n\nvar Package = do.Package(do.Lazy(NewOld))\n"
+	if err := os.WriteFile(p, []byte(src), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := AddToPackage(p, "NewUser", "NewUser"); err != nil {
+		t.Fatal(err)
+	}
+	content, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(string(content), "do.Lazy(NewUser)") != 1 {
+		t.Fatalf("not idempotent:\n%s", content)
+	}
+}

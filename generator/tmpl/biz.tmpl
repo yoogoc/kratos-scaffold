@@ -5,6 +5,9 @@ import (
 	"context"
 	"log/slog"
 	"github.com/go-kratos/kratos/v3/log"
+	{{- if eq .DI "do" }}
+	"github.com/samber/do/v2"
+	{{- end }}
 	{{- range $i, $s := .MaybeGoPackages }}
 	"{{ $s }}"
 	{{- end }}
@@ -55,12 +58,23 @@ type {{.Name}}Usecase struct {
 	log  *slog.Logger
 }
 
+{{- if eq .DI "do" }}
+func New{{.Name}}Usecase(i do.Injector) (*{{.Name}}Usecase, error) {
+	repo := do.MustInvoke[{{.Name}}Repo](i)
+	logger := do.MustInvoke[*slog.Logger](i)
+	return &{{.Name}}Usecase{
+		repo: repo,
+		log:  log.With(logger, "module", "usecase/{{.Name | ToLower}}"),
+	}, nil
+}
+{{- else }}
 func New{{.Name}}Usecase(repo {{.Name}}Repo, logger *slog.Logger) *{{.Name}}Usecase {
 	return &{{.Name}}Usecase{
 		repo: repo,
 		log:  log.With(logger, "module", "usecase/{{.Name | ToLower}}"),
 	}
 }
+{{- end }}
 
 func (uc *{{.Name}}Usecase) Create{{.Name}}(ctx context.Context, {{.Name | ToLower}} *{{.Name}}) (*{{.Name}}, error) {
 	return uc.repo.Create(ctx, {{.Name | ToLower}})

@@ -16,20 +16,14 @@ func genInternal(name string, appPath string, isSubMono bool) error {
 	if err := os.MkdirAll(bizPath, 0o700); err != nil {
 		return err
 	}
-	bizContent := `package biz
-
-import "github.com/google/wire"
-
-// ProviderSet is biz providers.
-var ProviderSet = wire.NewSet(NewTxUsecase, NewGreeterUsecase)
-`
+	bizContent := providerDeclaration("biz", "NewTxUsecase", "NewGreeterUsecase")
 	if err := os.WriteFile(path.Join(bizPath, "biz.go"), []byte(bizContent), 0o644); err != nil {
 		return err
 	}
 	if err := os.WriteFile(path.Join(bizPath, "tx.go"), []byte(bizTxGo), 0o644); err != nil {
 		return err
 	}
-	if err := os.WriteFile(path.Join(bizPath, "pagination.go"), []byte(bizPaginationGo), 0o644); err != nil {
+	if err := os.WriteFile(path.Join(bizPath, "pagination.go"), []byte(kitPaginationAliases), 0o644); err != nil {
 		return err
 	}
 	// 2. mkdir service. gen service/service.go
@@ -37,13 +31,7 @@ var ProviderSet = wire.NewSet(NewTxUsecase, NewGreeterUsecase)
 	if err := os.MkdirAll(servicePath, 0o700); err != nil {
 		return err
 	}
-	serviceContent := `package service
-
-import "github.com/google/wire"
-
-// ProviderSet is service providers.
-var ProviderSet = wire.NewSet(NewGreeterService)
-`
+	serviceContent := providerDeclaration("service", "NewGreeterService")
 	if err := os.WriteFile(path.Join(servicePath, "service.go"), []byte(serviceContent), 0o644); err != nil {
 		return err
 	}
@@ -72,13 +60,7 @@ var ProviderSet = wire.NewSet(NewGreeterService)
 		return err
 	}
 	// 4.2 gen server
-	serverContent := `package server
-
-import "github.com/google/wire"
-
-// ProviderSet is server providers.
-var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
-`
+	serverContent := providerDeclaration("server", "NewGRPCServer", "NewHTTPServer")
 	if err := os.WriteFile(path.Join(serverPath, "server.go"), []byte(serverContent), 0o644); err != nil {
 		return err
 	}
@@ -128,12 +110,7 @@ var ProviderSet = wire.NewSet(NewGRPCServer, NewHTTPServer)
 	if err := os.MkdirAll(middlewarePath, 0o700); err != nil {
 		return err
 	}
-	middlewareContent := `package middleware
-
-import "github.com/google/wire"
-
-var ProviderSet = wire.NewSet()
-`
+	middlewareContent := providerDeclaration("middleware")
 	if err := os.WriteFile(path.Join(middlewarePath, "middleware.go"), []byte(middlewareContent), 0o644); err != nil {
 		return err
 	}
@@ -142,6 +119,5 @@ var ProviderSet = wire.NewSet()
 	if err := genDemo(name, appPath, isSubMono, false); err != nil {
 		return err
 	}
-
-	return nil
+	return genDoAdapters(appPkgPath, appPath, false)
 }

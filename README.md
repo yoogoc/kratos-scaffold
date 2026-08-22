@@ -2,6 +2,17 @@
 
 kratos-layout脚手架，可以生成项目，proto，biz，service，data。mono库的生成未完全依照beer-shop，直接生成到app/xx而不是app/xx/service。
 
+## Dependency injection and configuration
+
+New projects use samber/do v2 by default; pass `--di=wire` to retain Wire.
+The selection is stored in `.kratos-scaffold.yaml` and reused by later
+generation commands. Projects without this file fall back to Wire.
+
+Generated defaults live in `configs/default` and are embedded through
+`kratos-kit`. Local overrides live in Git-ignored `configs/local`. The load
+order is shared default, Mono service default, shared local, Mono service
+local, explicit `--config`, then `KRATOS_` environment variables.
+
 ## Features
 
 - 生成完整项目（mono主库、mono子服务、单体库、BFF）并自带 demo Greeter 服务，开箱即用
