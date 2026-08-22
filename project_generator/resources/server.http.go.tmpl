@@ -16,8 +16,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(bootstrap *conf.Bootstrap, logger *slog.Logger, greeter *service.GreeterService) *http.Server {
-	c := bootstrap.Server
+func NewHTTPServer(c *conf.Server, logger *slog.Logger, greeter *service.GreeterService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(kitmiddleware.HTTP(logger)...),
 		http.Filter(handlers.CORS(

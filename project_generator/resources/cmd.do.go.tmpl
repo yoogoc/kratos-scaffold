@@ -22,6 +22,9 @@ import (
 var CommandPackage = do.Package(
 	do.Lazy(func(i do.Injector) (*RootCommand, error) { return newRootCmd(), nil }),
 	do.Lazy(func(i do.Injector) (*conf.Bootstrap, error) { return newConf(do.MustInvoke[*RootCommand](i)), nil }),
+	do.Lazy(func(i do.Injector) (*conf.Server, error) { return do.MustInvoke[*conf.Bootstrap](i).Server, nil }),
+	do.Lazy(func(i do.Injector) (*conf.Data, error) { return do.MustInvoke[*conf.Bootstrap](i).Data, nil }),
+	do.Lazy(func(i do.Injector) (*conf.Log, error) { return do.MustInvoke[*conf.Bootstrap](i).Log, nil }),
 	do.Lazy(func(i do.Injector) (kitlog.Options, error) {
 		return kitlog.Options{
 			Name: do.MustInvokeNamed[string](i, "app.name"),
@@ -29,7 +32,7 @@ var CommandPackage = do.Package(
 		}, nil
 	}),
 	do.Lazy(func(i do.Injector) (*slog.Logger, error) {
-		return newLogger(do.MustInvoke[*conf.Bootstrap](i), do.MustInvoke[kitlog.Options](i)), nil
+		return newLogger(do.MustInvoke[*conf.Log](i), do.MustInvoke[kitlog.Options](i)), nil
 	}),
 {{- if .IsBff }}
 	do.Lazy(func(i do.Injector) (*ServerCommand, error) {
@@ -40,7 +43,7 @@ var CommandPackage = do.Package(
 		return NewServerCmd(do.MustInvoke[kitlog.Options](i), do.MustInvoke[*slog.Logger](i), do.MustInvoke[*grpc.Server](i), do.MustInvoke[*http.Server](i)), nil
 	}),
 	do.Lazy(func(i do.Injector) (*MigrateCommand, error) {
-		return NewMigrateCmd(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*conf.Bootstrap](i)), nil
+		return NewMigrateCmd(do.MustInvoke[*slog.Logger](i), do.MustInvoke[*conf.Data](i)), nil
 	}),
 {{- end }}
 	do.Lazy(func(i do.Injector) (*cobra.Command, error) {

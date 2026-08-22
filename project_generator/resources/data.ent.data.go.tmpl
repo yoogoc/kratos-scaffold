@@ -65,8 +65,7 @@ func NewTxRepo(d *Data) biz.TxRepo {
 	return d
 }
 
-func NewEntClient(bootstrap *conf.Bootstrap, logger *slog.Logger) *ent.Client {
-	conf := bootstrap.Data
+func NewEntClient(conf *conf.Data, logger *slog.Logger) *ent.Client {
 	var ops []ent.Option
 	if conf.Database.EntDebug {
 		ops = append(ops, ent.Debug())

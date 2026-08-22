@@ -74,10 +74,10 @@ func newConf(rootCmd *RootCommand) *conf.Bootstrap {
 	return &bc
 }
 
-func newLogger(bc *conf.Bootstrap, app kitlog.Options) *slog.Logger {
-	if bc.Log != nil {
-		app.Type = bc.Log.Type
-		app.Level = bc.Log.Level
+func newLogger(logConf *conf.Log, app kitlog.Options) *slog.Logger {
+	if logConf != nil {
+		app.Type = logConf.Type
+		app.Level = logConf.Level
 	}
 	app.FilterKeys = []string{"password"}
 	return kitlog.New(app)

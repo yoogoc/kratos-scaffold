@@ -8,6 +8,7 @@ package main
 
 import (
 	"{{.AppPkgPath}}/internal/biz"
+	"{{.AppPkgPath}}/internal/conf"
 	"{{.AppPkgPath}}/internal/data"
 	"{{.AppPkgPath}}/internal/server"
 	"{{.AppPkgPath}}/internal/service"
@@ -27,6 +28,7 @@ func initApp(kitlog.Options) (*cobra.Command, func(), error) {
 		newRootCmd,
 		newCmd,
 		newConf,
+		wire.FieldsOf(new(*conf.Bootstrap), "Server", "Data", "Log"),
 		newLogger,
 	))
 }
