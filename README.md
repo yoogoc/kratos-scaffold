@@ -4,7 +4,7 @@ kratos-layout脚手架，可以生成项目，proto，biz，service，data。mon
 
 ## Dependency injection and configuration
 
-New projects use samber/do v2 by default; pass `--di=wire` to retain Wire.
+New projects use Wire by default; pass `--di=do` to use samber/do v2.
 The selection is stored in `.kratos-scaffold.yaml` and reused by later
 generation commands. Projects without this file fall back to Wire.
 

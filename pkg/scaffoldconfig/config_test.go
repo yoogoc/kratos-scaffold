@@ -25,7 +25,7 @@ func TestWriteAndFind(t *testing.T) {
 }
 
 func TestNormalizeDI(t *testing.T) {
-	if got, _ := NormalizeDI(""); got != "do" {
+	if got, _ := NormalizeDI(""); got != "wire" {
 		t.Fatalf("default = %q", got)
 	}
 	if _, err := NormalizeDI("bad"); err == nil {

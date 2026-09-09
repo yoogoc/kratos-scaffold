@@ -6,7 +6,7 @@ import (
 	"regexp"
 )
 
-var activeDI = "do"
+var activeDI = "wire"
 
 const kitPaginationAliases = `package biz
 

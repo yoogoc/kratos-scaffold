@@ -18,7 +18,7 @@ type Config struct {
 
 func NormalizeDI(value string) (string, error) {
 	if value == "" {
-		return "do", nil
+		return "wire", nil
 	}
 	if value != "do" && value != "wire" {
 		return "", fmt.Errorf("unsupported dependency injection mode %q (want do or wire)", value)
